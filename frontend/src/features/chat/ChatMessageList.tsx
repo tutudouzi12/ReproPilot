@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm';
 import type { ChatMessage } from '../../contracts/api';
 
 interface PdfActions {
-  onOpenPdf: () => void;
+  onOpenPdf: (url?: string) => void;
   onClosePdf: () => void;
 }
 
@@ -51,7 +51,7 @@ export function ChatMessageList(props: ChatMessageListProps) {
               <div className="flex gap-2 mt-1 animate-in fade-in slide-in-from-top-1 duration-300">
                 {msg.actions.includes('open_pdf') && (
                   <button
-                    onClick={pdfActions.onOpenPdf}
+                    onClick={() => pdfActions.onOpenPdf(msg.pdfUrl)}
                     className="flex items-center gap-1 text-xs bg-white text-blue-600 border border-blue-200 px-3 py-1.5 rounded-full hover:bg-blue-50 shadow-sm transition-all active:scale-95"
                   >
                     <FileText className="w-3 h-3" />

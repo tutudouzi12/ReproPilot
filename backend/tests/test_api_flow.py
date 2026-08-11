@@ -211,6 +211,24 @@ def test_direct_execution_stream_emits_error_in_strict_mode(tmp_path, monkeypatc
     assert "event: result" not in response.text
 
 
+def test_chat_returns_actionable_error_in_strict_mode(tmp_path, monkeypatch):
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.setenv("OFFLINE_DEMO_MODE", "false")
+    store = FilePlanStore(tmp_path / "plans.json")
+    events = EventBus(store)
+    executor = RoutedAgentExecutor()
+    monkeypatch.setattr(main, "store", store)
+    monkeypatch.setattr(main, "events", events)
+    monkeypatch.setattr(main, "scheduler", DAGScheduler(store, events, executor))
+    monkeypatch.setattr(main, "agents", executor)
+
+    with TestClient(main.app) as client:
+        response = client.post("/api/chat", json={"message": "翻译这段论文"})
+
+    assert response.status_code == 503
+    assert "OPENAI_API_KEY" in response.json()["detail"]
+
+
 def test_upload_ownership_and_dataset_routing(tmp_path, monkeypatch):
     store = FilePlanStore(tmp_path / "plans.json")
     events = EventBus(store)

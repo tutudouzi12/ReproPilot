@@ -64,6 +64,19 @@ export const retryTask = async (planId: string, taskId: string, identity: Reques
 	return response.data;
 };
 
+export const reassignTask = async (
+  planId: string,
+  taskId: string,
+  assignedTo: string,
+  identity: RequestIdentity,
+): Promise<void> => {
+  await httpClient.post(
+    `/api/plans/${planId}/tasks/${taskId}/reassign`,
+    { assigned_to: assignedTo },
+    { headers: buildIdentityHeaders(identity) },
+  );
+};
+
 export const getPdfProxyUrl = (url: string): string =>
   `${API_BASE_URL}/api/pdf-proxy?url=${encodeURIComponent(url)}`;
 

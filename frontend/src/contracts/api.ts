@@ -9,6 +9,7 @@ export interface ChatMessage {
   text: string;
   actions?: ChatAction[];
   taskId?: string;
+  pdfUrl?: string;
 }
 
 export interface UploadedFile {

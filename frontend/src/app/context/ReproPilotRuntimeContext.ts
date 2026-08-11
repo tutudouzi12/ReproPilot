@@ -16,6 +16,7 @@ export interface ReproPilotRuntimeContextValue {
 	handleApproveAndRun: ReproPilotRuntimeApi['handleApproveAndRun'];
 	handleCancelPlan: ReproPilotRuntimeApi['handleCancelPlan'];
 	handleRetryFailedPlan: ReproPilotRuntimeApi['handleRetryFailedPlan'];
+    handleReassignTask: ReproPilotRuntimeApi['handleReassignTask'];
     setDisplayMode: ReproPilotRuntimeApi['setDisplayMode'];
     closeTaskPanel: ReproPilotRuntimeApi['closeTaskPanel'];
     resetRuntimeState: ReproPilotRuntimeApi['resetRuntimeState'];

@@ -6,10 +6,9 @@ import { httpClient } from '../../services/api/httpClient';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url,
-).toString();
+const pdfWorkerUrl = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url);
+pdfWorkerUrl.searchParams.set('repropilot-worker', '1');
+pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl.toString();
 
 interface PdfPanelProps {
   pdfUrl: string;
@@ -21,6 +20,15 @@ interface TextSelection {
   left: number;
   top: number;
 }
+
+const translationErrorMessage = (error: unknown): string => {
+  if (!error || typeof error !== 'object') return '请求 AI 翻译失败，请重试。';
+  const response = (error as { response?: { data?: { detail?: unknown } } }).response;
+  const detail = response?.data?.detail;
+  return typeof detail === 'string' && detail.trim()
+    ? `翻译暂不可用：${detail}`
+    : '请求 AI 翻译失败，请检查后端服务后重试。';
+};
 
 export function PdfPanel({ pdfUrl, onAskAI }: PdfPanelProps) {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -66,8 +74,8 @@ export function PdfPanel({ pdfUrl, onAskAI }: PdfPanelProps) {
         message: `请把下面的论文片段准确翻译成中文。保留公式、数字、引用和专业术语，不添加原文没有的结论：\n\n${selection.text}`,
       });
       setTranslatedText(response.data.response);
-    } catch {
-      setTranslatedText('请求 AI 翻译时发生网络错误，请重试。');
+    } catch (error: unknown) {
+      setTranslatedText(translationErrorMessage(error));
     } finally {
       setIsTranslating(false);
     }

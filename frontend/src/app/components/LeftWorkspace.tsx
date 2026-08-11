@@ -69,7 +69,7 @@ interface LeftWorkspaceChatProps {
 	onRemoveAttachment: (uploadId: string) => void;
   };
   pdfActions: {
-    onOpenPdf: () => void;
+    onOpenPdf: (url?: string) => void;
     onClosePdf: () => void;
   };
   taskActions: {

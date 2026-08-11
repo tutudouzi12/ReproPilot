@@ -169,7 +169,7 @@ function ReproPilotWorkspaceContent(props: ReproPilotWorkspaceContentProps) {
 		onRemoveAttachment: chatFlow.handleRemoveAttachment,
       }}
       pdfActions={{
-        onOpenPdf: () => pdfFlow.setPdfUrl(getPdfProxyUrl('https://arxiv.org/pdf/1706.03762.pdf')),
+        onOpenPdf: (url?: string) => pdfFlow.setPdfUrl(url || getPdfProxyUrl('https://export.arxiv.org/pdf/1706.03762')),
         onClosePdf: () => pdfFlow.setPdfUrl(null),
       }}
       taskActions={{
@@ -252,6 +252,7 @@ export default function ReproPilotApp() {
 		handleApproveAndRun: runtime.handleApproveAndRun,
 		handleCancelPlan: runtime.handleCancelPlan,
 		handleRetryFailedPlan: runtime.handleRetryFailedPlan,
+        handleReassignTask: runtime.handleReassignTask,
         setDisplayMode: runtime.setDisplayMode,
         closeTaskPanel: runtime.closeTaskPanel,
         resetRuntimeState: runtime.resetRuntimeState,

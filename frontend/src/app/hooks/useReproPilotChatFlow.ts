@@ -354,6 +354,9 @@ export function useReproPilotChatFlow(options: UseReproPilotChatFlowOptions) {
 	const userPrompt = prompt.trim() || '请分析上传的材料，并设计预算受限的轻量消融实验。';
 	const attachmentNames = pendingAttachments.map((attachment) => attachment.name);
 	const attachmentIDs = pendingAttachments.map((attachment) => attachment.id);
+    const uploadedPdf = pendingAttachments.find(
+      (attachment) => attachment.content_type === 'application/pdf' || attachment.name.toLowerCase().endsWith('.pdf'),
+    );
     const requestUserId = persistedState.userId ?? guestUserId;
     const requestSessionId = persistedState.activeSessionId;
     setLoading(true);
@@ -387,14 +390,15 @@ export function useReproPilotChatFlow(options: UseReproPilotChatFlowOptions) {
             role: 'system',
             text: clarificationText,
 		});
-		setPendingAttachments([]);
-		setAttachmentError('');
         }
         appendMessageToSession(requestSessionId, {
           role: 'system',
           text: uiText.planGenerated,
           actions: ['open_pdf', 'close_pdf'],
+          pdfUrl: uploadedPdf?.content_url,
         });
+		setPendingAttachments([]);
+		setAttachmentError('');
       } else {
         const response = await chat(userPrompt, {
           userId: requestUserId,

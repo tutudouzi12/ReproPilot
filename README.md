@@ -158,9 +158,10 @@ Backend 只通过内部 Bearer Token 调用 Sandbox Service。每个任务容器
 
 | 验证层 | 当前结果 |
 |---|---|
-| Backend | `132 passed, 2 skipped` |
+| Backend | `133 passed, 2 skipped` |
 | Docker Sandbox | `7 passed` |
 | Frontend | ESLint 与生产构建通过 |
+| Chrome E2E | Reassign、PDF Worker、15 页论文渲染、划词助手、追问草稿与严格失败提示通过 |
 | Dependency Audit | `npm audit --omit=dev`：`0 vulnerabilities` |
 | Docker Smoke | 鉴权、白名单、网络隔离、资源限制、真实执行、超时、截断和清理全部通过 |
 | GitHub Actions | `test` 与 `docker-smoke` 两个 Job 均通过 |
@@ -170,6 +171,8 @@ Backend 只通过内部 Bearer Token 调用 Sandbox Service。每个任务容器
 - 在 `karpathy/minGPT` 固定提交 `37baab71b9abea1b76ab957409a1cc2fbfba8a26` 上完成 Repository Preparation。
 - 在隔离容器内完成受限前向传播，得到输出形状 `[2, 7, 64]` 和参数量 `167680`，运行后无沙箱容器泄漏。
 - Benchmark Harness 完成 preflight、execution 和 validation，并从逐样本预测重新计算 `accuracy=0.5`、`macro_f1=0.3333333333333333`。
+- 节点可在执行面板中重新分配 Agent；前端同步重置节点状态，后端递增 execution epoch 并隔离旧租约的迟到结果。
+- PDF 阅读器在生产 Nginx 镜像中加载本地 PDF.js Worker，支持文本层划词、翻译入口和带原文的追问草稿；上传 PDF 的内容地址会跟随消息动作打开，不再固定指向示例论文。
 - 严格模式缺少模型、仓库或 Sandbox 时保留真实失败原因，不生成伪成功结果。
 
 ## 技术栈

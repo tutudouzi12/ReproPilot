@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import type { RefObject } from 'react';
-import { Code, Eye, FileText, GitBranch, Loader2, Maximize2, Play, TerminalSquare, X } from 'lucide-react';
+import { Code, Eye, FileText, GitBranch, Loader2, Maximize2, Play, RefreshCw, TerminalSquare, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -24,6 +25,7 @@ interface ExecutionSidebarProps {
   logsEndRef: RefObject<HTMLDivElement | null>;
   onClose: () => void;
   onExecute: () => void;
+  onReassign: (assignedTo: string) => Promise<void>;
   onChangeDisplayMode: (mode: ExecutionDisplayMode) => void;
 }
 
@@ -50,6 +52,7 @@ export function ExecutionSidebar(props: ExecutionSidebarProps) {
     logsEndRef,
     onClose,
     onExecute,
+    onReassign,
     onChangeDisplayMode,
   } = props;
 
@@ -71,6 +74,7 @@ export function ExecutionSidebar(props: ExecutionSidebarProps) {
         <ExpandedReportView title={selectedTask.Name} executionResult={executionResult} onClose={() => onChangeDisplayMode('report')} />
       ) : (
         <ExecutionSidebarShell
+          key={`${selectedTask.ID}:${selectedTask.AssignedTo}`}
           selectedTask={selectedTask}
           isExecuting={isExecuting}
           activeMode={activeMode}
@@ -82,6 +86,7 @@ export function ExecutionSidebar(props: ExecutionSidebarProps) {
           logsEndRef={logsEndRef}
           onClose={onClose}
           onExecute={onExecute}
+          onReassign={onReassign}
           onChangeDisplayMode={onChangeDisplayMode}
         />
       )}
@@ -214,6 +219,7 @@ interface ExecutionSidebarShellProps {
   logsEndRef: RefObject<HTMLDivElement | null>;
   onClose: () => void;
   onExecute: () => void;
+  onReassign: (assignedTo: string) => Promise<void>;
   onChangeDisplayMode: (mode: ExecutionDisplayMode) => void;
 }
 
@@ -230,9 +236,26 @@ function ExecutionSidebarShell(props: ExecutionSidebarShellProps) {
     logsEndRef,
     onClose,
     onExecute,
+    onReassign,
     onChangeDisplayMode,
   } = props;
   const ablationBudget = selectedTask.Type === 'ablation_design' ? selectedTask.Inputs : undefined;
+  const [assignedTo, setAssignedTo] = useState(selectedTask.AssignedTo);
+  const [isReassigning, setIsReassigning] = useState(false);
+  const [reassignError, setReassignError] = useState('');
+
+  const applyReassignment = async () => {
+    if (!assignedTo || assignedTo === selectedTask.AssignedTo || isReassigning) return;
+    setIsReassigning(true);
+    setReassignError('');
+    try {
+      await onReassign(assignedTo);
+    } catch {
+      setReassignError('重新分配失败，请确认计划仍处于可修改状态。');
+    } finally {
+      setIsReassigning(false);
+    }
+  };
 
   return (
     <>
@@ -263,6 +286,41 @@ function ExecutionSidebarShell(props: ExecutionSidebarShellProps) {
           <div className="text-xs font-black text-blue-700 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 shadow-sm font-mono">
             {selectedTask.AssignedTo}
           </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <label htmlFor="reassign-agent" className="text-xs font-bold text-slate-600">
+              重新分配 Agent
+            </label>
+            <span className="text-[10px] text-slate-400">重置节点并使旧执行结果失效</span>
+          </div>
+          <div className="flex gap-2">
+            <select
+              id="reassign-agent"
+              value={assignedTo}
+              onChange={(event) => setAssignedTo(event.target.value)}
+              disabled={isReassigning}
+              className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100 disabled:opacity-60"
+            >
+              <option value="librarian_agent">文献智能体</option>
+              <option value="coder_agent">代码智能体</option>
+              <option value="research_coding_agent">科研 Coding 智能体</option>
+              <option value="sandbox_agent">沙箱智能体</option>
+              <option value="data_agent">数据智能体</option>
+              <option value="general_agent">通用智能体</option>
+            </select>
+            <button
+              type="button"
+              onClick={() => void applyReassignment()}
+              disabled={isReassigning || assignedTo === selectedTask.AssignedTo}
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-3 py-2 text-xs font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${isReassigning ? 'animate-spin' : ''}`} />
+              应用
+            </button>
+          </div>
+          {reassignError && <p className="mt-2 text-xs font-medium text-red-600">{reassignError}</p>}
         </div>
 
         {ablationBudget && (

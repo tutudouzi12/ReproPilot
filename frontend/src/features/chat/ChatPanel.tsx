@@ -37,7 +37,7 @@ interface ChatActions {
 }
 
 interface PdfActions {
-  onOpenPdf: () => void;
+  onOpenPdf: (url?: string) => void;
   onClosePdf: () => void;
 }
 

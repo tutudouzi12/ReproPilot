@@ -328,8 +328,14 @@ async def chat(
     x_user_id: str | None = Header(default=None),
     x_session_id: str | None = Header(default=None),
 ) -> dict[str, str]:
+    try:
+        answer = await agents.chat(payload.message)
+    except RuntimeError as exc:
+        if "OPENAI_API_KEY" in str(exc):
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        raise
     return {
-        "response": await agents.chat(payload.message),
+        "response": answer,
         "session_id": identity(x_session_id, "session"),
         "anon_user_id": identity(x_user_id, "anon"),
     }

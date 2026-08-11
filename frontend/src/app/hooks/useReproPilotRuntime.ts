@@ -3,7 +3,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import type { Node } from '@xyflow/react';
 import type { ChatMessage, ExecuteTaskResultEvent, NodeExecutionState, Task } from '../../contracts/api';
 import { PLAN_EVENTS, isPlanTerminalEvent, pickImageBase64 } from '../../contracts/events';
-import { approvePlan, cancelPlan, createPlanEventSource, executePlan, executeTaskStream, retryTask } from '../../services/api/repropilotApi';
+import { approvePlan, cancelPlan, createPlanEventSource, executePlan, executeTaskStream, reassignTask, retryTask } from '../../services/api/repropilotApi';
 import type { RequestIdentity } from '../../services/api/repropilotApi';
 import { getTaskStyleByStatus } from '../../features/shared/agentVisuals';
 import { createTaskNodeLabel } from '../../features/plan-graph/nodeLabelFactory';
@@ -35,6 +35,7 @@ type ExecutionAction =
   | { type: 'set-display-mode'; mode: ExecutionDisplayMode }
   | { type: 'set-executing'; value: boolean }
 	| { type: 'set-approval-resolved'; value: boolean }
+  | { type: 'reassign-task'; taskId: string; assignedTo: string }
   | { type: 'reset' };
 
 const initialNodeExecutionState: NodeExecutionState = { logs: '', result: '', code: '', structuredData: '', imageBase64: '' };
@@ -65,6 +66,27 @@ const updateNodeStatus = (node: Node, status: string, unverifiedDemo = Boolean(n
 			...getTaskStyleByStatus(unverifiedDemo ? 'unverified_demo' : status),
 		},
 	};
+};
+
+const updateNodeAssignment = (node: Node, assignedTo: string): Node => {
+  const task = node.data.task as Task;
+  if (!task) return node;
+  const updatedTask = { ...task, AssignedTo: assignedTo, Status: 'pending', Result: '', Code: '', StructuredData: '', ImageBase64: '' };
+  return {
+    ...updateNodeStatus(node, 'pending', false),
+    data: {
+      ...node.data,
+      status: 'pending',
+      unverifiedDemo: false,
+      task: updatedTask,
+      label: createTaskNodeLabel({
+        assignedTo,
+        taskName: updatedTask.Name,
+        status: 'pending',
+        step: typeof node.data.step === 'number' ? node.data.step : undefined,
+      }),
+    },
+  };
 };
 
 const detectBestDisplayMode = (task: Task, state: NodeExecutionState): ExecutionDisplayMode => {
@@ -165,6 +187,29 @@ const executionReducer = (state: ExecutionState, action: ExecutionAction): Execu
       return { ...state, isExecuting: action.value };
 	case 'set-approval-resolved':
 	  return { ...state, approvalResolved: action.value };
+    case 'reassign-task': {
+      const isSelected = state.selectedTask?.ID === action.taskId;
+      const selectedTask = isSelected && state.selectedTask
+        ? {
+            ...state.selectedTask,
+            AssignedTo: action.assignedTo,
+            Status: 'pending',
+            Result: '',
+            Code: '',
+            StructuredData: '',
+            ImageBase64: '',
+          }
+        : state.selectedTask;
+      return {
+        ...state,
+        selectedTask,
+        nodeStates: {
+          ...state.nodeStates,
+          [action.taskId]: initialNodeExecutionState,
+        },
+        displayMode: isSelected ? 'logs' : state.displayMode,
+      };
+    }
     case 'reset':
       return {
         selectedTask: null,
@@ -308,6 +353,18 @@ export function useReproPilotRuntime(options: UseReproPilotRuntimeOptions) {
               ...prev,
               logs: prev.logs ? `${prev.logs}\n[Plan Error] ${errorText}` : `[Plan Error] ${errorText}`,
             }));
+          }
+          if (event.event_type === PLAN_EVENTS.TASK_REASSIGNED && event.task_id) {
+            const assignedTo = String(event.payload?.to || '').trim();
+            if (assignedTo) {
+              setNodes((current) =>
+                current.map((node) => {
+                  if (node.id !== event.task_id) return node;
+                  return updateNodeAssignment(node, assignedTo);
+                }),
+              );
+              dispatchExecution({ type: 'reassign-task', taskId: event.task_id, assignedTo });
+            }
           }
 
           if (isPlanTerminalEvent(event)) {
@@ -562,6 +619,25 @@ export function useReproPilotRuntime(options: UseReproPilotRuntimeOptions) {
 		[appendChatMessage, connectPlanStream, executionState.isExecuting, identity, nodes, setNodes],
 	);
 
+  const handleReassignTask = useCallback(
+    async (activePlanId: string | null, task: Task, assignedTo: string) => {
+      const targetAgent = assignedTo.trim();
+      if (!activePlanId || !targetAgent || targetAgent === task.AssignedTo) return;
+
+      try {
+        await reassignTask(activePlanId, task.ID, targetAgent, identity);
+        setNodes((current) => current.map((node) => (node.id === task.ID ? updateNodeAssignment(node, targetAgent) : node)));
+        dispatchExecution({ type: 'reassign-task', taskId: task.ID, assignedTo: targetAgent });
+        appendChatMessage({ role: 'system', text: `节点 **[${task.Name}]** 已重新分配给 \`${targetAgent}\`，旧执行租约和结果已失效。` });
+      } catch (error) {
+        console.error(error);
+        appendChatMessage({ role: 'system', text: `节点 **[${task.Name}]** 重新分配失败，请检查计划状态后重试。` });
+        throw error;
+      }
+    },
+    [appendChatMessage, identity, setNodes],
+  );
+
   const onNodeClick = useCallback(
     (_: unknown, node: Node) => {
       const taskData = node.data.task as Task;
@@ -630,6 +706,7 @@ export function useReproPilotRuntime(options: UseReproPilotRuntimeOptions) {
 	handleApproveAndRun,
 	handleCancelPlan,
 	handleRetryFailedPlan,
+    handleReassignTask,
     appendSelectedTaskLog,
     setDisplayMode,
     closeTaskPanel,
