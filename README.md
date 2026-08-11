@@ -32,27 +32,19 @@
 
 ## Engineering highlights
 
-### Recoverable DAG runtime
+### Durable and recoverable Agent runtime
 
-Planner 将论文复现、框架评测、自有数据 Benchmark 和代码执行请求编译为带显式依赖、Artifact 契约、审批条件和运行预算的 `PlanGraph`。自研 `asyncio` Scheduler 并发调度 ready 节点，处理优先级、超时、有限重试、取消、阻断和计划终态；`FilePlanStore` 通过原子 Snapshot 与启动恢复保留已完成工作。
+Planner 将论文复现、框架评测、自有数据 Benchmark 和代码执行请求编译为带显式依赖、Artifact 契约、审批条件和运行预算的 `PlanGraph`。自研 `asyncio` Scheduler 并发调度 ready 节点，通过原子 Snapshot、启动恢复与 SSE 事件流管理长任务。每次执行由 `execution_id`、递增 `execution_epoch` 和带过期时间的租约隔离；Retry、Cancel 或 Agent Reassign 会使旧租约失效，迟到结果只能生成 `task_result_discarded` 事件，不能覆盖新状态或写入 Artifact。
 
-### Execution epoch and lease isolation
-
-每次任务尝试绑定独立的 `execution_id`、递增 `execution_epoch` 和带过期时间的执行租约。Retry、Cancel 或 Agent Reassign 会使旧租约失效；旧协程即使迟到返回，也只会产生 `task_result_discarded` 事件，不能覆盖新状态或写入 Artifact。
-
-### Bounded research-coding loop
+### Bounded Research Coding
 
 Research Coding Agent 将“模型诊断”和“真实文件写入”分离：只向模型提供受限源码上下文，只允许修改已授权文件，校验路径、符号链接、文件大小和禁止副作用，并记录修改前后 SHA-256。每轮补丁都会在同一受限运行时中重跑；执行失败或修复预算耗尽时恢复原文件。
 
-### Deterministic benchmark validation
+### Deterministic evaluation and evidence
 
-Benchmark Harness 串联数据画像、Adapter 生成、小样本预检与修复、正式执行和结果验证。正式运行必须输出逐样本 `predictions.jsonl`；Validator 再次读取预测，核对数据哈希、样本数和运行清单，并独立重算分类或回归指标，避免使用模型生成的汇总文本冒充评测结果。
+Benchmark Harness 串联数据画像、Adapter 生成、小样本预检与修复、正式执行和结果验证。Validator 核对数据哈希、样本数、运行清单和逐样本 `predictions.jsonl`，独立重算分类或回归指标。论文主张先被拆分为可独立验收并冻结哈希的 Rubric，执行后只能引用真实 Artifact；系统区分 `verified`、部分复现、冲突、不可验证和缺少资产等状态，并以预算约束的 Tree of Thoughts 为消融候选评分，只执行在实验数、GPU 分钟与总时长预算内的分支。
 
-### Claim-to-Evidence and budgeted ToT
-
-论文主张先被拆分为可独立验收的 Rubric 并冻结哈希，执行后只能引用真实存在的 Artifact。系统区分 `verified`、部分复现、冲突、不可验证和缺少资产等状态；消融候选则按信息增益、相关性、可复现性和风险评分，在实验数、GPU 分钟与总时长预算内选择真实执行分支。
-
-### Isolated execution and security boundaries
+### Isolated execution and security
 
 独立 Sandbox Service 通过 Docker SDK 管理任务容器，默认限制镜像、挂载根目录、网络、CPU、内存、PID、Linux capabilities、命令时长和输出大小。上传链路校验所有权和哈希，远程 PDF 代理拒绝回环、私网、链路本地及非受信目标，避免把研究附件入口变成 SSRF 通道。
 
@@ -68,7 +60,7 @@ ReproPilot 将会话、研究上下文、DAG 和节点级执行细节整合在�
 - **Research artifacts**：以独立视图展示报告、图片和 Claim-to-Evidence Graph。
 - **PDF Assist**：本地 PDF.js Worker 支持论文渲染、缩放、划词翻译和携带原文追问。
 
-![ReproPilot Execution Inspector](docs/assets/repropilot-execution-inspector-2026.png)
+![ReproPilot PDF Research Assist](docs/assets/repropilot-pdf-research-2026.png)
 
 ## Architecture
 
