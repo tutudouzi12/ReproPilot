@@ -11,7 +11,6 @@
   </p>
   <p>
     <a href="#why-repropilot">Why ReproPilot</a> ·
-    <a href="#quickstart">Quickstart</a> ·
     <a href="#architecture">Architecture</a> ·
     <a href="#validation">Validation</a> ·
     <a href="#documentation">Documentation</a>
@@ -54,55 +53,6 @@ ReproPilot 将会话、研究上下文、DAG 和节点级执行细节整合在�
 | Claim-to-Evidence | 冻结 Rubric、Artifact 引用校验、分层结论状态 | 区分完整、部分、冲突和不可验证结论 |
 | Bounded ToT ablation | 候选生成、评分、实验/GPU/时长预算 | 在资源边界内选择高价值消融分支 |
 | Docker Sandbox | 独立服务、镜像和挂载白名单、资源限制 | Agent 决策与真实代码执行分离 |
-
-## Quickstart
-
-需要 Docker Desktop 或兼容的 Docker Engine。
-
-```powershell
-git clone https://github.com/tutudouzi12/ReproPilot.git
-cd ReproPilot
-Copy-Item backend.env.example backend.env
-docker compose up --build -d
-docker compose ps
-```
-
-| Service | URL |
-|---|---|
-| Research Workspace | http://localhost:5173 |
-| Backend API | http://localhost:8080 |
-| OpenAPI Docs | http://localhost:8080/docs |
-| Sandbox Health | http://localhost:8082/api/v1/health |
-
-ReproPilot 使用 OpenAI-compatible Chat Completions 接口。需要模型能力时，在 `backend.env` 中配置：
-
-```dotenv
-OPENAI_API_KEY=your-key
-OPENAI_BASE_URL=https://your-compatible-endpoint/v1
-OPENAI_MODEL=your-model
-```
-
-`OFFLINE_DEMO_MODE=false` 是默认严格模式。缺少模型、仓库工作区或 Sandbox 时，相关节点会失败并保留真实原因。演示模式产生的内容统一标记为 `unverified_demo`，不会进入有效研究证据。
-
-<details>
-<summary><strong>Local development</strong></summary>
-
-需要 Python 3.11+、Node.js 20+ 和 Docker。
-
-```powershell
-Copy-Item backend.env.example backend.env
-
-py -3.11 -m pip install -e ".\backend[dev]"
-py -3.11 -m pip install -e ".\docker-sandbox[dev]"
-
-.\scripts\windows\start-sandbox.ps1
-.\scripts\windows\start-backend.ps1
-.\scripts\windows\start-frontend.ps1
-```
-
-Windows 与 Unix 启动脚本都位于 [`scripts/`](scripts/) 目录。
-
-</details>
 
 ## Architecture
 
@@ -270,6 +220,55 @@ Pop-Location
 
 py -3.11 .\scripts\docker_smoke.py
 ```
+
+## Quickstart
+
+需要 Docker Desktop 或兼容的 Docker Engine。
+
+```powershell
+git clone https://github.com/tutudouzi12/ReproPilot.git
+cd ReproPilot
+Copy-Item backend.env.example backend.env
+docker compose up --build -d
+docker compose ps
+```
+
+| Service | URL |
+|---|---|
+| Research Workspace | http://localhost:5173 |
+| Backend API | http://localhost:8080 |
+| OpenAPI Docs | http://localhost:8080/docs |
+| Sandbox Health | http://localhost:8082/api/v1/health |
+
+ReproPilot 使用 OpenAI-compatible Chat Completions 接口。需要模型能力时，在 `backend.env` 中配置：
+
+```dotenv
+OPENAI_API_KEY=your-key
+OPENAI_BASE_URL=https://your-compatible-endpoint/v1
+OPENAI_MODEL=your-model
+```
+
+`OFFLINE_DEMO_MODE=false` 是默认严格模式。缺少模型、仓库工作区或 Sandbox 时，相关节点会失败并保留真实原因。演示模式产生的内容统一标记为 `unverified_demo`，不会进入有效研究证据。
+
+<details>
+<summary><strong>Local development</strong></summary>
+
+需要 Python 3.11+、Node.js 20+ 和 Docker。
+
+```powershell
+Copy-Item backend.env.example backend.env
+
+py -3.11 -m pip install -e ".\backend[dev]"
+py -3.11 -m pip install -e ".\docker-sandbox[dev]"
+
+.\scripts\windows\start-sandbox.ps1
+.\scripts\windows\start-backend.ps1
+.\scripts\windows\start-frontend.ps1
+```
+
+Windows 与 Unix 启动脚本都位于 [`scripts/`](scripts/) 目录。
+
+</details>
 
 ## Repository layout
 
