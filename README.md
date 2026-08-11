@@ -11,6 +11,7 @@
   </p>
   <p>
     <a href="#why-repropilot">Why ReproPilot</a> ·
+    <a href="#engineering-highlights">Engineering Highlights</a> ·
     <a href="#architecture">Architecture</a> ·
     <a href="#validation">Validation</a> ·
     <a href="#documentation">Documentation</a>
@@ -29,6 +30,34 @@
 - **Bounded code repair** — Research Coding Agent 只能修改已提供上下文中的文件，并记录哈希、回滚失败补丁。
 - **Isolated execution** — 代码在独立 Docker Sandbox 中运行，应用镜像、挂载、网络、资源和权限限制。
 
+## Engineering highlights
+
+### Recoverable DAG runtime
+
+Planner 将论文复现、框架评测、自有数据 Benchmark 和代码执行请求编译为带显式依赖、Artifact 契约、审批条件和运行预算的 `PlanGraph`。自研 `asyncio` Scheduler 并发调度 ready 节点，处理优先级、超时、有限重试、取消、阻断和计划终态；`FilePlanStore` 通过原子 Snapshot 与启动恢复保留已完成工作。
+
+### Execution epoch and lease isolation
+
+每次任务尝试绑定独立的 `execution_id`、递增 `execution_epoch` 和带过期时间的执行租约。Retry、Cancel 或 Agent Reassign 会使旧租约失效；旧协程即使迟到返回，也只会产生 `task_result_discarded` 事件，不能覆盖新状态或写入 Artifact。
+
+### Bounded research-coding loop
+
+Research Coding Agent 将“模型诊断”和“真实文件写入”分离：只向模型提供受限源码上下文，只允许修改已授权文件，校验路径、符号链接、文件大小和禁止副作用，并记录修改前后 SHA-256。每轮补丁都会在同一受限运行时中重跑；执行失败或修复预算耗尽时恢复原文件。
+
+### Deterministic benchmark validation
+
+Benchmark Harness 串联数据画像、Adapter 生成、小样本预检与修复、正式执行和结果验证。正式运行必须输出逐样本 `predictions.jsonl`；Validator 再次读取预测，核对数据哈希、样本数和运行清单，并独立重算分类或回归指标，避免使用模型生成的汇总文本冒充评测结果。
+
+### Claim-to-Evidence and budgeted ToT
+
+论文主张先被拆分为可独立验收的 Rubric 并冻结哈希，执行后只能引用真实存在的 Artifact。系统区分 `verified`、部分复现、冲突、不可验证和缺少资产等状态；消融候选则按信息增益、相关性、可复现性和风险评分，在实验数、GPU 分钟与总时长预算内选择真实执行分支。
+
+### Isolated execution and security boundaries
+
+独立 Sandbox Service 通过 Docker SDK 管理任务容器，默认限制镜像、挂载根目录、网络、CPU、内存、PID、Linux capabilities、命令时长和输出大小。上传链路校验所有权和哈希，远程 PDF 代理拒绝回环、私网、链路本地及非受信目标，避免把研究附件入口变成 SSRF 通道。
+
+这些能力均有对应的单元测试、Docker Smoke、浏览器端到端验证和可复现实验记录，详见 [Validation](#validation)。
+
 ## Research Workspace
 
 ReproPilot 将会话、研究上下文、DAG 和节点级执行细节整合在同一工作区：
@@ -40,19 +69,6 @@ ReproPilot 将会话、研究上下文、DAG 和节点级执行细节整合在�
 - **PDF Assist**：本地 PDF.js Worker 支持论文渲染、缩放、划词翻译和携带原文追问。
 
 ![ReproPilot Execution Inspector](docs/assets/repropilot-execution-inspector-2026.png)
-
-## Core capabilities
-
-| Capability | Implementation | Guarantee |
-|---|---|---|
-| Research-to-DAG planning | 意图路由、确定性图模板、审批门禁 | 计划拓扑和执行条件可审计 |
-| Durable scheduling | `asyncio` 并发、原子 Snapshot、事件回放 | 中断后保留已完成节点和产物 |
-| Execution isolation | execution ID、epoch、lease | 迟到结果不能覆盖新状态 |
-| Research Coding | 有界上下文、文件白名单、SHA-256、自动回滚 | 模型不能获得任意写入权限 |
-| Benchmark Harness | 数据画像、Adapter、预检、逐样本预测、指标重算 | 模型不能自行宣布评测成功 |
-| Claim-to-Evidence | 冻结 Rubric、Artifact 引用校验、分层结论状态 | 区分完整、部分、冲突和不可验证结论 |
-| Bounded ToT ablation | 候选生成、评分、实验/GPU/时长预算 | 在资源边界内选择高价值消融分支 |
-| Docker Sandbox | 独立服务、镜像和挂载白名单、资源限制 | Agent 决策与真实代码执行分离 |
 
 ## Architecture
 
