@@ -10,7 +10,7 @@
 
 ReproPilot 不把一次模型回复当作研究结果。它将自然语言目标编译为带显式依赖、输入输出 Artifact、预算和审批条件的 `PlanGraph`，由 Python Runtime 驱动多个专业 Agent 协作执行，再使用确定性校验器重算指标、检查产物并构建 Claim-to-Evidence Graph。
 
-![ReproPilot Research Workspace](docs/assets/repropilot-dashboard.png)
+![ReproPilot Research Workspace](docs/assets/repropilot-workspace-2026.png)
 
 ## 从研究问题到可验证证据
 
@@ -55,7 +55,7 @@ ReproPilot 不把一次模型回复当作研究结果。它将自然语言目标
 - **研究产物视图**：报告、图片和 Claim-to-Evidence Graph 使用独立展示模式，不需要从原始日志里手工寻找结果。
 - **PDF Assist**：使用本地 PDF.js Worker 渲染论文，支持缩放、文本层划词、翻译和携带原文的追问草稿。
 
-![ReproPilot Execution Inspector](docs/assets/repropilot-node-panel.png)
+![ReproPilot Execution Inspector](docs/assets/repropilot-execution-inspector-2026.png)
 
 ## 核心工程能力
 
