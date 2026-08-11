@@ -1,0 +1,50 @@
+# Workspace metadata
+.codex/
+
+# Environment files
+backend.env
+backend.env.ps1
+.env
+
+# Logs and runtime output
+logs/
+*.log
+
+# Build output
+dist/
+coverage/
+
+# Python caches and runtime state
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+data/
+uploads/
+
+# Frontend dependencies
+frontend/node_modules/
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Temporary backups generated during local edits
+*.tmp
+*.bak
+*.orig
+*.rej
+*.swp
+*.swo
+*.seed
+*.pid
+*.pid.lock
+*.stackdump
+*.trace
+*.out
+*.err
+*.prof

@@ -1,0 +1,80 @@
+name: repropilot
+
+services:
+  docker-sandbox:
+    build: ./docker-sandbox
+    image: repropilot-sandbox-runtime:latest
+    ports:
+      - "127.0.0.1:8082:8082"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp:/tmp
+    environment:
+      SANDBOX_API_TOKEN: ${SANDBOX_API_TOKEN:-local-sandbox-token}
+      SANDBOX_CPU_LIMIT: ${SANDBOX_CPU_LIMIT:-1}
+      SANDBOX_MEMORY_LIMIT: ${SANDBOX_MEMORY_LIMIT:-512m}
+      SANDBOX_PIDS_LIMIT: ${SANDBOX_PIDS_LIMIT:-128}
+      SANDBOX_NETWORK_DISABLED: ${SANDBOX_NETWORK_DISABLED:-true}
+      SANDBOX_EXEC_TIMEOUT_SECONDS: ${SANDBOX_EXEC_TIMEOUT_SECONDS:-300}
+      SANDBOX_MAX_OUTPUT_BYTES: ${SANDBOX_MAX_OUTPUT_BYTES:-1048576}
+      SANDBOX_DOCKER_GPUS: ${SANDBOX_DOCKER_GPUS:-none}
+      SANDBOX_WORKSPACE_ROOTS: /tmp
+      SANDBOX_IMAGE_ALLOWLIST: ${SANDBOX_IMAGE_ALLOWLIST:-repropilot-sandbox-runtime:latest,python:3.11-slim,python:3.12-slim}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import json,urllib.request; assert json.load(urllib.request.urlopen('http://localhost:8082/api/v1/health', timeout=2))['ok']"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 10s
+    networks:
+      - runtime-network
+
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    volumes:
+      - plan-data:/app/data
+      - upload-data:/app/uploads
+      - /tmp:/tmp
+    env_file:
+      - backend.env
+    environment:
+      SANDBOX_URL: http://docker-sandbox:8082
+      SANDBOX_API_TOKEN: ${SANDBOX_API_TOKEN:-local-sandbox-token}
+      SANDBOX_IMAGE: ${SANDBOX_IMAGE:-repropilot-sandbox-runtime:latest}
+      PLAN_STORE_PATH: /app/data/plans.json
+      UPLOAD_ROOT: /app/uploads
+      UPLOAD_MAX_MB: ${UPLOAD_MAX_MB:-32}
+      OFFLINE_DEMO_MODE: ${OFFLINE_DEMO_MODE:-false}
+      REPOSITORY_OPERATIONS_ENABLED: ${REPOSITORY_OPERATIONS_ENABLED:-true}
+      REPOSITORY_WORKSPACE_ROOT: /tmp/repropilot-workspaces
+    healthcheck:
+      test: ["CMD", "python", "-c", "import json,urllib.request; assert json.load(urllib.request.urlopen('http://localhost:8080/api/health', timeout=4))['ok']"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    depends_on:
+      docker-sandbox:
+        condition: service_healthy
+    networks:
+      - runtime-network
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - runtime-network
+
+networks:
+  runtime-network:
+    driver: bridge
+
+volumes:
+  plan-data:
+  upload-data:
