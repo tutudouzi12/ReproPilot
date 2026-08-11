@@ -1,42 +1,42 @@
 import type { ReactNode } from 'react';
-import { Bot, X } from 'lucide-react';
+import { FileText, X } from 'lucide-react';
 import { ChatPanel } from '../../features/chat/ChatPanel';
 import { PdfPanel } from '../../features/pdf-viewer/PdfPanel';
 import type { ChatMessage, UploadedFile } from '../../contracts/api';
 
 interface LeftWorkspaceShellProps {
-  widthPercent: number;
+  width: number;
   showClosePdf: boolean;
   onClosePdf: () => void;
   children: ReactNode;
 }
 
 function LeftWorkspaceShell(props: LeftWorkspaceShellProps) {
-  const { widthPercent, showClosePdf, onClosePdf, children } = props;
+  const { width, showClosePdf, onClosePdf, children } = props;
 
   return (
     <div
-      style={{ width: `${widthPercent}%` }}
-      className="repropilot-left-workspace relative z-10 flex flex-shrink-0 flex-col overflow-hidden border-r border-gray-200 bg-white shadow-xl transition-all duration-300"
+      style={{ width: `${width}px` }}
+      className="repropilot-left-workspace relative z-10 flex flex-shrink-0 flex-col overflow-hidden"
     >
-      <div className="p-4 border-b border-gray-200 bg-blue-600 text-white flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Bot className="w-6 h-6" />
-          <h1 className="text-xl font-bold tracking-wide">ReproPilot</h1>
-        </div>
-        {showClosePdf && (
-          <button onClick={onClosePdf} className="text-blue-100 hover:text-white p-1 hover:bg-blue-500 rounded-full transition-colors">
+      {showClosePdf && (
+        <div className="paper-workspace-header">
+          <div className="flex items-center gap-2 text-xs font-semibold">
+            <FileText className="h-4 w-4" />
+            Paper viewer
+          </div>
+          <button onClick={onClosePdf} className="workspace-icon-button" aria-label="关闭论文阅读器">
             <X className="w-5 h-5" />
           </button>
-        )}
-      </div>
+        </div>
+      )}
       {children}
     </div>
   );
 }
 
 interface LeftWorkspaceChatProps {
-  widthPercent: number;
+  width: number;
   state: {
     chatHistory: ChatMessage[];
     loading: boolean;
@@ -69,7 +69,7 @@ interface LeftWorkspaceChatProps {
 	onRemoveAttachment: (uploadId: string) => void;
   };
   pdfActions: {
-    onOpenPdf: () => void;
+    onOpenPdf: (url?: string) => void;
     onClosePdf: () => void;
   };
   taskActions: {
@@ -78,25 +78,25 @@ interface LeftWorkspaceChatProps {
 }
 
 export function LeftWorkspaceChat(props: LeftWorkspaceChatProps) {
-  const { widthPercent, state, chatActions, pdfActions, taskActions } = props;
+  const { width, state, chatActions, pdfActions, taskActions } = props;
   return (
-    <LeftWorkspaceShell widthPercent={widthPercent} showClosePdf={false} onClosePdf={pdfActions.onClosePdf}>
+    <LeftWorkspaceShell width={width} showClosePdf={false} onClosePdf={pdfActions.onClosePdf}>
       <ChatPanel state={state} chatActions={chatActions} pdfActions={pdfActions} taskActions={taskActions} />
     </LeftWorkspaceShell>
   );
 }
 
 interface LeftWorkspacePdfProps {
-  widthPercent: number;
+  width: number;
   pdfUrl: string;
   onClosePdf: () => void;
   onAskAI: (text: string) => void;
 }
 
 export function LeftWorkspacePdf(props: LeftWorkspacePdfProps) {
-  const { widthPercent, pdfUrl, onClosePdf, onAskAI } = props;
+  const { width, pdfUrl, onClosePdf, onAskAI } = props;
   return (
-    <LeftWorkspaceShell widthPercent={widthPercent} showClosePdf onClosePdf={onClosePdf}>
+    <LeftWorkspaceShell width={width} showClosePdf onClosePdf={onClosePdf}>
       <PdfPanel
         pdfUrl={pdfUrl}
         onAskAI={onAskAI}

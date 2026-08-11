@@ -187,4 +187,4 @@ UPLOAD_MAX_MB=32
 - Attention runner 只包含被选类别对应的实验配置。
 - 上传、内容读取、用户隔离和文本摘要。
 
-当前自动化验证已覆盖 Python 侧候选生成/解析、两阶段模型接线、预算选择、Attention runner 生成、上传类型与所有权、后端附件数量限制和 Planner Artifact 传递。前端 ESLint 已通过；Vite 生产构建和真实浏览器联调仍需 Node 20.19+ 环境。真实 Docker/GPU 执行必须以对应环境中的运行 Artifact 为准。
+当前自动化验证已覆盖 Python 侧候选生成/解析、两阶段模型接线、预算选择、Attention runner 生成、上传类型与所有权、后端附件数量限制和 Planner Artifact 传递。前端 ESLint、TypeScript 与 Vite 生产构建均已通过；Chrome 已验证 PDF Worker、15 页论文渲染、文本层划词、追问草稿以及严格模式错误提示。真实 Docker/GPU 执行仍必须以对应环境中的运行 Artifact 为准。

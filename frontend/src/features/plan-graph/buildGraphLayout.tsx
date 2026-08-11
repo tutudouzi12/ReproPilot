@@ -4,15 +4,17 @@ import { getTaskStyleByStatus } from '../shared/agentVisuals';
 import { containsUnverifiedDemo } from '../shared/executionEvidence';
 import { createTaskNodeLabel } from './nodeLabelFactory';
 
-const NODE_WIDTH = 216;
-const NODE_HEIGHT = 92;
+const NODE_WIDTH = 236;
+const NODE_HEIGHT = 112;
 
 const getCompactColumnCount = () => (typeof window !== 'undefined' && window.innerWidth < 640 ? 2 : 3);
 
 const pairKey = (from: string, to: string) => `${from}->${to}`;
 
 const selectVisibleEdges = (planGraph: PlanGraph) => {
-  const controlEdges = planGraph.edges.filter((edge) => edge.type === 'control');
+  const controlEdges = planGraph.edges.filter(
+    (edge) => edge.type === 'control' || edge.type === 'dependency',
+  );
   const controlPairs = new Set(controlEdges.map((edge) => pairKey(edge.from, edge.to)));
   const adjacency = controlEdges.reduce<Record<string, string[]>>((result, edge) => {
     result[edge.from] = [...(result[edge.from] ?? []), edge.to];
@@ -102,8 +104,8 @@ export const buildGraphLayout = (planGraph: PlanGraph): { nodes: Node[]; edges: 
   const maxTasksInLevel = Math.max(...Object.values(tasksPerLevel), 1);
   const useCompactLongChain = maxLevel >= 5 && maxTasksInLevel <= 2;
   const compactColumns = getCompactColumnCount();
-  const compactStackGap = 112;
-  const compactRowHeight = maxTasksInLevel > 1 ? 260 : 148;
+  const compactStackGap = 132;
+  const compactRowHeight = maxTasksInLevel > 1 ? 292 : 172;
 
   const levelCounts: Record<number, number> = {};
   sortedTasks.forEach((task, taskIndex) => {
@@ -115,8 +117,8 @@ export const buildGraphLayout = (planGraph: PlanGraph): { nodes: Node[]; edges: 
     const styleState = getTaskStyleByStatus(unverifiedDemo ? 'unverified_demo' : task.status);
 
     let position = {
-      x: 48 + level * 276,
-      y: 48 + (stackIndex + (maxTasksInLevel - tasksPerLevel[level]) / 2) * 132,
+      x: 64 + level * 316,
+      y: 82 + (stackIndex + (maxTasksInLevel - tasksPerLevel[level]) / 2) * 154,
     };
     let sourcePosition = Position.Right;
     let targetPosition = Position.Left;
@@ -130,8 +132,8 @@ export const buildGraphLayout = (planGraph: PlanGraph): { nodes: Node[]; edges: 
       const levelStackOffset = ((maxTasksInLevel - tasksPerLevel[level]) * compactStackGap) / 2;
 
       position = {
-        x: 48 + column * 268,
-        y: 48 + row * compactRowHeight + levelStackOffset + stackIndex * compactStackGap,
+        x: 64 + column * 304,
+        y: 82 + row * compactRowHeight + levelStackOffset + stackIndex * compactStackGap,
       };
       targetPosition = startsNewRow ? Position.Top : row % 2 === 0 ? Position.Left : Position.Right;
       sourcePosition = endsRow ? Position.Bottom : row % 2 === 0 ? Position.Right : Position.Left;
@@ -161,7 +163,7 @@ export const buildGraphLayout = (planGraph: PlanGraph): { nodes: Node[]; edges: 
         backgroundColor: styleState.backgroundColor,
         border: '1px solid',
         borderColor: styleState.borderColor,
-        boxShadow: '0 4px 14px rgb(15 23 42 / 0.07)',
+        boxShadow: 'none',
         cursor: 'pointer',
         overflow: 'hidden',
         padding: 0,
@@ -172,24 +174,25 @@ export const buildGraphLayout = (planGraph: PlanGraph): { nodes: Node[]; edges: 
   });
 
   selectVisibleEdges(planGraph).forEach((edge) => {
-    const targetStatus = tasksById[edge.to]?.status;
     const isDataEdge = edge.type === 'data';
     newEdges.push({
       id: edge.id,
       source: edge.from,
       target: edge.to,
       type: 'smoothstep',
-      animated: targetStatus === 'in_progress',
+      animated: false,
+      className: 'workflow-edge',
+      data: { edgeType: edge.type },
       style: {
-        stroke: isDataEdge ? '#8b5cf6' : '#94a3b8',
-        strokeWidth: isDataEdge ? 1.5 : 2,
+        stroke: '#c9c4ba',
+        strokeWidth: 1.25,
         strokeDasharray: isDataEdge ? '5 5' : undefined,
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
-        color: isDataEdge ? '#8b5cf6' : '#94a3b8',
-        width: 16,
-        height: 16,
+        color: '#c9c4ba',
+        width: 14,
+        height: 14,
       },
     });
   });

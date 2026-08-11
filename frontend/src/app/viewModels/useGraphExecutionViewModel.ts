@@ -62,6 +62,12 @@ export function useGraphExecutionViewModel(options: UseGraphExecutionViewModelOp
             void runtime.actions.handleExecuteTask(
               runtime.state.executionState.selectedTask as NonNullable<typeof runtime.state.executionState.selectedTask>,
             ),
+          onReassign: (assignedTo: string) =>
+            runtime.actions.handleReassignTask(
+              activePlanId,
+              runtime.state.executionState.selectedTask as NonNullable<typeof runtime.state.executionState.selectedTask>,
+              assignedTo,
+            ),
           onChangeDisplayMode: runtime.actions.setDisplayMode,
         }
       : null;

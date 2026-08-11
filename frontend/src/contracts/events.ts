@@ -8,6 +8,7 @@ export const PLAN_EVENTS = {
   TASK_BLOCKED: 'task_blocked',
   TASK_COMPLETED: 'task_completed',
   TASK_FAILED: 'task_failed',
+  TASK_REASSIGNED: 'task_reassigned',
   PLAN_COMPLETED: 'plan_completed',
   PLAN_FAILED: 'plan_failed',
 	PLAN_CANCELED: 'plan_canceled',

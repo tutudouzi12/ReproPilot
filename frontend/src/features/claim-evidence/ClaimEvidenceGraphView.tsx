@@ -77,11 +77,11 @@ interface ClaimEvidenceGraphViewProps {
 }
 
 const statusConfig: Record<ClaimStatus, { label: string; color: string; background: string; border: string }> = {
-  verified: { label: '已验证', color: '#166534', background: '#f0fdf4', border: '#86efac' },
-  partially_reproduced: { label: '部分复现', color: '#92400e', background: '#fffbeb', border: '#fbbf24' },
-  contradicted: { label: '与证据矛盾', color: '#991b1b', background: '#fef2f2', border: '#fca5a5' },
-  unverifiable: { label: '不可验证', color: '#475569', background: '#f8fafc', border: '#cbd5e1' },
-  blocked_by_missing_asset: { label: '缺少资产', color: '#075985', background: '#f0f9ff', border: '#7dd3fc' },
+  verified: { label: '已验证', color: '#55624b', background: '#f2f4ef', border: '#bbc4b5' },
+  partially_reproduced: { label: '部分复现', color: '#8e543b', background: '#faf1eb', border: '#dab5a4' },
+  contradicted: { label: '与证据矛盾', color: '#80514b', background: '#f8efed', border: '#d8b5b0' },
+  unverifiable: { label: '不可验证', color: '#716e68', background: '#f4f2ed', border: '#d6d2ca' },
+  blocked_by_missing_asset: { label: '缺少资产', color: '#80614c', background: '#f5efe9', border: '#d9c5b4' },
 };
 
 const nodeBaseStyle: CSSProperties = {
@@ -140,14 +140,14 @@ const statusNodeLabel = (eyebrow: string, title: string, status: ClaimStatus, de
 };
 
 const evidenceNodeLabel = (evidence: ClaimEvidenceNode) => (
-  <div className="w-full text-left text-cyan-950">
-    <div className="flex items-center gap-2 border-b border-cyan-200 bg-cyan-50 px-3 py-2">
+  <div className="w-full text-left text-emerald-950">
+    <div className="flex items-center gap-2 border-b border-emerald-200 bg-emerald-50 px-3 py-2">
       <FileSearch className="h-3.5 w-3.5" />
       <span className="font-mono text-[10px] font-semibold">{evidence.evidence_type}</span>
     </div>
     <div className="px-3 py-2">
       <div className="break-all font-semibold leading-4">{evidence.artifact_key}</div>
-      <div className="mt-1 font-mono text-[9px] text-cyan-700">{evidence.sha256 ? evidence.sha256.slice(0, 12) : 'no hash'}</div>
+      <div className="mt-1 font-mono text-[9px] text-emerald-700">{evidence.sha256 ? evidence.sha256.slice(0, 12) : 'no hash'}</div>
     </div>
   </div>
 );
@@ -201,8 +201,8 @@ const buildVisualGraph = (graph: ClaimEvidenceGraph): { nodes: Node<VisualNodeDa
         id: `${claim.claim_id}-${criterion.criterion_id}`,
         source: claim.claim_id,
         target: criterion.criterion_id,
-        markerEnd: { type: MarkerType.ArrowClosed, color: '#94a3b8' },
-        style: { stroke: '#94a3b8', strokeWidth: 1.5 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#aaa59c' },
+        style: { stroke: '#aaa59c', strokeWidth: 1.5 },
       });
 
       if (criterion.evidence_ids.length === 0) {
@@ -284,8 +284,8 @@ const buildVisualGraph = (graph: ClaimEvidenceGraph): { nodes: Node<VisualNodeDa
       style: {
         ...nodeBaseStyle,
         width: 225,
-        border: isGap ? '1px dashed #94a3b8' : '1px solid #67e8f9',
-        background: isGap ? '#f8fafc' : '#ecfeff',
+        border: isGap ? '1px dashed #aaa59c' : '1px solid #bbc4b5',
+        background: isGap ? '#f4f2ed' : '#f2f4ef',
       },
       data: {
         label: isGap ? gapNodeLabel() : evidenceNodeLabel(placement.evidence),
@@ -313,7 +313,7 @@ const buildVisualGraph = (graph: ClaimEvidenceGraph): { nodes: Node<VisualNodeDa
 };
 
 const DetailIcon = ({ detail }: { detail: VisualNodeDetail }) => {
-  if (detail.kind === 'evidence') return <Link2 className="h-4 w-4 text-cyan-700" />;
+  if (detail.kind === 'evidence') return <Link2 className="h-4 w-4 text-emerald-700" />;
   if (detail.kind === 'gap') return <CircleHelp className="h-4 w-4 text-slate-500" />;
   if (detail.status === 'verified') return <CheckCircle2 className="h-4 w-4 text-green-700" />;
   if (detail.status === 'contradicted') return <XCircle className="h-4 w-4 text-red-700" />;
@@ -380,7 +380,7 @@ export function ClaimEvidenceGraphView({ rawGraph, expanded = false }: ClaimEvid
           onNodeClick={(_, node) => setSelectedNodeID(node.id)}
           proOptions={{ hideAttribution: true }}
         >
-          <Background color="#cbd5e1" gap={20} size={1} />
+          <Background color="#c9c4ba" gap={20} size={1} />
           <Controls showInteractive={false} position="bottom-right" />
         </ReactFlow>
       </div>
