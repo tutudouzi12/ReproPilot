@@ -1,4 +1,5 @@
-import { Bot, FileText, Maximize2, X } from 'lucide-react';
+import { Activity, Bot, CircleAlert, FileText, GitBranch, Maximize2, Microscope, Search, X } from 'lucide-react';
+import type { ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { ChatMessage } from '../../contracts/api';
@@ -20,84 +21,170 @@ interface ChatMessageListProps {
   taskActions: TaskActions;
 }
 
+interface AssistantPresentation {
+  label: string;
+  icon: typeof Bot;
+  className: string;
+}
+
+const resolveAssistantPresentation = (message: ChatMessage): AssistantPresentation => {
+  const normalizedText = message.text.trim().toLowerCase();
+  if (message.text.includes('请求未完成')) {
+    return { label: 'Needs attention', icon: CircleAlert, className: 'is-failed' };
+  }
+  if (message.actions?.includes('view_plot') || message.actions?.includes('view_report')) {
+    return { label: 'Result', icon: FileText, className: 'is-completed' };
+  }
+  if (message.text.includes('执行计划')) {
+    return { label: 'Planning', icon: GitBranch, className: 'is-running' };
+  }
+  if (normalizedText.startsWith('[searching]') || message.text.startsWith('正在搜索')) {
+    return { label: 'Searching', icon: Search, className: 'is-running' };
+  }
+  if (normalizedText.startsWith('[running]') || message.text.startsWith('正在运行')) {
+    return { label: 'Running', icon: Activity, className: 'is-running' };
+  }
+  if (normalizedText.startsWith('[analyzing]') || message.text.startsWith('正在分析')) {
+    return { label: 'Analyzing', icon: Microscope, className: 'is-running' };
+  }
+  return { label: 'Research response', icon: Bot, className: 'is-neutral' };
+};
+
 export function ChatMessageList(props: ChatMessageListProps) {
   const { chatHistory, loading, isLoggedIn, pdfActions, taskActions } = props;
 
   return (
-    <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
-      {!isLoggedIn && (
-        <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-3 text-sm leading-6 text-slate-600">
-          当前为游客模式：可以直接聊天和新建临时 session，但刷新页面后不会保留会话记录。
-        </div>
-      )}
-      {chatHistory.map((msg, i) => (
-        <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-          <div className={`max-w-[85%] flex flex-col gap-2 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-            <div
-              className={`rounded-2xl px-4 py-3 shadow-sm ${
-                msg.role === 'user' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-gray-100 text-gray-800 rounded-bl-none'
-              }`}
-            >
-              {msg.role === 'user' ? (
-                msg.text
-              ) : (
-                <div className="prose prose-sm prose-slate max-w-none prose-p:leading-snug prose-pre:my-1 prose-pre:bg-gray-800 prose-pre:text-gray-100 prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:rounded">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
-                </div>
-              )}
-            </div>
+    <div className="research-conversation">
+      <div className="research-conversation-stream" data-guest={!isLoggedIn || undefined}>
+        {chatHistory.map((message, index) =>
+          message.role === 'user' ? (
+            <UserMessage key={index} message={message} />
+          ) : (
+            <AssistantMessage
+              key={index}
+              message={message}
+              pdfActions={pdfActions}
+              taskActions={taskActions}
+            />
+          ),
+        )}
 
-            {msg.actions && msg.actions.length > 0 && (
-              <div className="flex gap-2 mt-1 animate-in fade-in slide-in-from-top-1 duration-300">
-                {msg.actions.includes('open_pdf') && (
-                  <button
-                    onClick={() => pdfActions.onOpenPdf(msg.pdfUrl)}
-                    className="flex items-center gap-1 text-xs bg-white text-blue-600 border border-blue-200 px-3 py-1.5 rounded-full hover:bg-blue-50 shadow-sm transition-all active:scale-95"
-                  >
-                    <FileText className="w-3 h-3" />
-                    打开论文原文
-                  </button>
-                )}
-                {msg.actions.includes('close_pdf') && (
-                  <button
-                    onClick={pdfActions.onClosePdf}
-                    className="flex items-center gap-1 text-xs bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50 shadow-sm transition-all active:scale-95"
-                  >
-                    <X className="w-3 h-3" />
-                    关闭阅读器
-                  </button>
-                )}
-                {msg.actions.includes('view_plot') && msg.taskId && (
-                  <button
-                    onClick={() => taskActions.onOpenTaskView(msg.taskId as string, 'plot')}
-                    className="flex items-center gap-1 text-xs bg-white text-orange-600 border border-orange-200 px-3 py-1.5 rounded-full hover:bg-orange-50 shadow-sm transition-all active:scale-95"
-                  >
-                    <Maximize2 className="w-3 h-3" />
-                    查看生成的图表
-                  </button>
-                )}
-                {msg.actions.includes('view_report') && msg.taskId && (
-                  <button
-                    onClick={() => taskActions.onOpenTaskView(msg.taskId as string, 'report')}
-                    className="flex items-center gap-1 text-xs bg-white text-green-600 border border-green-200 px-3 py-1.5 rounded-full hover:bg-green-50 shadow-sm transition-all active:scale-95"
-                  >
-                    <FileText className="w-3 h-3" />
-                    查看分析报告
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+        {loading && <PlanningActivity />}
+      </div>
+    </div>
+  );
+}
+
+function UserMessage({ message }: { message: ChatMessage }) {
+  return (
+    <article className="repropilot-chat-message research-user-message">
+      <div className="research-message-author">You</div>
+      <div className="research-user-message__body">
+        {message.text}
+      </div>
+    </article>
+  );
+}
+
+function AssistantMessage({
+  message,
+  pdfActions,
+  taskActions,
+}: {
+  message: ChatMessage;
+  pdfActions: PdfActions;
+  taskActions: TaskActions;
+}) {
+  const presentation = resolveAssistantPresentation(message);
+  const PresentationIcon = presentation.icon;
+
+  return (
+    <article className="repropilot-chat-message research-agent-message">
+      <header className="research-agent-message__header">
+        <div className="research-agent-identity">
+          <Bot />
+          <span>ReproPilot</span>
         </div>
-      ))}
-      {loading && (
-        <div className="flex justify-start">
-          <div className="bg-gray-100 rounded-2xl rounded-bl-none px-4 py-3 text-gray-500 animate-pulse flex items-center gap-2">
-            <Bot className="w-4 h-4" />
-            正在使用 Planner 编排多智能体任务拓扑图...
-          </div>
+        <span className={`research-message-state ${presentation.className}`}>
+          <PresentationIcon />
+          {presentation.label}
+        </span>
+      </header>
+
+      <div className="research-agent-message__body">
+        <div className="research-message-prose prose max-w-none">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
         </div>
+
+        {message.actions && message.actions.length > 0 && (
+          <MessageActions message={message} pdfActions={pdfActions} taskActions={taskActions} />
+        )}
+      </div>
+    </article>
+  );
+}
+
+function MessageActions({
+  message,
+  pdfActions,
+  taskActions,
+}: {
+  message: ChatMessage;
+  pdfActions: PdfActions;
+  taskActions: TaskActions;
+}) {
+  return (
+    <div className="research-message-actions">
+      {message.actions?.includes('open_pdf') && (
+        <ActionButton label="打开论文原文" icon={<FileText className="h-3 w-3" />} onClick={() => pdfActions.onOpenPdf(message.pdfUrl)} />
+      )}
+      {message.actions?.includes('close_pdf') && (
+        <ActionButton label="关闭阅读器" icon={<X className="h-3 w-3" />} onClick={pdfActions.onClosePdf} />
+      )}
+      {message.actions?.includes('view_plot') && message.taskId && (
+        <ActionButton
+          label="查看生成的图表"
+          icon={<Maximize2 className="h-3 w-3" />}
+          onClick={() => taskActions.onOpenTaskView(message.taskId as string, 'plot')}
+        />
+      )}
+      {message.actions?.includes('view_report') && message.taskId && (
+        <ActionButton
+          label="查看分析报告"
+          icon={<FileText className="h-3 w-3" />}
+          onClick={() => taskActions.onOpenTaskView(message.taskId as string, 'report')}
+        />
       )}
     </div>
+  );
+}
+
+function ActionButton({ label, icon, onClick }: { label: string; icon: ReactNode; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="research-message-action"
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
+
+function PlanningActivity() {
+  return (
+    <details open className="repropilot-planning-activity" aria-live="polite">
+      <summary>
+        <span className="flex items-center gap-2">
+          <span className="repropilot-loading-dot" />
+          Planning workflow
+        </span>
+        <span className="research-message-state is-running">Running</span>
+      </summary>
+      <div className="repropilot-disclosure-content">
+        Planner is structuring the multi-agent task graph. The workflow will appear in the center canvas when ready.
+      </div>
+    </details>
   );
 }

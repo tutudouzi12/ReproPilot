@@ -56,7 +56,7 @@ export function ChatPanel(props: ChatPanelProps) {
   const { state, chatActions, pdfActions, taskActions } = props;
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div className="research-sidebar flex h-full min-h-0 flex-col">
       <ChatSessionManager
         state={{
           isLoggedIn: state.isLoggedIn,
@@ -73,6 +73,12 @@ export function ChatPanel(props: ChatPanelProps) {
           onSwitchSession: chatActions.onSwitchSession,
         }}
       />
+      <div className="research-conversation-heading">
+        <span>Conversation</span>
+        <span className="research-conversation-count">
+          {state.chatHistory.length} {state.chatHistory.length === 1 ? 'message' : 'messages'}
+        </span>
+      </div>
       <ChatMessageList
         chatHistory={state.chatHistory}
         loading={state.loading}
@@ -85,6 +91,7 @@ export function ChatPanel(props: ChatPanelProps) {
         loading={state.loading}
         isLoggedIn={state.isLoggedIn}
         showSuggestions={state.showSuggestions}
+        isEmptyConversation={state.chatHistory.length <= 1}
 		pendingAttachments={state.pendingAttachments}
 		uploadingAttachments={state.uploadingAttachments}
 		attachmentError={state.attachmentError}

@@ -3,35 +3,35 @@ import { Bot, Code, Database, FileText, TerminalSquare, Wrench } from 'lucide-re
 export const getAgentIcon = (agentName: string) => {
   switch (agentName) {
     case 'librarian_agent':
-      return <FileText className="w-5 h-5 text-blue-500" />;
+      return <FileText className="h-4 w-4" />;
     case 'coder_agent':
-      return <Code className="w-5 h-5 text-purple-500" />;
+      return <Code className="h-4 w-4" />;
     case 'sandbox_agent':
-      return <TerminalSquare className="w-5 h-5 text-orange-500" />;
+      return <TerminalSquare className="h-4 w-4" />;
     case 'data_agent':
-      return <Database className="w-5 h-5 text-green-500" />;
+      return <Database className="h-4 w-4" />;
     case 'research_coding_agent':
-      return <Wrench className="w-5 h-5 text-teal-600" />;
+      return <Wrench className="h-4 w-4" />;
     default:
-      return <Bot className="w-5 h-5 text-gray-500" />;
+      return <Bot className="h-4 w-4" />;
   }
 };
 
 export const getTaskStyleByStatus = (status?: string) => {
   switch (status) {
     case 'ready':
-      return { borderColor: '#3b82f6', backgroundColor: '#eff6ff' };
+      return { borderColor: '#d8b8a9', backgroundColor: '#fffdfa' };
     case 'in_progress':
-      return { borderColor: '#f59e0b', backgroundColor: '#fffbeb' };
+      return { borderColor: '#b65f3c', backgroundColor: '#fbf3ee' };
     case 'completed':
-      return { borderColor: '#22c55e', backgroundColor: '#f0fdf4' };
+      return { borderColor: '#b9c1b2', backgroundColor: '#fbfcfa' };
     case 'unverified_demo':
-      return { borderColor: '#8b5cf6', backgroundColor: '#f5f3ff' };
+      return { borderColor: '#c7b8c2', backgroundColor: '#fcfafb' };
     case 'failed':
-      return { borderColor: '#ef4444', backgroundColor: '#fef2f2' };
+      return { borderColor: '#cba9a4', backgroundColor: '#fdf9f8' };
     case 'blocked':
-      return { borderColor: '#6b7280', backgroundColor: '#f3f4f6' };
+      return { borderColor: '#d2cec6', backgroundColor: '#f2f0eb' };
     default:
-      return { borderColor: '#e5e7eb', backgroundColor: '#ffffff' };
+      return { borderColor: '#ddd9d1', backgroundColor: '#fffefa' };
   }
 };

@@ -1,6 +1,7 @@
-import { Background, Controls, ReactFlow } from '@xyflow/react';
+import { Background, Controls, MarkerType, ReactFlow } from '@xyflow/react';
 import type { Edge, Node, OnEdgesChange, OnNodesChange } from '@xyflow/react';
-import { CheckCircle2, GitBranch, LoaderCircle, Play, RotateCcw, ShieldCheck, Square } from 'lucide-react';
+import { CheckCircle2, GitBranch, Waypoints } from 'lucide-react';
+import { useMemo } from 'react';
 import type { IntentContext } from '../../contracts/api';
 
 interface GraphPanelProps {
@@ -36,112 +37,114 @@ export function GraphPanel(props: GraphPanelProps) {
     onEdgesChange,
     onNodeClick,
     intentContext,
-    runAllText,
     graphTitle,
     graphHint,
-    isExecuting,
-	requiresApproval,
-    onRunAll,
-	onApproveAndRun,
-	onCancel,
-	onRetryFailed,
   } = props;
   const completedCount = nodes.filter((node) => node.data.status === 'completed' && !node.data.unverifiedDemo).length;
   const demoCount = nodes.filter((node) => Boolean(node.data.unverifiedDemo)).length;
   const runningCount = nodes.filter((node) => node.data.status === 'in_progress').length;
 	const failedCount = nodes.filter((node) => node.data.status === 'failed').length;
-  const runnableCount = nodes.filter((node) => ['pending', 'ready'].includes(String(node.data.status))).length;
   const intentLabel = intentContext ? intentLabels[intentContext.intent_type] ?? intentContext.intent_type : null;
   const subtitle = intentContext?.raw_intent || graphHint;
+  const visualEdges = useMemo(() => {
+    const nodeStateById = new Map(
+      nodes.map((node) => [
+        node.id,
+        {
+          status: String(node.data.status ?? 'pending'),
+          unverifiedDemo: Boolean(node.data.unverifiedDemo),
+        },
+      ]),
+    );
+
+    return edges.map((edge) => {
+      const targetState = nodeStateById.get(edge.target);
+      const isDataEdge = edge.data?.edgeType === 'data';
+      let stroke = '#c9c4ba';
+      let stateClass = 'is-neutral';
+      let animated = false;
+
+      if (targetState?.unverifiedDemo) {
+        stroke = '#7a6474';
+        stateClass = 'is-unverified';
+      } else if (targetState?.status === 'in_progress') {
+        stroke = '#b65f3c';
+        stateClass = 'is-running';
+        animated = true;
+      } else if (targetState?.status === 'completed') {
+        stroke = '#68745c';
+        stateClass = 'is-completed';
+      } else if (targetState?.status === 'failed') {
+        stroke = '#945c55';
+        stateClass = 'is-failed';
+      }
+
+      return {
+        ...edge,
+        animated,
+        className: `workflow-edge ${stateClass}`,
+        style: {
+          ...edge.style,
+          stroke,
+          strokeWidth: stateClass === 'is-neutral' ? 1.25 : 1.6,
+          strokeDasharray: isDataEdge ? '5 5' : undefined,
+        },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: stroke,
+          width: 14,
+          height: 14,
+        },
+      };
+    });
+  }, [edges, nodes]);
 
   return (
-    <div className="flex h-full min-w-0 flex-1 flex-col bg-slate-50">
-      <div className="shrink-0 border-b border-slate-200 bg-white px-5 py-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-              <GitBranch className="h-4 w-4 text-blue-600" />
-              {graphTitle}
-            </h2>
-            <p className="mt-1.5 max-w-3xl truncate text-xs text-slate-500" title={subtitle}>
-              {subtitle}
-            </p>
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-              {intentLabel && <span className="rounded-md bg-blue-50 px-2 py-1 font-medium text-blue-700">{intentLabel}</span>}
-              <span className="rounded-md bg-slate-100 px-2 py-1 text-slate-600">{nodes.length} 个步骤</span>
-              <span className="flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 text-emerald-700">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                {completedCount}/{nodes.length} 已验证完成
-              </span>
-              {demoCount > 0 && <span className="rounded-md bg-violet-50 px-2 py-1 font-medium text-violet-700">{demoCount} 演示·未验证</span>}
-              {runningCount > 0 && (
-                <span className="flex items-center gap-1 rounded-md bg-amber-50 px-2 py-1 text-amber-700">
-                  <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
-                  {runningCount} 运行中
-                </span>
-              )}
-			  {failedCount > 0 && <span className="rounded-md bg-rose-50 px-2 py-1 font-medium text-rose-700">{failedCount} 失败</span>}
+    <div className="workflow-workspace">
+      <div className="workflow-canvas-stage">
+        <div className="workflow-canvas-toolbar">
+          <div className="workflow-canvas-toolbar__identity">
+            <span className="workflow-canvas-toolbar__icon"><GitBranch /></span>
+            <div className="min-w-0">
+              <h2>{graphTitle}</h2>
+              <p title={subtitle}>{subtitle}</p>
             </div>
           </div>
-		  <div className="flex shrink-0 items-center gap-2">
-			{isExecuting ? (
-			  <button
-				type="button"
-				onClick={onCancel}
-				title="取消计划"
-				className="flex items-center gap-2 rounded-md border border-rose-200 bg-white px-3.5 py-2 text-sm font-semibold text-rose-700 transition-colors hover:bg-rose-50"
-			  >
-				<Square className="h-3.5 w-3.5 fill-current" />
-				取消
-			  </button>
-			) : requiresApproval ? (
-			  <button
-				type="button"
-				onClick={onApproveAndRun}
-				className="flex items-center gap-2 rounded-md bg-emerald-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
-			  >
-				<ShieldCheck className="h-4 w-4" />
-				审批并运行
-			  </button>
-			) : failedCount > 0 ? (
-			  <button
-				type="button"
-				onClick={onRetryFailed}
-				className="flex items-center gap-2 rounded-md bg-amber-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-700"
-			  >
-				<RotateCcw className="h-4 w-4" />
-				重试失败节点
-			  </button>
-			) : (
-			  <button
-				type="button"
-				onClick={onRunAll}
-				disabled={runnableCount === 0}
-				className="flex items-center gap-2 rounded-md bg-blue-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-			  >
-				<Play className="h-4 w-4 fill-current" />
-				{runAllText}
-			  </button>
-			)}
-		  </div>
+          <div className="workflow-canvas-toolbar__meta">
+            {intentLabel && <span>{intentLabel}</span>}
+            <span>{nodes.length} steps</span>
+            <span className="workflow-complete-count"><CheckCircle2 /> {completedCount}/{nodes.length}</span>
+            {demoCount > 0 && <span className="is-unverified">{demoCount} unverified</span>}
+            {runningCount > 0 && <span className="is-running"><span className="repropilot-loading-dot" /> {runningCount} running</span>}
+            {failedCount > 0 && <span className="is-failed">{failedCount} failed</span>}
+          </div>
         </div>
-      </div>
 
-      <div className="relative min-h-0 flex-1">
+        {nodes.length === 0 && (
+          <div className="workflow-empty-state" aria-hidden="true">
+            <Waypoints />
+            <div>
+              <strong>Your research workflow will appear here</strong>
+              <span>Start with a question, paper, repository, or dataset.</span>
+            </div>
+          </div>
+        )}
+
         <ReactFlow
           nodes={nodes}
-          edges={edges}
+          edges={visualEdges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onNodeClick={onNodeClick}
           nodesConnectable={false}
           nodesDraggable={false}
           fitView
-          fitViewOptions={{ padding: 0.16, maxZoom: 1.08 }}
-          className="bg-slate-50"
+          fitViewOptions={{ padding: 0.22, maxZoom: 1.04 }}
+          className="workflow-canvas"
+          proOptions={{ hideAttribution: true }}
         >
-          <Background color="#cbd5e1" gap={20} size={1} />
-          <Controls showInteractive={false} />
+          <Background color="#bdb8af" gap={24} size={0.8} />
+          <Controls showInteractive={false} position="bottom-left" />
         </ReactFlow>
       </div>
     </div>

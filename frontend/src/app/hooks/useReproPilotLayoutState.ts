@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react';
 
 export function useReproPilotLayoutState() {
-  const [leftPanelWidth, setLeftPanelWidth] = useState(35);
+  const [leftPanelWidth, setLeftPanelWidth] = useState(276);
   const [isResizing, setIsResizing] = useState(false);
-  const [sidebarWidth, setSidebarWidth] = useState(450);
+  const [sidebarWidth, setSidebarWidth] = useState(360);
   const [isResizingSidebar, setIsResizingSidebar] = useState(false);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isResizing) {
-        const newWidth = (e.clientX / window.innerWidth) * 100;
-        if (newWidth > 20 && newWidth < 80) {
+        const newWidth = e.clientX;
+        if (newWidth > 252 && newWidth < 320) {
           setLeftPanelWidth(newWidth);
         }
       } else if (isResizingSidebar) {
         const newSidebarWidth = window.innerWidth - e.clientX;
-        if (newSidebarWidth > 300 && newSidebarWidth < window.innerWidth * 0.6) {
+        if (newSidebarWidth > 336 && newSidebarWidth < Math.min(420, window.innerWidth * 0.4)) {
           setSidebarWidth(newSidebarWidth);
         }
       }

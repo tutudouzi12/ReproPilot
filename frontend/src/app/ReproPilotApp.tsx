@@ -6,6 +6,7 @@ import '@xyflow/react/dist/style.css';
 import 'katex/dist/katex.min.css';
 
 import { LeftWorkspaceChat, LeftWorkspacePdf } from './components/LeftWorkspace';
+import { WorkspaceHeader } from './components/WorkspaceHeader';
 import { useReproPilotRuntimeContext, type ReproPilotRuntimeContextValue } from './context/ReproPilotRuntimeContext';
 import { ReproPilotRuntimeProvider } from './context/ReproPilotRuntimeProvider';
 import { usePdfAssistFlow } from './hooks/usePdfAssistFlow';
@@ -29,54 +30,55 @@ interface ReproPilotAppShellProps {
 
 function ReproPilotAppShell(props: ReproPilotAppShellProps) {
   const { layout, leftWorkspace, graphExecutionViewModel, mobilePane, onMobilePaneChange } = props;
-  const graphNodeCount = graphExecutionViewModel.graphPanelProps.nodes.length;
+  const graphProps = graphExecutionViewModel.graphPanelProps;
+  const graphNodeCount = graphProps.nodes.length;
+  const completedCount = graphProps.nodes.filter((node) => node.data.status === 'completed' && !node.data.unverifiedDemo).length;
+  const failedCount = graphProps.nodes.filter((node) => node.data.status === 'failed').length;
+  const runnableCount = graphProps.nodes.filter((node) => ['pending', 'ready'].includes(String(node.data.status))).length;
+  const taskTitle = graphProps.intentContext?.raw_intent || 'Start a new research task';
+  const statusLabel = graphProps.isExecuting ? 'Running' : failedCount > 0 ? 'Needs attention' : graphNodeCount > 0 ? 'Ready' : 'Idle';
 
   return (
-    <div
-      className="repropilot-app-shell flex h-screen overflow-hidden bg-gray-100 font-sans"
-      data-mobile-pane={mobilePane}
-    >
-      <div className="repropilot-mobile-tabbar">
-        <button
-          type="button"
-          onClick={() => onMobilePaneChange('chat')}
-          className={mobilePane === 'chat' ? 'is-active' : ''}
-        >
-          <MessageSquareText className="h-4 w-4" />
-          对话
-        </button>
-        <button
-          type="button"
-          onClick={() => onMobilePaneChange('graph')}
-          className={mobilePane === 'graph' ? 'is-active' : ''}
-        >
-          <GitBranch className="h-4 w-4" />
-          流程{graphNodeCount > 0 ? ` ${graphNodeCount}` : ''}
-        </button>
-      </div>
+    <div className="repropilot-app-shell" data-mobile-pane={mobilePane}>
+      <WorkspaceHeader
+        leftPanelWidth={layout.leftPanelWidth}
+        taskTitle={taskTitle}
+        stepCount={graphNodeCount}
+        completedCount={completedCount}
+        failedCount={failedCount}
+        statusLabel={statusLabel}
+        isExecuting={graphProps.isExecuting}
+        requiresApproval={graphProps.requiresApproval}
+        runnableCount={runnableCount}
+        onRun={graphProps.onRunAll}
+        onApproveAndRun={graphProps.onApproveAndRun}
+        onCancel={graphProps.onCancel}
+        onRetry={graphProps.onRetryFailed}
+      />
 
-      {leftWorkspace}
+      <div className="repropilot-workspace-body flex min-h-0 flex-1 overflow-hidden">
+        <div className="repropilot-mobile-tabbar">
+          <button type="button" onClick={() => onMobilePaneChange('chat')} className={mobilePane === 'chat' ? 'is-active' : ''}>
+            <MessageSquareText className="h-4 w-4" /> Conversation
+          </button>
+          <button type="button" onClick={() => onMobilePaneChange('graph')} className={mobilePane === 'graph' ? 'is-active' : ''}>
+            <GitBranch className="h-4 w-4" /> Workflow{graphNodeCount > 0 ? ` ${graphNodeCount}` : ''}
+          </button>
+        </div>
 
-      <div
-        className={`repropilot-left-resize-handle flex w-1.5 cursor-col-resize items-center justify-center bg-gray-200 transition-colors hover:bg-blue-400 ${layout.isResizing ? 'bg-blue-500' : ''}`}
-        onMouseDown={layout.startResizingLeftPanel}
-      >
-        <div className="h-8 w-1 bg-gray-400 rounded-full" />
-      </div>
+        {leftWorkspace}
 
-      <div className="repropilot-graph-workspace relative flex min-w-0 flex-1 overflow-hidden">
-        <GraphPanel {...graphExecutionViewModel.graphPanelProps} />
+        <div className={`repropilot-left-resize-handle workspace-resize-handle ${layout.isResizing ? 'is-resizing' : ''}`} onMouseDown={layout.startResizingLeftPanel} />
 
-        {graphExecutionViewModel.showExecutionResizeHandle && (
-          <div
-            className={`w-1 bg-gray-200 hover:bg-blue-400 cursor-col-resize z-20 transition-colors flex items-center justify-center ${layout.isResizingSidebar ? 'bg-blue-500' : ''}`}
-            onMouseDown={layout.startResizingSidebar}
-          >
-            <div className="h-8 w-0.5 bg-gray-400 rounded-full" />
-          </div>
-        )}
+        <div className="repropilot-graph-workspace relative flex min-w-0 flex-1 overflow-hidden">
+          <GraphPanel {...graphProps} />
 
-        {graphExecutionViewModel.executionSidebarProps && <ExecutionSidebar {...graphExecutionViewModel.executionSidebarProps} />}
+          {graphExecutionViewModel.showExecutionResizeHandle && (
+            <div className={`workspace-resize-handle z-20 ${layout.isResizingSidebar ? 'is-resizing' : ''}`} onMouseDown={layout.startResizingSidebar} />
+          )}
+
+          {graphExecutionViewModel.executionSidebarProps && <ExecutionSidebar {...graphExecutionViewModel.executionSidebarProps} />}
+        </div>
       </div>
     </div>
   );
@@ -135,14 +137,14 @@ function ReproPilotWorkspaceContent(props: ReproPilotWorkspaceContentProps) {
 
   const leftWorkspace = pdfFlow.pdfUrl ? (
     <LeftWorkspacePdf
-      widthPercent={layout.leftPanelWidth}
+      width={layout.leftPanelWidth}
       pdfUrl={pdfFlow.pdfUrl}
       onClosePdf={() => pdfFlow.setPdfUrl(null)}
       onAskAI={pdfFlow.onAskAI}
     />
   ) : (
     <LeftWorkspaceChat
-      widthPercent={layout.leftPanelWidth}
+      width={layout.leftPanelWidth}
       state={{
         chatHistory: chatFlow.chatHistory,
         loading: chatFlow.loading,
