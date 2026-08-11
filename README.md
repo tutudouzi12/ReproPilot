@@ -239,7 +239,7 @@ py -3.11 .\scripts\docker_smoke.py
 
 ## Quickstart
 
-需要 Docker Desktop 或兼容的 Docker Engine。
+需要 Docker Desktop 或兼容的 Docker Engine：
 
 ```powershell
 git clone https://github.com/tutudouzi12/ReproPilot.git
@@ -249,14 +249,7 @@ docker compose up --build -d
 docker compose ps
 ```
 
-| Service | URL |
-|---|---|
-| Research Workspace | http://localhost:5173 |
-| Backend API | http://localhost:8080 |
-| OpenAPI Docs | http://localhost:8080/docs |
-| Sandbox Health | http://localhost:8082/api/v1/health |
-
-ReproPilot 使用 OpenAI-compatible Chat Completions 接口。需要模型能力时，在 `backend.env` 中配置：
+启动后访问 [Research Workspace](http://localhost:5173)；接口定义位于 [OpenAPI Docs](http://localhost:8080/docs)。使用模型能力时，在 `backend.env` 中配置 OpenAI-compatible 接口：
 
 ```dotenv
 OPENAI_API_KEY=your-key
@@ -264,27 +257,7 @@ OPENAI_BASE_URL=https://your-compatible-endpoint/v1
 OPENAI_MODEL=your-model
 ```
 
-`OFFLINE_DEMO_MODE=false` 是默认严格模式。缺少模型、仓库工作区或 Sandbox 时，相关节点会失败并保留真实原因。演示模式产生的内容统一标记为 `unverified_demo`，不会进入有效研究证据。
-
-<details>
-<summary><strong>Local development</strong></summary>
-
-需要 Python 3.11+、Node.js 20+ 和 Docker。
-
-```powershell
-Copy-Item backend.env.example backend.env
-
-py -3.11 -m pip install -e ".\backend[dev]"
-py -3.11 -m pip install -e ".\docker-sandbox[dev]"
-
-.\scripts\windows\start-sandbox.ps1
-.\scripts\windows\start-backend.ps1
-.\scripts\windows\start-frontend.ps1
-```
-
-Windows 与 Unix 启动脚本都位于 [`scripts/`](scripts/) 目录。
-
-</details>
+默认使用严格模式；演示模式产物标记为 `unverified_demo`，不会进入有效研究证据。依赖安装、本地开发和环境变量说明见 [Local startup guide](docs/local_startup_guide.md)。
 
 ## Repository layout
 
