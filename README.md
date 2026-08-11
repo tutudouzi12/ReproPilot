@@ -2,195 +2,211 @@
 
 [![CI](https://github.com/tutudouzi12/ReproPilot/actions/workflows/ci.yml/badge.svg)](https://github.com/tutudouzi12/ReproPilot/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Agent_Runtime-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=111)](https://react.dev/)
-[![Docker](https://img.shields.io/badge/Docker-Sandbox-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Docker](https://img.shields.io/badge/Docker-Isolated_Sandbox-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 
-**面向论文复现、代码调试与模型评测的可恢复 Agent 执行平台。**
+**把论文、仓库和数据集转化为可执行 DAG，并在受限 Docker 环境中完成调度、调试、验证与证据追踪的多 Agent 科研工作台。**
 
-ReproPilot 将自然语言研究目标编译为可审计的任务 DAG，在受限 Docker Sandbox 中执行真实代码，再通过确定性校验器重算指标、验证 Artifact，并生成 Claim-to-Evidence Graph。它关注的不只是“让 Agent 给出答案”，而是让一次研究任务具备可执行、可恢复、可追踪和可验证的完整闭环。
+ReproPilot 不把一次模型回复当作研究结果。它将自然语言目标编译为带显式依赖、输入输出 Artifact、预算和审批条件的 `PlanGraph`，由 Python Runtime 驱动多个专业 Agent 协作执行，再使用确定性校验器重算指标、检查产物并构建 Claim-to-Evidence Graph。
 
-![ReproPilot 工作台](docs/assets/repropilot-dashboard.png)
+![ReproPilot Research Workspace](docs/assets/repropilot-dashboard.png)
 
-## 项目概览
+## 从研究问题到可验证证据
 
-科研复现任务往往同时涉及论文解析、仓库发现、依赖安装、代码执行、失败修复、指标对齐和证据整理。单轮对话难以管理这些长链路状态，也无法可靠回答“代码是否真的运行”“指标是否来自逐样本预测”“失败后修改了哪些文件”。
+```text
+论文 / GitHub 仓库 / 数据集 / 自然语言目标
+                    │
+                    ▼
+       Intent Router + Rule Planner
+                    │
+                    ▼
+       PlanGraph（依赖、契约、预算、审批）
+                    │
+                    ▼
+       asyncio DAG Scheduler + Agent Runtime
+                    │
+          ┌─────────┴─────────┐
+          ▼                   ▼
+  Docker Sandbox       Event / Artifact Store
+          │                   │
+          └─────────┬─────────┘
+                    ▼
+       Deterministic Validators
+                    │
+                    ▼
+  Metrics / Reports / Claim-to-Evidence Graph
+```
 
-ReproPilot 将这些问题拆成三个相互隔离的层次：
+一次完整任务包含四个相互约束的阶段：
 
-1. **模型负责提出结构化方案**：解析意图、选择 Agent、生成受约束的适配器或最小补丁。
-2. **Python Runtime 负责治理执行**：调度 DAG、维护状态与租约、控制预算、持久化事件和恢复中断任务。
-3. **确定性组件负责认定结果**：校验路径与哈希、重算指标、验证图片和预测文件、构建证据图。
+1. **组织研究上下文**：在 Research Workspace 中维护会话，附加论文、代码仓库或数据文件，并通过 PDF 阅读器直接处理原文。
+2. **生成可审计计划**：Planner 识别论文复现、框架评测、自有数据 Benchmark、代码执行等意图，生成显式 DAG；高风险或 full 计划先进入审批门禁。
+3. **治理真实执行**：Scheduler 只调度依赖已满足的节点，并处理并发、超时、重试、取消、预算、恢复和 Agent Reassign。
+4. **验证而非宣告成功**：确定性组件校验路径、哈希、逐样本预测、指标与证据引用；证据不足时明确降级，不生成伪成功结果。
 
-## 核心架构
+## 新版 Research Workspace
+
+新版界面把会话、研究上下文、DAG 和节点级执行细节放进同一工作区：
+
+- **会话与附件**：新建或切换研究会话，上传论文与数据；用户身份和会话身份会参与计划、附件与事件的所有权校验。
+- **Workflow DAG**：React Flow 展示节点依赖、Agent 类型、步骤编号和实时状态；SSE 事件到达后同步更新节点和全局进度。
+- **Execution Inspector**：每个节点都可以查看 Overview、Trace、Output 和 Artifacts，并单独运行、重试或重新分配 Agent。
+- **研究产物视图**：报告、图片和 Claim-to-Evidence Graph 使用独立展示模式，不需要从原始日志里手工寻找结果。
+- **PDF Assist**：使用本地 PDF.js Worker 渲染论文，支持缩放、文本层划词、翻译和携带原文的追问草稿。
+
+![ReproPilot Execution Inspector](docs/assets/repropilot-node-panel.png)
+
+## 核心工程能力
+
+| 能力 | 实现方式 | 解决的问题 |
+|---|---|---|
+| DAG 编排 | 确定性图模板、显式依赖、优先级、超时和并发上限 | 长链路任务不再依赖单轮对话隐式推进 |
+| 可恢复执行 | 原子 JSON Snapshot、启动恢复、事件历史回放 | 服务中断后保留已完成节点和 Artifact |
+| 迟到结果隔离 | `execution_id`、递增 epoch 与执行租约 | 重试、取消或 Reassign 后旧协程不能覆盖新状态 |
+| 专业 Agent 路由 | Librarian、Coder、Research Coding、Sandbox、Data | 将检索、代码、运行和证据分析拆成可治理职责 |
+| 受限代码修复 | 有界上下文、路径校验、修改白名单、SHA-256 与自动回滚 | 防止模型获得任意文件系统或 Shell 写权限 |
+| Benchmark Harness | 数据画像、Adapter、预检修复、正式执行、指标重算 | 模型不能用汇总文本冒充逐样本评测结果 |
+| Claim-to-Evidence | 冻结 Rubric、Artifact 引用校验、分层结论状态 | 区分完整复现、部分复现、冲突和证据缺失 |
+| 预算约束 ToT | 候选生成、评分与实验/GPU/总时长预算选择 | 消融设计在明确资源边界内搜索高价值分支 |
+| 隔离执行 | 独立 FastAPI Sandbox、Docker SDK、资源和能力限制 | 将 Agent 决策与真实代码执行边界分离 |
+
+## 系统架构
 
 ```mermaid
 flowchart LR
-    U[研究目标 / 论文 / 数据集] --> P[Intent Router & Rule Planner]
+    U[Researcher] --> W[React Research Workspace]
+    F[Paper / Repository / Dataset] --> W
+
+    W -->|REST| API[FastAPI API]
+    API --> P[Intent Router & Planner]
     P --> G[PlanGraph & Approval Gate]
     G --> S[asyncio DAG Scheduler]
 
-    S --> A[Specialized Agents]
+    S --> A[Specialized Agent Runtime]
     A --> L[Librarian]
     A --> C[Coder]
     A --> R[Research Coding]
     A --> D[Data]
 
-    R --> X[Docker Sandbox]
-    C --> X
-    X --> O[Logs / Metrics / Artifacts]
-    O --> V[Deterministic Validators]
+    C --> X[Docker Sandbox Service]
+    R --> X
+    X --> K[Isolated Task Containers]
+
+    S <--> ST[FilePlanStore & EventBus]
+    S --> V[Deterministic Validators]
     V --> E[Claim-to-Evidence Graph]
 
-    S --> B[SSE Event Bus]
-    B --> W[React Workbench]
+    ST -->|SSE replay + live events| W
     E --> W
 ```
 
-| 层次 | 主要职责 | 核心实现 |
+### 服务职责
+
+| 层 | 主要职责 | 技术实现 |
 |---|---|---|
-| Workbench | 对话、DAG、审批、节点日志、PDF 与 Artifact 展示 | React 19、TypeScript、React Flow、SSE |
-| API & Planner | 身份与附件校验、意图路由、确定性图模板、模型契约 | FastAPI、Pydantic |
-| Agent Runtime | 并发调度、状态机、租约、重试、取消、预算、恢复 | asyncio、自研 DAG Scheduler |
-| Research Harness | 仓库准备、依赖恢复、受限补丁、Benchmark 适配与验证 | Python、结构化 Agent 输出 |
-| Sandbox | 容器生命周期、资源限制、命令流与执行隔离 | docker-py、独立 FastAPI 服务 |
-| Evidence | Rubric 冻结、哈希校验、指标重算、证据关联 | SHA-256、Claim-to-Evidence Graph |
+| Research Workspace | 会话、附件、DAG、PDF、节点检查器与 Artifact 展示 | React 19、TypeScript、React Flow、PDF.js |
+| API & Planner | 身份、上传、意图路由、图模板、审批和 PDF 安全代理 | FastAPI、Pydantic |
+| Agent Runtime | Agent 路由、结构化输出契约、研究执行与报告 | Python 3.11、OpenAI-compatible API |
+| DAG Scheduler | 并发、状态机、租约、重试、取消、预算与恢复 | `asyncio`、原子 JSON Snapshot |
+| Sandbox | 容器生命周期、命令流、资源限制和执行隔离 | FastAPI、docker-py |
+| Verification | Benchmark 重算、Rubric、Artifact 和证据图校验 | 确定性 Python 组件、SHA-256 |
 
-## 关键工程能力
+## 调度、恢复与 Reassign 语义
 
-### 1. 可恢复的 DAG Agent Runtime
+Scheduler 根据依赖关系将节点从 `pending` 推进到 `ready`，并按优先级并发执行。失败节点在额度内重试，无法继续的下游节点进入 `blocked`；取消、失败、跳过和阻断是独立终态，不会被成功文案覆盖。
 
-- Planner 使用可审计的规则路由与图模板，将论文复现、框架评测、代码执行和自有数据 Benchmark 转换为显式依赖图。
-- Scheduler 基于 `asyncio` 并发运行 ready 节点，支持优先级、节点超时、有限重试、全图尝试预算和总时长预算。
-- 失败节点会阻断其下游依赖；取消、失败、跳过和阻断均拥有独立终态，不用“成功文案”掩盖执行失败。
-- 高风险或 full 计划可以进入 `awaiting_approval`，批准后才获得执行权限。
-
-每次节点执行都会绑定：
+每次节点尝试都会绑定：
 
 ```text
-execution_id + execution_epoch + lease_owner + lease_expires_at
+task_id + execution_id + execution_epoch + lease_owner + lease_expires_at
 ```
 
-任务被取消、重试或转交后，epoch 与租约随之变化。旧协程即使迟到返回，也只会产生 `task_result_discarded` 事件，不能覆盖新状态。
+当用户重试、取消或重新分配 Agent 时，Runtime 会递增 `execution_epoch` 并使旧租约失效。Agent 返回结果后，Scheduler 会重新读取持久化状态并核对执行标识、epoch 和租约所有者；不匹配的结果只产生 `task_result_discarded` 事件，不能写入节点状态或 Artifact。
 
-### 2. 原子持久化与事件回放
+`FilePlanStore` 使用“临时文件写入 → `fsync` → 原子替换”保存计划和事件。服务重启后，中断节点恢复为可重新调度状态，旧执行租约被清理，已完成节点及其 Artifact 保持不变。
 
-- `FilePlanStore` 先写临时文件、执行 `fsync`，再通过原子替换提交计划快照。
-- 服务启动时会识别上次中断的运行节点，清理过期执行租约并恢复为可重新调度状态。
-- 事件流记录节点 ready、start、log、Artifact、终态和计划终态；SSE 重连后可以回放历史事件。
-- Session 切换会关闭旧 SSE 连接，避免终止消息串入其他会话。
+## 论文、仓库与数据执行链路
 
-### 3. 受约束的 Research Coding Agent
+### 论文复现
 
-ReproPilot 不允许模型直接获得任意文件系统或 Shell 权限。Research Coding 链路将“模型判断”和“实际写入”拆开：
+```text
+Paper Parse
+  → Freeze Claim Rubric
+  → Repository Discovery
+  → Workspace Preparation
+  → Dependency Resolution
+  → Isolated Runtime
+  → Baseline / Repair / Rerun
+  → Result Comparison
+  → Claim-to-Evidence Graph
+```
 
-1. Python Harness 收集入口文件、traceback 命中的仓库文件和有限源码上下文。
-2. 模型返回 `patched`、`no_change` 或 `unsupported`，以及结构化的文件级修改方案。
-3. Runtime 校验目标路径、符号链接、文件大小、禁止副作用和可修改文件集合。
-4. 写入前保存原内容与权限，并记录修改前后的 SHA-256。
-5. 在同一受限运行时重跑；修复预算耗尽时自动恢复 Agent 修改过的文件。
+Research Coding Agent 只允许修改已经提供给模型的工作区文件。写入前会校验路径、符号链接、文件大小和禁止副作用，保存原内容及权限并记录前后 SHA-256；执行失败或修复预算耗尽时自动恢复修改。
 
-固定治理边界包括：最多 3 次执行、2 轮修复、每轮最多修改 3 个已提供给模型的 Python 文件；缺少数据、checkpoint、凭证、算力或科学口径不一致时不会伪造补丁或指标。
-
-### 4. 可验证的自有数据 Benchmark Harness
-
-自有数据评测由固定 DAG 驱动，而不是让模型自由宣布成功：
+### 自有数据 Benchmark
 
 ```text
 Dataset Profile
-      ├── Repository Discovery → Workspace → Dependency Resolution
-      └── Adapter Generation
-                    ↓
-          Preflight & Repair
-                    ↓
-          Benchmark Execution
-                    ↓
-       Prediction / Metric Validation
-                    ↓
-             Evidence Report
+  → Repository Discovery
+  → Adapter Generation
+  → Bounded Preflight & Repair
+  → Benchmark Execution
+  → Prediction / Metric Validation
+  → Evidence Report
 ```
 
-- 支持 CSV、TSV、JSON、JSONL，以及分类、回归和无标签推理任务。
-- `dataset_profile` 使用确定性代码解析列、样本数、任务类型和数据 SHA-256。
-- Adapter 生成分为候选入口比较与最终代码生成两个阶段，源码上下文和文件数量均受预算限制。
-- 正式执行前最多进行 3 次、每次最多 8 条样本的预检与受限修复。
-- 验证器重新读取 `predictions.jsonl`，校验数据哈希、样本数、运行清单和数值范围，并独立重算 `accuracy`、`macro_f1`、`mse` 或 `mae`。
-- 适配器、数据或仓库源码在执行期间发生未授权变化时，整次评测失败。
+- 支持 CSV、TSV、JSON 和 JSONL，以及分类、回归和无标签推理任务。
+- `dataset_profile` 以确定性代码解析列、样本数、任务类型和数据 SHA-256。
+- 预检最多执行 3 轮、每轮最多使用 8 条样本；正式执行输出逐样本 `predictions.jsonl` 和运行清单。
+- Validator 重新读取预测，核对数据哈希和样本数，并独立重算 `accuracy`、`macro_f1`、`mse` 或 `mae`。
+- Adapter、数据或仓库源码出现未授权变化时，整次评测失败。
 
-### 5. Claim-to-Evidence Graph
+### Claim-to-Evidence Graph
 
-论文主张不会直接从模型文本升级为“已复现”。系统先冻结规范化 Rubric 及其 SHA-256，再允许后续节点引用真实存在的 Artifact：
+论文主张先被拆分为可独立验收的分层 Rubric 并冻结哈希，随后才允许节点引用真实存在的 Artifact。每项主张会得到明确状态：
 
 | 状态 | 含义 |
 |---|---|
-| `verified` | 现有 Artifact 满足冻结的验收条件 |
-| `partially_reproduced` | 只覆盖了部分条件或缩小规模的实验 |
-| `contradicted` | 运行结果与目标主张冲突 |
-| `unverifiable` | 证据不足，无法做可靠判断 |
-| `blocked_by_missing_asset` | 缺少数据、checkpoint 或其他必要资产 |
+| `verified` | Artifact 满足冻结的验收条件 |
+| `partially_reproduced` | 只覆盖部分条件或缩小规模实验 |
+| `contradicted` | 运行证据与目标主张冲突 |
+| `unverifiable` | 当前证据不足，无法可靠判断 |
+| `blocked_by_missing_asset` | 缺少数据、Checkpoint 或其他必要资产 |
 
-离线演示结果带有 `unverified_demo` 标记，会被报告、绘图和 Evidence Graph 主动排除，不能混入有效研究证据。
+离线演示产物统一标记为 `unverified_demo`，并从有效报告、绘图和 Evidence Graph 中排除。
 
-### 6. 独立 Docker Sandbox
+## PDF 与附件研究链路
 
-Backend 只通过内部 Bearer Token 调用 Sandbox Service。每个任务容器默认应用：
+- 文件上传会校验所有权、类型、大小和 SHA-256，并只向外部响应返回安全元数据。
+- 上传 PDF 的内容地址与消息动作绑定，点击后打开实际附件，不使用固定示例地址。
+- 远程 PDF 代理只接受受信 HTTPS 目标，拒绝用户信息、回环、私网、链路本地和组播地址；不自动跟随重定向，并限制响应类型与大小。
+- PDF.js Worker 随前端镜像本地部署；文本层支持划词后翻译，也可以将选中原文带入后续研究问题。
 
-- 镜像白名单与挂载根目录白名单；
-- `network_mode=none`，默认关闭网络；
-- 1 CPU、512 MiB 内存、128 PIDs；
-- `cap-drop ALL` 与 `no-new-privileges`；
-- 命令级超时和 UTF-8 安全的输出截断；
-- stdout/stderr NDJSON 流与 final 事件；
-- 成功、失败、取消后的容器清理与泄漏检查。
+## Docker Sandbox 安全模型
 
-运行镜像预装 `torch 2.13.0+cpu`，可在离线容器内执行真实科学计算。GPU 可通过显式 `DeviceRequest` 配置启用。
+Backend 仅通过内部 Bearer Token 调用独立 Sandbox Service。每个任务容器默认使用：
 
-## 端到端工作流
-
-| 场景 | 执行链路 | 主要产物 |
-|---|---|---|
-| 论文复现 | 论文解析 → 仓库准备 → 依赖恢复 → 基线执行/调试 → 结果比较 → Claim 审定 | 运行指标、补丁清单、差异报告、证据图 |
-| 框架评测 | 框架解析 → 运行时准备 → 受限实验 → 指标与图表生成 | 评测报告、指标 Artifact、可验证 PNG |
-| 自有数据 Benchmark | 数据画像 → Adapter 生成 → 预检修复 → 正式执行 → 指标重算 | 数据清单、逐样本预测、运行清单、验证报告 |
-| 通用代码执行 | 计划生成 → 审批 → 沙箱执行 → 日志与 Artifact 回传 | stdout/stderr、退出码、执行证据 |
-
-## 验证证据
-
-| 验证层 | 当前结果 |
+| 控制项 | 默认值 |
 |---|---|
-| Backend | `133 passed, 2 skipped` |
-| Docker Sandbox | `7 passed` |
-| Frontend | ESLint 与生产构建通过 |
-| Chrome E2E | Reassign、PDF Worker、15 页论文渲染、划词助手、追问草稿与严格失败提示通过 |
-| Dependency Audit | `npm audit --omit=dev`：`0 vulnerabilities` |
-| Docker Smoke | 鉴权、白名单、网络隔离、资源限制、真实执行、超时、截断和清理全部通过 |
-| GitHub Actions | `test` 与 `docker-smoke` 两个 Job 均通过 |
+| 镜像 | 精确 allowlist |
+| 挂载目录 | `SANDBOX_WORKSPACE_ROOTS` 白名单 |
+| 网络 | `network_mode=none` |
+| CPU | 1 core |
+| 内存 | 512 MiB |
+| 进程数 | 128 PIDs |
+| Linux capabilities | `cap_drop=ALL` |
+| Privilege escalation | `no-new-privileges` |
+| 单命令超时 | 300 秒 |
+| 输出上限 | 1 MiB，UTF-8 安全截断 |
 
-真实链路验证还包括：
+命令输出通过 NDJSON 传输 stdout、stderr 和 final 事件，任务完成、失败或取消后清理容器。GPU 必须通过显式 `DeviceRequest` 启用。
 
-- 在 `karpathy/minGPT` 固定提交 `37baab71b9abea1b76ab957409a1cc2fbfba8a26` 上完成 Repository Preparation。
-- 在隔离容器内完成受限前向传播，得到输出形状 `[2, 7, 64]` 和参数量 `167680`，运行后无沙箱容器泄漏。
-- Benchmark Harness 完成 preflight、execution 和 validation，并从逐样本预测重新计算 `accuracy=0.5`、`macro_f1=0.3333333333333333`。
-- 节点可在执行面板中重新分配 Agent；前端同步重置节点状态，后端递增 execution epoch 并隔离旧租约的迟到结果。
-- PDF 阅读器在生产 Nginx 镜像中加载本地 PDF.js Worker，支持文本层划词、翻译入口和带原文的追问草稿；上传 PDF 的内容地址会跟随消息动作打开，不再固定指向示例论文。
-- 严格模式缺少模型、仓库或 Sandbox 时保留真实失败原因，不生成伪成功结果。
+> Sandbox Service 仍需要访问 Docker Socket，因此它适合受控开发和研究环境。若直接服务不可信公网租户，应把执行面迁移到独立 Worker、rootless runtime、gVisor/Kata 或云端短生命周期沙箱。
 
-## 技术栈
+## 快速启动
 
-| 范围 | 技术 |
-|---|---|
-| Frontend | React 19、TypeScript 5.9、React Flow、Tailwind CSS 4、Vite 8、PDF.js |
-| Backend | Python 3.11、FastAPI、Pydantic、Uvicorn |
-| Runtime | asyncio、自研 DAG Scheduler、SSE、JSON Atomic Snapshot |
-| Agent | OpenAI-compatible Chat Completions、结构化输出契约、ReAct 修复、预算受限 ToT |
-| Sandbox | Docker、docker-py、独立 FastAPI Service、PyTorch CPU |
-| Quality | pytest、ESLint、TypeScript、npm audit、GitHub Actions |
-
-## 快速开始
-
-### Docker Compose
-
-需要 Docker Desktop 或兼容的 Docker Engine。
+需要 Docker Desktop（或兼容 Docker Engine）。
 
 ```powershell
 git clone https://github.com/tutudouzi12/ReproPilot.git
@@ -200,14 +216,16 @@ docker compose up --build -d
 docker compose ps
 ```
 
-服务地址：
+| 服务 | 地址 |
+|---|---|
+| Research Workspace | http://localhost:5173 |
+| Backend API | http://localhost:8080 |
+| OpenAPI Docs | http://localhost:8080/docs |
+| Sandbox Health | http://localhost:8082/api/v1/health |
 
-- Web Workbench：`http://localhost:5173`
-- Backend API：`http://localhost:8080`
-- OpenAPI Docs：`http://localhost:8080/docs`
-- Sandbox Health：`http://localhost:8082/api/v1/health`
+### 配置模型
 
-需要模型能力时，在 `backend.env` 中配置 OpenAI-compatible 接口：
+ReproPilot 使用 OpenAI-compatible Chat Completions 接口。需要模型能力时，在 `backend.env` 中配置：
 
 ```dotenv
 OPENAI_API_KEY=your-key
@@ -215,7 +233,7 @@ OPENAI_BASE_URL=https://your-compatible-endpoint/v1
 OPENAI_MODEL=your-model
 ```
 
-默认 `OFFLINE_DEMO_MODE=false`。严格模式下，缺少模型或可信执行条件的节点会失败并保留错误证据。只做界面与 DAG 联调时可以显式启用演示模式，但其产物不会成为有效证据。
+`OFFLINE_DEMO_MODE=false` 是默认严格模式：缺少模型、仓库工作区或 Sandbox 时，相关执行节点会失败并保留真实原因。只有界面和 DAG 联调时才应显式启用演示模式；演示产物不会升级为有效研究证据。
 
 ### 本地开发
 
@@ -232,27 +250,48 @@ py -3.11 -m pip install -e ".\docker-sandbox[dev]"
 .\scripts\windows\start-frontend.ps1
 ```
 
-Windows 与 Unix 的启动脚本都位于 [`scripts/`](scripts/) 目录。
+Windows 与 Unix 启动脚本都位于 [`scripts/`](scripts/) 目录。
 
-## 运行示例
+## API 与实时事件
 
-论文复现：
+| Method | Endpoint | 用途 |
+|---|---|---|
+| `POST` | `/api/plan` | 解析意图并创建 PlanGraph |
+| `GET` | `/api/plans/{plan_id}` | 读取计划、节点与 Artifact |
+| `POST` | `/api/plans/{plan_id}/approve` | 批准待审批计划 |
+| `POST` | `/api/plans/{plan_id}/execute` | 启动计划执行 |
+| `POST` | `/api/plans/{plan_id}/cancel` | 取消计划并使未完成租约失效 |
+| `POST` | `/api/plans/{plan_id}/tasks/{task_id}/retry` | 重置失败节点及受阻塞下游 |
+| `POST` | `/api/plans/{plan_id}/tasks/{task_id}/reassign` | 更换 Agent 并递增 execution epoch |
+| `GET` | `/api/plans/{plan_id}/events` | 获取可回放事件历史 |
+| `GET` | `/api/plans/{plan_id}/stream` | 订阅 SSE 实时事件流 |
+| `POST` | `/api/uploads` | 上传论文、代码或数据附件 |
+| `GET` | `/api/uploads/{upload_id}/content` | 读取已授权附件内容 |
+| `GET` | `/api/pdf-proxy` | 安全代理受信远程 PDF |
 
-```text
-复现 Attention Is All You Need 的核心 attention 实验，
-使用指定 GitHub 仓库运行 smoke 模式，并生成指标对比和 Claim-Evidence 报告。
-```
+SSE 事件覆盖 `plan_started`、`task_ready`、`task_started`、`task_log`、`artifact_created`、`task_completed`、`task_result_discarded`、`task_reassigned` 和计划终态。客户端先订阅再回放历史，并通过事件指纹去重，避免连接建立期间遗漏或重复消息。
 
-自有数据 Benchmark：
+## 可复现验证
 
-```text
-用 https://github.com/OWNER/REPOSITORY 跑 benchmark，
-输入列是 review，标签列是 label，最多运行 500 条样本。
-```
+截至 2026-08-11，合并后的主分支完成了以下验证：
 
-系统会先生成 DAG；需要审批的计划必须批准后才会进入真实执行阶段。
+| 验证层 | 结果 |
+|---|---|
+| Backend | `133 passed, 2 skipped` |
+| Docker Sandbox | `7 passed` |
+| Frontend | ESLint、TypeScript 与 Vite production build 通过 |
+| Dependency Audit | `npm audit --omit=dev`：`0 vulnerabilities` |
+| Docker Compose | Frontend、Backend、Sandbox 三个服务健康启动 |
+| Docker Smoke | Token、白名单、网络/资源限制、真实执行、超时、截断和清理通过 |
+| Chrome E2E | 附件、DAG、Reassign、PDF Worker、15 页论文渲染、划词翻译/追问和严格失败提示通过 |
+| GitHub Actions | `test` 与 `docker-smoke` 两个 Job 通过 |
 
-## 测试与质量检查
+验证中还完成了两条真实执行证据：
+
+- 在 `karpathy/minGPT` 固定提交 `37baab71b9abea1b76ab957409a1cc2fbfba8a26` 上完成 Repository Preparation，并在隔离容器内执行受限前向传播，得到输出形状 `[2, 7, 64]`、参数量 `167680`；运行结束后无任务容器泄漏。
+- Benchmark Harness 完成 preflight、execution 和 validation，并从逐样本预测独立重算 `accuracy=0.5`、`macro_f1=0.3333333333333333`。
+
+本地质量检查：
 
 ```powershell
 Push-Location backend
@@ -269,11 +308,7 @@ npm run lint
 npm run build
 npm audit --omit=dev
 Pop-Location
-```
 
-Compose 启动后执行真实 Docker 验收：
-
-```powershell
 py -3.11 .\scripts\docker_smoke.py
 ```
 
@@ -285,38 +320,37 @@ ReproPilot/
 │   ├── app/
 │   │   ├── planner.py              # 意图路由与 DAG 模板
 │   │   ├── scheduler.py            # 调度、租约、预算与恢复
-│   │   ├── agents.py               # Agent 路由与执行契约
-│   │   ├── research_coding.py      # 受限补丁、回滚与重跑
-│   │   ├── benchmark*.py           # 数据契约、执行与指标验证
+│   │   ├── agents.py               # Agent 路由与结构化执行契约
+│   │   ├── research_coding.py      # 受限修复、回滚与重跑
+│   │   ├── benchmark*.py           # 数据契约、执行与指标重算
 │   │   ├── claim_evidence.py       # Rubric 与 Evidence Graph
+│   │   ├── safe_http.py            # PDF SSRF 与响应边界
 │   │   └── store.py                # 原子计划快照
 │   └── tests/
-├── docker-sandbox/                 # 独立隔离执行服务
-├── frontend/                       # React Agent Workbench
-├── docs/                           # 架构、用户手册与设计文档
-├── examples/                       # 最小复现示例
-├── scripts/                        # 启动与 Docker Smoke 脚本
+├── docker-sandbox/                 # 独立 Docker 执行服务
+├── frontend/                       # React Research Workspace
+├── docs/                           # 架构、运行时与使用文档
+├── examples/                       # 最小研究复现样例
+├── scripts/                        # 启动脚本与 Docker Smoke
+├── test/                           # Claim-Evidence 可复现样例
 ├── docker-compose.yml
 └── backend.env.example
 ```
 
-## 工程边界
+## 设计边界与扩展方向
 
-- 计划与事件当前使用单机 JSON 原子快照；多实例部署需要替换为数据库与分布式租约。
-- Sandbox 通过 Docker Socket 创建任务容器，适合受控开发和评测环境；不应直接作为不可信多租户隔离边界。
-- 私有仓库认证、需要人工许可的数据、私有 checkpoint、交互式 GUI 和高度定制的数据加载协议需要额外集成。
-- 代码修复成功只证明对应执行错误已消除，不自动证明论文方法、数据口径和科学结论已经完整复现。
+- 当前计划与事件存储面向可靠单节点部署；多副本调度需要迁移到事务数据库并引入分布式租约或 leader election。
+- API 静态 Token、Header 身份和 Cookie 会话适合本地产品工作流；公网部署需要可信认证网关、OIDC/RBAC 和不可伪造审计身份。
+- 私有仓库、受限数据集、私有 Checkpoint、交互式 GUI 和高度定制的数据加载协议需要额外集成。
+- 代码修复成功只证明对应执行错误已消除，不自动证明论文方法、数据口径或科学结论已经完整复现。
 
 ## 文档
 
 - [系统架构](docs/project_architecture.md)
+- [Agent Runtime 可靠性与治理](docs/agent_runtime_p0_p1.md)
 - [Research Coding Agent 与 Benchmark Harness](docs/research_coding_agent.md)
 - [Claim-to-Evidence Graph](docs/claim_evidence_graph.md)
 - [ToT 消融、上传与安全边界](docs/tot_ablation_and_uploads.md)
 - [本地启动指南](docs/local_startup_guide.md)
 - [用户手册](docs/user_manual.md)
 - [贡献指南](docs/CONTRIBUTING.md)
-
-## License
-
-[MIT](LICENSE)
