@@ -32,7 +32,7 @@ def wait_for_health(url: str, attempts: int = 60) -> None:
             with urlopen(url, timeout=3) as response:
                 if response.status == 200:
                     return
-        except (HTTPError, URLError, TimeoutError):
+        except (HTTPError, URLError, TimeoutError, ConnectionError):
             pass
         time.sleep(1)
     raise RuntimeError(f"health check did not become ready: {url}")
