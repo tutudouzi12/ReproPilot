@@ -13,7 +13,7 @@
     <a href="#四个核心工程亮点">核心亮点</a> ·
     <a href="#15-秒端到端演示">演示</a> ·
     <a href="#系统如何工作">工作流程</a> ·
-    <a href="#系统架构">架构</a> ·
+    <a href="#四点主流程">主流程</a> ·
     <a href="#快速启动">快速启动</a>
   </p>
 </div>
@@ -64,31 +64,50 @@ Research Coding Agent 只负责诊断、假设和候选修改，确定性 Harnes
 | `Validation Report` | 汇总独立重算指标、隐藏验收和文件完整性检查 |
 | `Claim-to-Evidence Graph` | 将论文主张绑定到论文位置、运行指标和真实 Artifact |
 
-## 系统架构
+## 四点主流程
 
 ```mermaid
 flowchart LR
-    U[Researcher] --> W[React Workspace]
-    W -->|REST / Upload / SSE| API[FastAPI API]
-    API --> P[Intent Router & Planner]
-    P --> S[asyncio DAG Scheduler]
+    U[研究目标<br/>论文 · 仓库 · 数据] --> RS
 
-    S --> L[Librarian]
-    S --> C[Coder]
-    S --> R[Research Coding]
-    S --> D[Data]
+    subgraph A[① 契约与可靠运行时]
+        RS[ResearchSpec<br/>版本 · 文件 · 预算] --> PG[PlanGraph]
+        PG --> SCH[Scheduler<br/>lease · epoch · 恢复]
+    end
 
-    C --> X[Docker Sandbox]
-    R --> X
-    X --> V[Deterministic Validators]
-    V --> E[Trial Ledger / Evidence Graph]
+    subgraph B[② 多 Agent 受治理协作]
+        AG[Librarian · Coder · Research Coding · Data]
+        RC[模型提出候选<br/>Harness 决定写入与回滚]
+        AG --> RC
+    end
 
-    S <--> ST[FilePlanStore & EventBus]
-    ST --> W
-    E --> W
+    subgraph C[③ 隔离执行与确定性验收]
+        SB[Docker Sandbox<br/>资源 · 网络 · 超时边界]
+        VA[Validator<br/>重算指标 · Keep / Reject]
+        SB --> VA
+    end
+
+    subgraph D[④ 可审计证据]
+        TL[Trial Ledger]
+        VR[Validation Report]
+        CE[Claim-to-Evidence Graph]
+    end
+
+    SCH -->|typed Artifact| AG
+    RC --> SB
+    VA --> TL
+    VA --> VR
+    TL --> CE
+
+    classDef runtime fill:#f2e4da,stroke:#b8683e,color:#302821;
+    classDef agent fill:#f6f2eb,stroke:#9b8e84,color:#302821;
+    classDef verify fill:#e8f0ea,stroke:#537c62,color:#302821;
+    class RS,PG,SCH runtime;
+    class AG,RC agent;
+    class SB,VA,TL,VR,CE verify;
 ```
 
-核心边界是：LLM 负责理解任务并提出结构化候选；确定性组件负责权限、持久化、真实执行、指标计算和最终验收。设计原因与限制见 [设计取舍与已知限制](docs/design-decisions.md)。
+这张图也是建议的面试讲解顺序：先说明为什么要把开放任务冻结成契约，再讲多 Agent 如何按权限协作，随后说明代码为什么必须进入隔离执行与确定性验收，最后落到可审计证据。四段对应上面的四个核心亮点，不额外制造新的叙事分支。核心边界是：LLM 负责理解任务并提出结构化候选；确定性组件负责权限、持久化、真实执行、指标计算和最终验收。设计原因与限制见 [设计取舍与已知限制](docs/design-decisions.md)。
 
 ## 验证状态
 
