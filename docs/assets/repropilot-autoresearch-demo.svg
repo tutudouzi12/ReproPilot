@@ -133,7 +133,7 @@
   </g>
 
   <g id="phase1">
-    <animate attributeName="opacity" values="1;1;0;0;0;1" keyTimes="0;.27;.33;.60;.94;1" dur="15s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;1;0;0;0;1" keyTimes="0;.27;.33;.60;.94;1" dur="9s" repeatCount="indefinite"/>
     <rect x="692" y="369" width="358" height="118" rx="11" fill="#fffdf9" stroke="#ddd4cd" filter="url(#shadow)"/>
     <text x="714" y="399" class="label">Plan completed</text>
     <text x="714" y="425" class="small muted">Explicit Agent roles · typed Artifact handoff</text>
@@ -143,7 +143,7 @@
   </g>
 
   <g id="phase2" opacity="0">
-    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;.27;.33;.60;.66;1" dur="15s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;.27;.33;.60;.66;1" dur="9s" repeatCount="indefinite"/>
     <rect class="panel" x="642" y="120" width="474" height="386" rx="12"/>
     <text x="667" y="153" class="tiny accent">ARTIFACT PREVIEW</text>
     <text x="667" y="182" class="title">Research Trial Ledger</text>
@@ -167,7 +167,7 @@
   </g>
 
   <g id="phase3" opacity="0">
-    <animate attributeName="opacity" values="0;0;0;0;1;1;0" keyTimes="0;.60;.66;.66;.72;.94;1" dur="15s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0;0;0;1;1;0" keyTimes="0;.60;.66;.66;.72;.94;1" dur="9s" repeatCount="indefinite"/>
     <rect class="panel" x="642" y="120" width="474" height="386" rx="12"/>
     <text x="667" y="153" class="tiny accent">VALIDATION REPORT</text>
     <text x="667" y="182" class="title">Hidden holdout</text>
@@ -202,5 +202,5 @@
     <circle cx="522" cy="0" r="12" fill="#b8683e"/><text x="518.5" y="4" class="tiny" fill="#fff">3</text>
     <text x="542" y="5" class="label">Hidden validation</text>
   </g>
-  <text x="270" y="641" class="tiny muted">Governed execution path · three-stage walkthrough · loops every 15 seconds</text>
+  <text x="270" y="641" class="tiny muted">Governed execution path · three-stage walkthrough · loops every 9 seconds</text>
 </svg>
