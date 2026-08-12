@@ -40,7 +40,7 @@ Research Coding Agent 只负责诊断、假设和候选修改，确定性 Harnes
 
 独立 Docker Sandbox Service 管理任务容器，限制镜像、挂载根目录、网络、CPU、内存、PID、Linux capabilities、命令时长和输出大小；任务完成、失败、超时或取消后清理容器。上传链路校验文件所有权与哈希，远程 PDF 代理拒绝回环、私网和链路本地目标。它是受限单机执行面，不被包装成零信任多租户云沙箱。
 
-## 9 秒端到端演示
+## 演示
 
 ![ReproPilot：多 Agent DAG、受治理实验与隐藏验收](docs/assets/repropilot-autoresearch-demo.gif)
 
