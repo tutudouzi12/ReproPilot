@@ -1,7 +1,7 @@
 <div align="center">
   <h1>ReproPilot</h1>
-  <h3>Evidence-driven research execution for papers, repositories, and datasets</h3>
-  <p>将研究目标编译为可执行 DAG，在隔离环境中完成多 Agent 协作、代码调试、指标验证与证据追踪。</p>
+  <h3>Evidence-driven multi-agent research execution</h3>
+  <p>将论文、仓库与数据任务编译为可恢复 DAG，让专业 Agent 在受控环境中修改代码、执行实验并交付可审计证据。</p>
   <p>
     <a href="https://github.com/tutudouzi12/ReproPilot/actions/workflows/ci.yml"><img src="https://github.com/tutudouzi12/ReproPilot/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
     <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white" alt="Python 3.11+"></a>
@@ -10,184 +10,67 @@
     <a href="https://www.docker.com/"><img src="https://img.shields.io/badge/Docker-Isolated_Sandbox-2496ED?logo=docker&logoColor=white" alt="Docker Sandbox"></a>
   </p>
   <p>
-    <a href="#why-repropilot">Why ReproPilot</a> ·
-    <a href="#engineering-highlights">Engineering Highlights</a> ·
+    <a href="#four-engineering-pillars">Four Pillars</a> ·
+    <a href="#15-second-visual-walkthrough">15-second Demo</a> ·
     <a href="#architecture">Architecture</a> ·
     <a href="#validation">Validation</a> ·
-    <a href="#documentation">Documentation</a>
+    <a href="#quickstart">Quickstart</a>
   </p>
 </div>
 
 ![ReproPilot Research Workspace](docs/assets/repropilot-workspace-2026.png)
 
-## Why ReproPilot
+ReproPilot 解决的不是一次模型问答，而是一条长时间研究执行链：理解目标、分工、准备仓库、受控修改代码、隔离运行、重新计算指标并沉淀证据。模型负责理解和提出候选；Python Runtime 掌握状态转移、文件写入、执行、验收与回滚。
 
-论文复现不是一次问答，而是一条包含论文解析、仓库发现、环境准备、代码执行、失败修复、指标对齐和证据审定的长链路。ReproPilot 将这条链路建模为可持久化的 `PlanGraph`：模型负责提出结构化方案，Python Runtime 负责治理执行，确定性组件负责认定结果。
+## Four engineering pillars
 
-- **Durable execution** — DAG 状态、事件和 Artifact 原子持久化；服务重启后恢复未完成节点。
-- **Governed agents** — 每个节点声明依赖、输入输出、工具权限、超时、重试和预算，不依赖隐式对话状态推进。
-- **Evidence before claims** — 指标由 Validator 重算，论文主张必须引用真实 Artifact，证据不足时明确降级。
-- **Bounded code repair** — Research Coding Agent 与 AutoResearch 只修改已授权文件，由冻结评测契约决定 Keep/Reject，并记录哈希和回滚失败候选。
-- **Isolated execution** — 代码在独立 Docker Sandbox 中运行，应用镜像、挂载、网络、资源和权限限制。
+### 1. Contract-driven multi-agent DAG runtime
 
-## Engineering highlights
+Planner 将任务编译为带显式依赖的 `PlanGraph`，并通过类型化 Artifact 连接 Librarian、Coder、Research Coding、Sandbox 与 Data Agent。自研 `asyncio` Scheduler 管理 ready-node 调度、超时、重试、取消和 Agent Reassign；`execution_id + execution_epoch + lease` 使旧 Worker 的迟到结果无法覆盖新状态。计划、事件与 Artifact 原子持久化，服务重启后可恢复未完成任务，SSE 提供事件回放与实时进度。
 
-### Durable and recoverable Agent runtime
+### 2. Governed Research Coding and AutoResearch
 
-Planner 将论文复现、框架评测、自有数据 Benchmark 和代码执行请求编译为带显式依赖、Artifact 契约、审批条件和运行预算的 `PlanGraph`。自研 `asyncio` Scheduler 并发调度 ready 节点，通过原子 Snapshot、启动恢复与 SSE 事件流管理长任务。每次执行由 `execution_id`、递增 `execution_epoch` 和带过期时间的租约隔离；Retry、Cancel 或 Agent Reassign 会使旧租约失效，迟到结果只能生成 `task_result_discarded` 事件，不能覆盖新状态或写入 Artifact。
+Research Coding Agent 只负责诊断、假设和候选修改，确定性 Harness 掌握真实写入与接受权。`ResearchSpec` 冻结 Git revision、文件白名单、评测命令、重复次数和预算；baseline 与候选按同一契约重复执行，只有达到 `min_delta` 才 Keep，否则 Reject 并回滚。达到目标分数时由 Harness 停止搜索，最终验收不再调用候选模型。
 
-### Bounded Research Coding
+### 3. Deterministic evaluation and auditable evidence
 
-Research Coding Agent 将“模型诊断”和“真实文件写入”分离：只向模型提供受限源码上下文，只允许修改已授权文件，校验路径、符号链接、文件大小和禁止副作用，并记录修改前后 SHA-256。每轮补丁都会在同一受限运行时中重跑；执行失败或修复预算耗尽时恢复原文件。
+系统不接受模型自报的成功或汇总指标。Benchmark Validator 核对数据哈希、样本数、运行清单和逐样本预测后独立重算指标；AutoResearch 记录 Trial Ledger、补丁哈希和模型用量，并使用模型不可见 holdout 重复验收。论文复现通过冻结 Rubric 和 Claim-to-Evidence Graph 将每项主张绑定到真实 Artifact，证据不足时明确标记为部分复现、冲突或不可验证。
 
-### Deterministic evaluation and evidence
+### 4. Isolated tool execution and security boundaries
 
-Benchmark Harness 串联数据画像、Adapter 生成、小样本预检与修复、正式执行和结果验证。Validator 核对数据哈希、样本数、运行清单和逐样本 `predictions.jsonl`，独立重算分类或回归指标。论文主张先被拆分为可独立验收并冻结哈希的 Rubric，执行后只能引用真实 Artifact；系统区分 `verified`、部分复现、冲突、不可验证和缺少资产等状态，并以预算约束的 Tree of Thoughts 为消融候选评分，只执行在实验数、GPU 分钟与总时长预算内的分支。
+独立 Docker Sandbox Service 管理任务容器，限制镜像、挂载根目录、网络、CPU、内存、PID、Linux capabilities、命令时长和输出大小；任务完成、失败、超时或取消后清理容器。上传链路校验文件所有权与哈希，远程 PDF 代理拒绝回环、私网和链路本地目标。它是受限单机执行面，不被包装成零信任多租户云沙箱。
 
-### Isolated execution and security
+## 15-second visual walkthrough
 
-独立 Sandbox Service 通过 Docker SDK 管理任务容器，默认限制镜像、挂载根目录、网络、CPU、内存、PID、Linux capabilities、命令时长和输出大小。上传链路校验所有权和哈希，远程 PDF 代理拒绝回环、私网、链路本地及非受信目标，避免把研究附件入口变成 SSRF 通道。
+![ReproPilot AutoResearch: multi-agent DAG, governed trials and hidden validation](docs/assets/repropilot-autoresearch-demo.svg)
 
-这些能力均有对应的单元测试、Docker Smoke、浏览器端到端验证和可复现实验记录，详见 [Validation](#validation)。
-
-## Research Workspace
-
-ReproPilot 将会话、研究上下文、DAG 和节点级执行细节整合在同一工作区：
-
-- **Sessions & attachments**：维护研究会话，上传论文、代码和数据；计划与附件受用户和会话所有权约束。
-- **Workflow DAG**：React Flow 展示节点依赖、Agent 类型和实时状态，SSE 同步执行进度。
-- **Execution Inspector**：查看节点 Overview、Trace、Output 和 Artifacts，并执行重试或 Agent Reassign。
-- **Research artifacts**：以独立视图展示报告、图片和 Claim-to-Evidence Graph。
-- **PDF Assist**：本地 PDF.js Worker 支持论文渲染、缩放、划词翻译和携带原文追问。
-
-![ReproPilot PDF Research Assist](docs/assets/repropilot-pdf-research-2026.png)
+真实模型与 Docker 案例：8/8 节点约 26 秒完成；公开分数 `0.6667 → 1.0`，经历 1 次 Reject 和 1 次 Keep；模型不可见 holdout `3/3` 通过且文件完整。动图每 15 秒自动循环；输入、过程和证据边界见 [End-to-end demo](docs/end-to-end-demo.md)。
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    U[Researcher] --> W[React Research Workspace]
-    F[Paper / Repository / Dataset] --> W
-
-    W -->|REST| API[FastAPI API]
+    U[Researcher] --> W[React Workspace]
+    W -->|REST / Upload / SSE| API[FastAPI API]
     API --> P[Intent Router & Planner]
-    P --> G[PlanGraph & Approval Gate]
-    G --> S[asyncio DAG Scheduler]
+    P --> S[asyncio DAG Scheduler]
 
-    S --> A[Specialized Agent Runtime]
-    A --> L[Librarian]
-    A --> C[Coder]
-    A --> R[Research Coding]
-    A --> D[Data]
+    S --> L[Librarian]
+    S --> C[Coder]
+    S --> R[Research Coding]
+    S --> D[Data]
 
-    C --> X[Docker Sandbox Service]
+    C --> X[Docker Sandbox]
     R --> X
-    X --> K[Isolated Task Containers]
+    X --> V[Deterministic Validators]
+    V --> E[Trial Ledger / Evidence Graph]
 
     S <--> ST[FilePlanStore & EventBus]
-    S --> V[Deterministic Validators]
-    V --> E[Claim-to-Evidence Graph]
-
-    ST -->|SSE replay + live events| W
+    ST --> W
     E --> W
 ```
 
-| Layer | Responsibility | Stack |
-|---|---|---|
-| Research Workspace | 会话、附件、DAG、PDF、节点检查器和 Artifact | React 19、TypeScript、React Flow、PDF.js |
-| API & Planner | 身份、上传、意图路由、图模板、审批和 PDF 安全代理 | FastAPI、Pydantic |
-| Agent Runtime | Agent 路由、结构化输出、研究执行和报告 | Python 3.11、OpenAI-compatible API |
-| DAG Scheduler | 并发、状态机、租约、重试、取消、预算和恢复 | `asyncio`、原子 JSON Snapshot |
-| Sandbox | 容器生命周期、命令流、资源限制和执行隔离 | FastAPI、docker-py |
-| Verification | Benchmark 重算、Rubric、Artifact 和证据图校验 | 确定性 Python、SHA-256 |
-
-## Runtime guarantees
-
-### Lease-based stale result isolation
-
-Scheduler 只运行依赖已满足的节点。每次节点尝试都会绑定：
-
-```text
-task_id + execution_id + execution_epoch + lease_owner + lease_expires_at
-```
-
-重试、取消或 Agent Reassign 会递增 `execution_epoch` 并使旧租约失效。Agent 返回后，Scheduler 重新读取持久化状态并核对执行标识、epoch 和租约所有者；不匹配的结果只产生 `task_result_discarded` 事件，不能写入节点状态或 Artifact。
-
-### Recovery and event replay
-
-- `FilePlanStore` 按“临时文件 → `fsync` → 原子替换”保存计划和事件。
-- 服务启动时清理中断节点的旧租约并恢复调度，已完成节点及其 Artifact 保持不变。
-- SSE 先订阅再回放历史，并使用事件指纹去重，避免连接建立期间遗漏或重复事件。
-- 计划支持审批、取消、失败节点重试、尝试次数预算和总执行时长预算。
-
-## Research verification
-
-### Paper reproduction
-
-```text
-Paper Parse → Freeze Claim Rubric → Repository Discovery
-→ Workspace & Dependencies → Isolated Execution → Repair / Rerun
-→ Result Comparison → Claim-to-Evidence Graph
-```
-
-Research Coding Agent 只允许修改模型已看到的工作区文件。写入前校验路径、符号链接、文件大小和禁止副作用，记录修改前后 SHA-256；执行失败或修复预算耗尽时恢复原文件。
-
-### Custom benchmark
-
-```text
-Dataset Profile → Adapter Generation → Bounded Preflight & Repair
-→ Benchmark Execution → Prediction / Metric Validation → Evidence Report
-```
-
-- 支持 CSV、TSV、JSON 和 JSONL，以及分类、回归和无标签推理任务。
-- 预检最多执行 3 轮、每轮最多使用 8 条样本。
-- 正式执行输出逐样本 `predictions.jsonl` 和运行清单。
-- Validator 核对数据哈希和样本数，并独立重算 `accuracy`、`macro_f1`、`mse` 或 `mae`。
-- Adapter、数据或仓库源码出现未授权变化时，评测失败。
-
-### Claim-to-Evidence and ablation
-
-论文主张先被拆分为可独立验收的 Rubric 并冻结哈希，随后才允许引用真实 Artifact。判定结果包括 `verified`、`partially_reproduced`、`contradicted`、`unverifiable` 和 `blocked_by_missing_asset`。
-
-ToT 消融在候选生成后按信息增益、相关性、可复现性和风险评分，并受实验数、GPU 分钟和总时长预算约束。被选中的分支会进入真实执行配置，而不只是改变报告文字。
-
-## Sandbox security
-
-Backend 通过内部 Bearer Token 调用独立 Sandbox Service。任务容器默认应用：
-
-| Control | Default |
-|---|---|
-| Image | 精确 allowlist |
-| Mounts | `SANDBOX_WORKSPACE_ROOTS` 白名单 |
-| Network | `network_mode=none` |
-| CPU | 1 core |
-| Memory | 512 MiB |
-| Processes | 128 PIDs |
-| Capabilities | `cap_drop=ALL` |
-| Privilege escalation | `no-new-privileges` |
-| Command timeout | 300 seconds |
-| Output | 1 MiB，UTF-8 安全截断 |
-
-stdout、stderr 和 final 事件通过 NDJSON 传输；任务完成、失败或取消后清理容器。GPU 必须通过显式 `DeviceRequest` 启用。
-
-## API
-
-| Method | Endpoint | Purpose |
-|---|---|---|
-| `POST` | `/api/plan` | 解析意图并创建 PlanGraph |
-| `GET` | `/api/plans/{plan_id}` | 读取计划、节点和 Artifact |
-| `POST` | `/api/plans/{plan_id}/approve` | 批准待审批计划 |
-| `POST` | `/api/plans/{plan_id}/execute` | 启动计划 |
-| `POST` | `/api/plans/{plan_id}/cancel` | 取消计划并使未完成租约失效 |
-| `POST` | `/api/plans/{plan_id}/tasks/{task_id}/retry` | 重置失败节点及受阻塞下游 |
-| `POST` | `/api/plans/{plan_id}/tasks/{task_id}/reassign` | 更换 Agent 并递增 execution epoch |
-| `GET` | `/api/plans/{plan_id}/events` | 获取可回放事件历史 |
-| `GET` | `/api/plans/{plan_id}/stream` | 订阅 SSE 实时事件 |
-| `POST` | `/api/uploads` | 上传论文、代码或数据附件 |
-| `GET` | `/api/uploads/{upload_id}/content` | 读取已授权附件 |
-| `GET` | `/api/pdf-proxy` | 安全代理受信远程 PDF |
-
-SSE 事件覆盖节点 ready、start、log、Artifact、终态、Reassign、迟到结果丢弃和计划终态。完整 Schema 可在 [OpenAPI](http://localhost:8080/docs) 中查看。
+The key boundary is deliberate: LLMs propose structured work, while deterministic components own authorization, persistence, execution, scoring and acceptance. See [Design decisions and limitations](docs/design-decisions.md).
 
 ## Validation
 
@@ -196,19 +79,12 @@ SSE 事件覆盖节点 ready、start、log、Artifact、终态、Reassign、迟�
 | Backend | `146 passed, 2 skipped` |
 | Docker Sandbox | `7 passed` |
 | Frontend | ESLint、TypeScript、Vite production build 通过 |
-| Dependency Audit | `npm audit --omit=dev`：`0 vulnerabilities` |
+| Dependency audit | `npm audit --omit=dev`：`0 vulnerabilities` |
 | Docker Compose | Frontend、Backend、Sandbox 健康启动 |
-| Docker Smoke | Token、白名单、资源限制、真实执行、超时、截断和清理通过 |
-| Browser E2E | 附件、DAG、Reassign、PDF Worker、论文渲染、划词翻译/追问和严格失败提示通过 |
-| GitHub Actions | `test` 与 `docker-smoke` 通过 |
+| Docker smoke | 鉴权、白名单、资源限制、真实执行、超时、截断和清理通过 |
+| GitHub Actions | Backend、Sandbox、Frontend 与 Docker smoke jobs |
 
-<details>
-<summary><strong>Reproducible execution evidence</strong></summary>
-
-- 在 `karpathy/minGPT` 固定提交 `37baab71b9abea1b76ab957409a1cc2fbfba8a26` 上完成 Repository Preparation；隔离容器内的受限前向传播得到输出形状 `[2, 7, 64]`、参数量 `167680`，运行后无任务容器泄漏。
-- Benchmark Harness 完成 preflight、execution 和 validation，并从逐样本预测独立重算 `accuracy=0.5`、`macro_f1=0.3333333333333333`。
-
-</details>
+上述状态区分单元测试、容器 Smoke 和真实模型案例；它们不等于公网生产部署或大规模论文复现成功率。
 
 ```powershell
 Push-Location backend
@@ -241,7 +117,7 @@ docker compose up --build -d
 docker compose ps
 ```
 
-启动后访问 [Research Workspace](http://localhost:5173)；接口定义位于 [OpenAPI Docs](http://localhost:8080/docs)。使用模型能力时，在 `backend.env` 中配置 OpenAI-compatible 接口：
+启动后访问 [Research Workspace](http://localhost:5173) 和 [OpenAPI Docs](http://localhost:8080/docs)。使用模型能力时，在本地 `backend.env` 中配置 OpenAI-compatible 接口；该文件已被 Git 忽略：
 
 ```dotenv
 OPENAI_API_KEY=your-key
@@ -249,50 +125,25 @@ OPENAI_BASE_URL=https://your-compatible-endpoint/v1
 OPENAI_MODEL=your-model
 ```
 
-默认使用严格模式；演示模式产物标记为 `unverified_demo`，不会进入有效研究证据。依赖安装、本地开发和环境变量说明见 [Local startup guide](docs/local_startup_guide.md)。
-
-## Repository layout
-
-```text
-ReproPilot/
-├── backend/
-│   ├── app/
-│   │   ├── planner.py              # intent routing and DAG templates
-│   │   ├── scheduler.py            # scheduling, leases, budgets, recovery
-│   │   ├── agents.py               # agent routing and execution contracts
-│   │   ├── research_coding.py      # bounded repair, rollback, rerun
-│   │   ├── autoresearch.py         # frozen experiments, trial ledger, holdout validation
-│   │   ├── benchmark*.py           # dataset contracts and metric validation
-│   │   ├── claim_evidence.py       # rubric and evidence graph
-│   │   ├── safe_http.py            # PDF SSRF and response boundaries
-│   │   └── store.py                # atomic plan snapshots
-│   └── tests/
-├── docker-sandbox/                 # isolated Docker execution service
-├── frontend/                       # React Research Workspace
-├── docs/                           # architecture and user documentation
-├── examples/                       # minimal reproduction examples
-├── scripts/                        # startup helpers and Docker smoke test
-├── test/                           # reproducible Claim-Evidence example
-├── docker-compose.yml
-└── backend.env.example
-```
+默认使用严格模式。只有显式设置 `OFFLINE_DEMO_MODE=true` 才会生成联调用占位结果；此类结果标记为 `unverified_demo`，不会进入有效研究证据。
 
 ## Documentation
 
+- [End-to-end demo](docs/end-to-end-demo.md)
+- [Design decisions and limitations](docs/design-decisions.md)
+- [Interview-ready project narrative](docs/interview-guide.md)
 - [System architecture](docs/project_architecture.md)
-- [Agent Runtime reliability and governance](docs/agent_runtime_p0_p1.md)
-- [Research Coding Agent and Benchmark Harness](docs/research_coding_agent.md)
+- [Agent Runtime reliability](docs/agent_runtime_p0_p1.md)
+- [Research Coding and Benchmark Harness](docs/research_coding_agent.md)
 - [Governed AutoResearch](docs/autoresearch.md)
 - [Claim-to-Evidence Graph](docs/claim_evidence_graph.md)
-- [ToT ablation, uploads, and security](docs/tot_ablation_and_uploads.md)
+- [ToT ablation and uploads](docs/tot_ablation_and_uploads.md)
 - [Local startup guide](docs/local_startup_guide.md)
 - [User manual](docs/user_manual.md)
-- [Contributing](docs/CONTRIBUTING.md)
 
-## Operational boundaries
+## Scope
 
-- `FilePlanStore` 面向可靠单节点部署；多副本调度需要事务数据库、分布式租约或 leader election。
-- API Token、Header 身份和 Cookie 会话适合本地产品工作流；公网部署需要可信认证网关、OIDC/RBAC 和不可伪造审计身份。
-- Sandbox Service 可以访问 Docker Socket。服务不可信公网租户时，应将执行面迁至独立 Worker、rootless runtime、gVisor/Kata 或云端短生命周期沙箱。
-- 私有仓库、受限数据集、私有 Checkpoint、交互式 GUI 和高度定制的数据加载协议需要额外集成。
-- 代码修复成功只证明对应执行错误已消除，不自动证明论文方法、数据口径或科学结论已经完整复现。
+- `FilePlanStore` 面向可靠单节点部署；多副本需要事务数据库、分布式租约或 leader election。
+- Header/Cookie 身份适合本地个人工作流；公网部署需要可信认证、RBAC 和不可伪造审计身份。
+- Sandbox Service 可访问 Docker Socket；不可信公网租户应迁移到独立 Worker、rootless runtime、gVisor/Kata 或云端短生命周期沙箱。
+- 修复代码并通过冻结 evaluator，只证明该任务契约通过，不自动证明论文方法或科学结论被完整复现。
