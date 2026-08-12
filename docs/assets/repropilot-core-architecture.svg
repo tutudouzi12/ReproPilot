@@ -1,0 +1,240 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="820" viewBox="0 0 1440 820" role="img" aria-labelledby="title desc">
+  <title id="title">ReproPilot 核心执行架构</title>
+  <desc id="desc">研究输入经过契约编译、可靠调度、多 Agent 协作、隔离实验和确定性验收，最终形成可审计证据。</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#352820" flood-opacity="0.08"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#a99d94"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#537c62"/>
+    </marker>
+    <style>
+      text { font-family: Inter, "Segoe UI", "Microsoft YaHei", Arial, sans-serif; fill: #302821; }
+      .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 1.7px; fill: #b8683e; }
+      .heading { font-size: 28px; font-weight: 750; }
+      .subtitle { font-size: 14px; fill: #81766e; }
+      .stage { font-size: 12px; font-weight: 750; letter-spacing: 1.2px; fill: #9a5b3b; }
+      .card-title { font-size: 18px; font-weight: 750; }
+      .body { font-size: 13px; fill: #746a63; }
+      .label { font-size: 12px; font-weight: 650; }
+      .micro { font-size: 11px; fill: #8d827a; }
+      .dark-micro { font-size: 11px; fill: #cfc4bc; }
+      .dark-label { font-size: 12px; font-weight: 650; fill: #fff; }
+      .mono { font-family: "Cascadia Code", Consolas, monospace; font-size: 11px; fill: #675c55; }
+      .card { fill: #fffdf9; stroke: #ddd4cd; stroke-width: 1; filter: url(#shadow); }
+      .chip { fill: #f3eee8; stroke: #ded6cf; }
+      .green-chip { fill: #e9f1eb; stroke: #cfddd2; }
+      .orange-chip { fill: #f5e7de; stroke: #e7cfc0; }
+      .line { fill: none; stroke: #a99d94; stroke-width: 1.7; marker-end: url(#arrow); }
+      .feedback { fill: none; stroke: #537c62; stroke-width: 1.6; stroke-dasharray: 6 5; marker-end: url(#arrow-green); }
+    </style>
+  </defs>
+
+  <rect width="1440" height="820" fill="#f6f2eb"/>
+  <rect x="0" y="0" width="1440" height="94" fill="#fbf8f2"/>
+  <line x1="0" y1="94" x2="1440" y2="94" stroke="#ddd5ce"/>
+
+  <g transform="translate(56 31)">
+    <path d="M0 13 11 2l11 11-11 11z M11 2l11-11 11 11-11 11z" fill="none" stroke="#b8683e" stroke-width="2" transform="scale(.72) translate(0 10)"/>
+    <text x="35" y="24" font-size="20" font-weight="780">ReproPilot</text>
+  </g>
+  <text x="210" y="42" class="heading">核心执行架构</text>
+  <text x="210" y="68" class="subtitle">从开放研究目标到可审计证据的受治理执行链</text>
+  <g transform="translate(1194 28)">
+    <rect width="190" height="38" rx="19" fill="#e8f0ea" stroke="#ccdcd1"/>
+    <circle cx="20" cy="19" r="5" fill="#537c62"/>
+    <text x="34" y="24" class="label" fill="#537c62">Deterministic control</text>
+  </g>
+
+  <!-- input rail -->
+  <g transform="translate(48 126)">
+    <text x="0" y="14" class="eyebrow">RESEARCH INPUT</text>
+    <text x="0" y="47" class="card-title">研究输入</text>
+    <text x="0" y="70" class="body">统一进入契约边界</text>
+    <g transform="translate(0 98)">
+      <rect width="170" height="56" rx="10" class="chip"/>
+      <circle cx="25" cy="28" r="10" fill="#ead9cc"/>
+      <path d="M21 23h8M21 27h8M21 31h5" stroke="#b8683e" stroke-width="1.4"/>
+      <text x="47" y="33" class="label">论文与 Rubric</text>
+    </g>
+    <g transform="translate(0 168)">
+      <rect width="170" height="56" rx="10" class="chip"/>
+      <circle cx="25" cy="28" r="10" fill="#ead9cc"/>
+      <path d="m20 27 5-5 5 5-5 5z" fill="none" stroke="#b8683e" stroke-width="1.4"/>
+      <text x="47" y="33" class="label">Git 仓库</text>
+    </g>
+    <g transform="translate(0 238)">
+      <rect width="170" height="56" rx="10" class="chip"/>
+      <circle cx="25" cy="28" r="10" fill="#ead9cc"/>
+      <path d="M20 23h10v10H20zM22 26h6M22 29h4" fill="none" stroke="#b8683e" stroke-width="1.2"/>
+      <text x="47" y="33" class="label">数据与评测</text>
+    </g>
+  </g>
+
+  <!-- main pipeline connector -->
+  <path d="M230 362 H274" class="line"/>
+  <path d="M512 362 H548" class="line"/>
+  <path d="M786 362 H822" class="line"/>
+  <path d="M1060 362 H1096" class="line"/>
+
+  <!-- stage 1 -->
+  <g transform="translate(274 142)">
+    <rect width="238" height="440" rx="16" class="card"/>
+    <rect width="238" height="7" rx="3.5" fill="#b8683e"/>
+    <text x="22" y="40" class="stage">01 · CONTRACT</text>
+    <text x="22" y="72" class="card-title">契约编译</text>
+    <text x="22" y="96" class="body">将开放目标冻结为可执行规格</text>
+
+    <g transform="translate(18 126)">
+      <rect width="202" height="108" rx="12" class="orange-chip"/>
+      <text x="16" y="28" class="label">ResearchSpec</text>
+      <text x="16" y="53" class="mono">revision · allowlist</text>
+      <text x="16" y="73" class="mono">commands · repeats</text>
+      <text x="16" y="93" class="mono">budget · acceptance</text>
+    </g>
+    <g transform="translate(18 250)">
+      <rect width="202" height="78" rx="12" class="chip"/>
+      <text x="16" y="29" class="label">PlanGraph</text>
+      <text x="16" y="54" class="body">显式依赖与 Artifact 契约</text>
+    </g>
+    <g transform="translate(18 346)">
+      <rect width="202" height="58" rx="12" fill="#302821"/>
+      <text x="16" y="24" class="dark-micro">BOUNDARY</text>
+      <text x="16" y="43" class="dark-label">版本、文件、预算已冻结</text>
+    </g>
+  </g>
+
+  <!-- stage 2 -->
+  <g transform="translate(548 142)">
+    <rect width="238" height="440" rx="16" class="card"/>
+    <rect width="238" height="7" rx="3.5" fill="#b8683e"/>
+    <text x="22" y="40" class="stage">02 · RUNTIME</text>
+    <text x="22" y="72" class="card-title">可靠调度</text>
+    <text x="22" y="96" class="body">控制长任务状态与故障恢复</text>
+
+    <g transform="translate(18 126)">
+      <rect width="202" height="90" rx="12" class="orange-chip"/>
+      <text x="16" y="29" class="label">asyncio Scheduler</text>
+      <text x="16" y="54" class="body">ready-node · retry · cancel</text>
+      <text x="16" y="74" class="body">Agent reassign</text>
+    </g>
+    <g transform="translate(18 232)">
+      <rect width="202" height="82" rx="12" class="chip"/>
+      <text x="16" y="29" class="label">Lease + Execution Epoch</text>
+      <text x="16" y="55" class="body">隔离迟到 Worker 结果</text>
+    </g>
+    <g transform="translate(18 330)">
+      <rect width="202" height="74" rx="12" class="chip"/>
+      <text x="16" y="28" class="label">FilePlanStore + SSE</text>
+      <text x="16" y="53" class="body">原子持久化 · 恢复 · 回放</text>
+    </g>
+  </g>
+
+  <!-- stage 3 -->
+  <g transform="translate(822 142)">
+    <rect width="238" height="440" rx="16" class="card"/>
+    <rect width="238" height="7" rx="3.5" fill="#9b8e84"/>
+    <text x="22" y="40" class="stage" fill="#756960">03 · AGENTS</text>
+    <text x="22" y="72" class="card-title">专业 Agent 协作</text>
+    <text x="22" y="96" class="body">按工具权限与产物契约分工</text>
+
+    <g transform="translate(18 126)">
+      <rect width="96" height="66" rx="11" class="chip"/>
+      <circle cx="18" cy="20" r="5" fill="#b8683e"/>
+      <text x="31" y="24" class="label">Librarian</text>
+      <text x="12" y="48" class="micro">文献与上下文</text>
+    </g>
+    <g transform="translate(124 126)">
+      <rect width="96" height="66" rx="11" class="chip"/>
+      <circle cx="18" cy="20" r="5" fill="#b8683e"/>
+      <text x="31" y="24" class="label">Coder</text>
+      <text x="12" y="48" class="micro">仓库与依赖</text>
+    </g>
+    <g transform="translate(18 204)">
+      <rect width="202" height="72" rx="11" class="orange-chip"/>
+      <circle cx="18" cy="22" r="5" fill="#b8683e"/>
+      <text x="31" y="26" class="label">Research Coding</text>
+      <text x="12" y="51" class="micro">诊断 · 假设 · 结构化候选</text>
+    </g>
+    <g transform="translate(18 288)">
+      <rect width="96" height="66" rx="11" class="chip"/>
+      <circle cx="18" cy="20" r="5" fill="#537c62"/>
+      <text x="31" y="24" class="label">Sandbox</text>
+      <text x="12" y="48" class="micro">隔离工具执行</text>
+    </g>
+    <g transform="translate(124 288)">
+      <rect width="96" height="66" rx="11" class="chip"/>
+      <circle cx="18" cy="20" r="5" fill="#537c62"/>
+      <text x="31" y="24" class="label">Data</text>
+      <text x="12" y="48" class="micro">数据与指标</text>
+    </g>
+    <text x="22" y="390" class="micro">交接载体</text>
+    <text x="22" y="412" class="label">Typed Artifact</text>
+  </g>
+
+  <!-- stage 4 -->
+  <g transform="translate(1096 142)">
+    <rect width="296" height="440" rx="16" class="card"/>
+    <rect width="296" height="7" rx="3.5" fill="#537c62"/>
+    <text x="22" y="40" class="stage" fill="#537c62">04 · EXECUTION &amp; EVIDENCE</text>
+    <text x="22" y="72" class="card-title">隔离验收与证据</text>
+    <text x="22" y="96" class="body">确定性组件掌握最终接受权</text>
+
+    <g transform="translate(18 126)">
+      <rect width="260" height="74" rx="12" class="green-chip"/>
+      <text x="16" y="28" class="label">AutoResearch Harness</text>
+      <text x="16" y="53" class="body">受控写入 · Keep / Reject · 回滚</text>
+    </g>
+    <g transform="translate(18 216)">
+      <rect width="125" height="82" rx="12" class="green-chip"/>
+      <text x="14" y="28" class="label">Docker Sandbox</text>
+      <text x="14" y="52" class="micro">CPU · 内存 · 网络</text>
+      <text x="14" y="69" class="micro">超时 · 容器清理</text>
+    </g>
+    <g transform="translate(153 216)">
+      <rect width="125" height="82" rx="12" class="green-chip"/>
+      <text x="14" y="28" class="label">Validator</text>
+      <text x="14" y="52" class="micro">独立重算指标</text>
+      <text x="14" y="69" class="micro">隐藏验收</text>
+    </g>
+    <g transform="translate(18 316)">
+      <rect width="260" height="88" rx="12" fill="#302821"/>
+      <text x="16" y="25" class="dark-micro">AUDITABLE OUTPUT</text>
+      <text x="16" y="49" class="dark-label">Trial Ledger · Validation Report</text>
+      <text x="16" y="70" class="dark-label">Claim-to-Evidence Graph</text>
+    </g>
+  </g>
+
+  <!-- governed feedback -->
+  <path d="M1226 612 V655 H936 V596" class="feedback"/>
+  <rect x="1040" y="640" width="134" height="28" rx="14" fill="#e9f1eb" stroke="#cfddd2"/>
+  <text x="1062" y="659" class="micro" fill="#537c62">Reject · retry · stop</text>
+
+  <!-- boundary footer -->
+  <g transform="translate(48 704)">
+    <rect width="1344" height="76" rx="14" fill="#fbf8f2" stroke="#ddd5ce"/>
+    <g transform="translate(22 18)">
+      <circle cx="18" cy="20" r="18" fill="#f2e4da"/>
+      <text x="12" y="25" font-size="15" font-weight="750" fill="#b8683e">LLM</text>
+      <text x="49" y="17" class="micro">PROPOSE</text>
+      <text x="49" y="38" class="label">理解目标并提出结构化候选</text>
+    </g>
+    <line x1="388" y1="16" x2="388" y2="60" stroke="#ddd5ce"/>
+    <g transform="translate(416 18)">
+      <circle cx="18" cy="20" r="18" fill="#e9f1eb"/>
+      <path d="M11 20h14M18 13v14" stroke="#537c62" stroke-width="2"/>
+      <text x="49" y="17" class="micro">CONTROL</text>
+      <text x="49" y="38" class="label">运行时控制权限、状态、写入、执行与验收</text>
+    </g>
+    <line x1="874" y1="16" x2="874" y2="60" stroke="#ddd5ce"/>
+    <g transform="translate(902 18)">
+      <circle cx="18" cy="20" r="18" fill="#302821"/>
+      <path d="m11 20 5 5 10-12" fill="none" stroke="#fff" stroke-width="2"/>
+      <text x="49" y="17" class="micro">DELIVER</text>
+      <text x="49" y="38" class="label">证据不足时不将模型声明包装为成功</text>
+    </g>
+  </g>
+</svg>
