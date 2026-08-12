@@ -1,7 +1,7 @@
 <div align="center">
   <h1>ReproPilot</h1>
   <h3>证据驱动的多 Agent 科研执行系统</h3>
-  <p>将论文、仓库与数据任务编译为可恢复 DAG，让专业 Agent 在受控环境中修改代码、执行实验并交付可审计证据。</p>
+  <p>把论文、仓库与数据任务拆成可执行流程，让多个 Agent 在受控环境中协作完成代码实验与结果验证。</p>
   <p>
     <a href="https://github.com/tutudouzi12/ReproPilot/actions/workflows/ci.yml"><img src="https://github.com/tutudouzi12/ReproPilot/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
     <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white" alt="Python 3.11+"></a>
@@ -10,8 +10,8 @@
     <a href="https://www.docker.com/"><img src="https://img.shields.io/badge/Docker-Isolated_Sandbox-2496ED?logo=docker&logoColor=white" alt="Docker Sandbox"></a>
   </p>
   <p>
-    <a href="#四个核心工程亮点">核心亮点</a> ·
-    <a href="#15-秒端到端演示">演示</a> ·
+    <a href="#四个核心能力">核心能力</a> ·
+    <a href="#演示">演示</a> ·
     <a href="#系统如何工作">工作流程</a> ·
     <a href="#核心执行架构">执行架构</a> ·
     <a href="#快速启动">快速启动</a>
@@ -20,25 +20,25 @@
 
 ![ReproPilot Research Workspace](docs/assets/repropilot-workspace-2026.png)
 
-ReproPilot 解决的不是一次模型问答，而是一条长时间研究执行链：理解目标、分工、准备仓库、受控修改代码、隔离运行、重新计算指标并沉淀证据。模型负责理解和提出候选；Python Runtime 掌握状态转移、文件写入、执行、验收与回滚。
+ReproPilot 关注的不是一次模型问答，而是一条完整的研究执行链：理解目标、拆分任务、准备仓库、修改代码、运行实验、验证结果并保存证据。模型负责理解问题和提出方案，系统负责控制执行过程并检查结果。
 
-## 四个核心工程亮点
+## 四个核心能力
 
-### 1. 契约驱动的多 Agent DAG 运行时
+### 1. 多 Agent 任务编排与故障恢复
 
-Planner 将任务编译为带显式依赖的 `PlanGraph`，并通过类型化 Artifact 连接 Librarian、Coder、Research Coding、Sandbox 与 Data Agent。自研 `asyncio` Scheduler 管理 ready-node 调度、超时、重试、取消和 Agent Reassign；`execution_id + execution_epoch + lease` 使旧 Worker 的迟到结果无法覆盖新状态。计划、事件与 Artifact 原子持久化，服务重启后可恢复未完成任务，SSE 提供事件回放与实时进度。
+系统将研究任务拆成带依赖关系的 DAG，由不同 Agent 分别处理文献、代码、执行和数据工作，并通过结构化产物交接。运行过程中支持超时、重试、取消、重新分配和服务重启恢复，同时避免已经失效的任务结果覆盖最新状态。
 
-### 2. 受治理的 Research Coding 与 AutoResearch
+### 2. 受控代码实验
 
-Research Coding Agent 只负责诊断、假设和候选修改，确定性 Harness 掌握真实写入与接受权。`ResearchSpec` 冻结 Git revision、文件白名单、评测命令、重复次数和预算；baseline 与候选按同一契约重复执行，只有达到 `min_delta` 才 Keep，否则 Reject 并回滚。达到目标分数时由 Harness 停止搜索，最终验收不再调用候选模型。
+模型负责分析问题并提出代码候选，系统负责限制可以修改的文件、执行统一评测并比较候选效果。只有满足验收条件的修改才会保留，不符合条件的候选会被拒绝或回滚，模型不能自行修改评测规则或宣布成功。
 
-### 3. 确定性评测与可审计证据链
+### 3. 结果验证与证据记录
 
-系统不接受模型自报的成功或汇总指标。Benchmark Validator 核对数据哈希、样本数、运行清单和逐样本预测后独立重算指标；AutoResearch 记录 Trial Ledger、补丁哈希和模型用量，并使用模型不可见 holdout 重复验收。论文复现通过冻结 Rubric 和 Claim-to-Evidence Graph 将每项主张绑定到真实 Artifact，证据不足时明确标记为部分复现、冲突或不可验证。
+系统不会直接相信模型给出的成功结论，而是重新运行评测并计算指标，同时记录实验配置、候选修改和验收结果。论文主张可以关联到实际运行产物；证据不足、结果冲突或无法验证时会被明确标记。
 
-### 4. Docker 隔离执行与安全边界
+### 4. Docker 隔离执行
 
-独立 Docker Sandbox Service 管理任务容器，限制镜像、挂载根目录、网络、CPU、内存、PID、Linux capabilities、命令时长和输出大小；任务完成、失败、超时或取消后清理容器。上传链路校验文件所有权与哈希，远程 PDF 代理拒绝回环、私网和链路本地目标。它是受限单机执行面，不被包装成零信任多租户云沙箱。
+代码实验在独立 Docker 容器中运行，系统限制可用资源、网络、执行时间和输出大小，并在任务完成、失败或取消后清理容器。该机制用于降低运行第三方代码的风险，但不等同于面向不可信公网用户的生产级安全沙箱。
 
 ## 演示
 
@@ -48,27 +48,27 @@ Research Coding Agent 只负责诊断、假设和候选修改，确定性 Harnes
 
 ## 系统如何工作
 
-1. **冻结任务契约**：将目标仓库、Git revision、允许修改的文件、评测命令和预算写入 `ResearchSpec`。
-2. **编译执行计划**：Planner 生成带依赖关系的 `PlanGraph`，Scheduler 只调度依赖已满足的节点。
-3. **按权限分工**：Librarian、Coder、Research Coding、Sandbox 与 Data Agent 通过类型化 Artifact 交接，不共享无限工具权限。
-4. **受控实验与验收**：模型提出候选，Harness 负责写入、Docker 执行、指标重算、Keep/Reject 和回滚。
-5. **沉淀可审计证据**：运行结果进入 Trial Ledger、Validation Report 与 Claim-to-Evidence Graph，结论可以回溯到具体文件和指标。
+1. **确定任务边界**：固定目标仓库、允许修改的文件、评测方式和实验预算。
+2. **生成执行计划**：将任务拆成带依赖关系的步骤，只运行前置条件已经满足的节点。
+3. **Agent 分工协作**：文献、代码、执行和数据 Agent 通过结构化产物交接结果。
+4. **运行并验收候选**：在 Docker 中执行代码，由系统重新计算指标并决定保留或回滚。
+5. **保存实验依据**：记录实验过程、验收结果和论文主张对应的运行证据。
 
 ### 核心产物
 
 | 产物 | 作用 |
 |---|---|
-| `ResearchSpec` | 冻结仓库版本、文件边界、评测方式与实验预算 |
-| `PlanGraph` + Event Stream | 描述 Agent 依赖、执行状态、重试恢复与实时进度 |
-| `Trial Ledger` | 记录候选修改、文件哈希、模型用量及 Keep/Reject 原因 |
-| `Validation Report` | 汇总独立重算指标、隐藏验收和文件完整性检查 |
-| `Claim-to-Evidence Graph` | 将论文主张绑定到论文位置、运行指标和真实 Artifact |
+| 任务规格 | 固定仓库版本、文件边界、评测方式和实验预算 |
+| 执行计划与事件记录 | 描述 Agent 依赖、执行状态、恢复过程和实时进度 |
+| 实验账本 | 记录候选修改、模型调用和保留或拒绝原因 |
+| 验收报告 | 汇总系统重新计算的指标和文件完整性检查 |
+| 主张—证据图 | 将论文主张关联到论文位置、运行指标和真实产物 |
 
 ## 核心执行架构
 
 ![ReproPilot 核心执行架构：契约编译、可靠调度、多 Agent 协作、隔离验收与证据交付](docs/assets/repropilot-core-architecture.svg)
 
-开放式研究目标首先被冻结为可执行契约，再由可靠调度器驱动专业 Agent 协作。LLM 只提出结构化候选；文件写入、隔离执行、指标重算、结果接受与证据持久化由确定性运行时控制。设计原因与限制见 [设计取舍与已知限制](docs/design-decisions.md)。
+研究目标首先被整理为明确的执行边界，再由调度器驱动多个专业 Agent 协作。LLM 负责提出候选方案，系统负责文件写入、隔离执行、结果计算和最终验收。更深入的设计原因与限制见 [设计取舍与已知限制](docs/design-decisions.md)。
 
 ## 验证状态
 
@@ -128,20 +128,13 @@ OPENAI_MODEL=your-model
 ## 文档导航
 
 - [端到端演示](docs/end-to-end-demo.md)
-- [设计取舍与已知限制](docs/design-decisions.md)
-- [项目说明与常见问题](docs/interview-guide.md)
-- [系统架构](docs/project_architecture.md)
-- [Agent Runtime 可靠性](docs/agent_runtime_p0_p1.md)
-- [Research Coding 与 Benchmark Harness](docs/research_coding_agent.md)
-- [受治理 AutoResearch](docs/autoresearch.md)
-- [Claim-to-Evidence Graph](docs/claim_evidence_graph.md)
-- [ToT 消融与文件上传](docs/tot_ablation_and_uploads.md)
+- [设计说明与已知限制](docs/design-decisions.md)
 - [本地启动指南](docs/local_startup_guide.md)
 - [用户手册](docs/user_manual.md)
 
 ## 已知边界
 
-- `FilePlanStore` 面向可靠单节点部署；多副本需要事务数据库、分布式租约或 leader election。
-- Header/Cookie 身份适合本地个人工作流；公网部署需要可信认证、RBAC 和不可伪造审计身份。
-- Sandbox Service 可访问 Docker Socket；不可信公网租户应迁移到独立 Worker、rootless runtime、gVisor/Kata 或云端短生命周期沙箱。
-- 修复代码并通过冻结 evaluator，只证明该任务契约通过，不自动证明论文方法或科学结论被完整复现。
+- 当前运行时面向可靠的单机工作流，不是生产级分布式调度平台。
+- 当前身份机制适合本地个人使用，公开部署仍需补充正式认证和权限管理。
+- Docker 隔离降低了代码执行风险，但不能替代面向不可信租户的专业安全沙箱。
+- 代码通过既定评测，只能证明当前任务要求被满足，不能自动证明论文结论被完整复现。
