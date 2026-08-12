@@ -16,6 +16,7 @@ from fastapi.responses import Response, StreamingResponse
 from .agents import RoutedAgentExecutor
 from .events import EventBus
 from .models import ChatRequest, ExecuteTaskRequest, PlanEvent, PlanRequest, ReassignTaskRequest, TaskNode, utc_now
+from .autoresearch import parse_uploaded_research_spec
 from .planner import Planner
 from .scheduler import DAGScheduler, SchedulerConflict
 from .safe_http import open_pinned_pdf, resolve_public_addresses, validate_pdf_url
@@ -165,9 +166,14 @@ async def create_plan(
     context.metadata["attachment_count"] = len(resolved_uploads)
     if resolved_uploads:
         context.entities["uploaded_files"] = resolved_uploads
+        research_spec = parse_uploaded_research_spec(resolved_uploads)
+        if research_spec is not None:
+            context.intent_type = "AutoResearch"
+            context.entities["needs_autoresearch"] = True
+            context.entities["repository_revision"] = research_spec["repository_revision"]
         benchmark_file = any(item["name"].lower().endswith((".csv", ".tsv", ".json", ".jsonl")) for item in resolved_uploads)
         benchmark_intent = any(word in payload.intent.lower() for word in ("benchmark", "基准测试", "评测", "测评", "跑分"))
-        if benchmark_file and benchmark_intent:
+        if research_spec is None and benchmark_file and benchmark_intent:
             context.intent_type = "Custom_Benchmark"
             context.entities["needs_custom_benchmark"] = True
     plan = planner.build_plan(context)

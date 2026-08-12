@@ -107,6 +107,40 @@ async def test_failed_result_retries_within_limit(tmp_path):
     assert saved.nodes[0].result == "recovered"
 
 
+@pytest.mark.asyncio
+async def test_failed_result_preserves_validation_payload(tmp_path):
+    class FailedValidationExecutor:
+        async def execute(self, task, plan):
+            return TaskExecutionResult(
+                status="failed",
+                result="validation payload",
+                structured_data='{"status":"failed"}',
+                error="holdout failed",
+            )
+
+    store = FilePlanStore(tmp_path / "plans.json")
+    planner = Planner()
+    plan = planner.build_plan(planner.classify("验证失败结果持久化"))
+    plan.nodes = [plan.nodes[0]]
+    plan.edges = []
+    plan.nodes[0].retry_limit = 0
+    await store.save_plan(plan)
+
+    await DAGScheduler(
+        store,
+        EventBus(store),
+        FailedValidationExecutor(),
+        1,
+    ).execute_plan(plan.id)
+
+    saved = await store.get_plan(plan.id)
+    assert saved.status == "failed"
+    assert saved.nodes[0].status == "failed"
+    assert saved.nodes[0].result == "validation payload"
+    assert saved.nodes[0].structured_data == '{"status":"failed"}'
+    assert saved.nodes[0].error == "holdout failed"
+
+
 class SlowExecutor:
     async def execute(self, task, plan):
         await asyncio.sleep(10)

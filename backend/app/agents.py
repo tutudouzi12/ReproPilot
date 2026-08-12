@@ -5,8 +5,10 @@ import os
 import ast
 import re
 import sys
+import time
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import httpx
 
@@ -21,6 +23,17 @@ from .agent_contracts import (
     validate_evidence_references,
 )
 from .adapter_generation import generate_benchmark_adapter
+from .autoresearch import (
+    CandidateProposal,
+    CommandResult,
+    ModelUsage,
+    ResearchSpec,
+    TrialLedger,
+    freeze_research_spec,
+    locate_research_spec,
+    run_autoresearch,
+    validate_autoresearch,
+)
 from .benchmark import BenchmarkAdapterSpec, DatasetManifest, profile_dataset, validate_output_directory
 from .benchmark_harness import execute_benchmark, preflight_adapter
 from .claim_evidence import (
@@ -129,22 +142,35 @@ class SandboxClient:
             response.raise_for_status()
 
 
+class LLMCompletion:
+    def __init__(self, content: str, usage: ModelUsage) -> None:
+        self.content = content
+        self.usage = usage
+
+
 class LLMClient:
-    def __init__(self, offline_demo_mode: bool | None = None) -> None:
+    def __init__(self, offline_demo_mode: bool | None = None, transport: httpx.AsyncBaseTransport | None = None) -> None:
         self.api_key = os.getenv("OPENAI_API_KEY", "").strip()
         self.base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
         self.model = os.getenv("OPENAI_MODEL", os.getenv("OPENAI_MODEL_NAME", "gpt-4o-mini"))
         self.offline_demo_mode = env_flag("OFFLINE_DEMO_MODE") if offline_demo_mode is None else offline_demo_mode
+        self.transport = transport
 
     @property
     def configured(self) -> bool:
         return bool(self.api_key)
 
     async def complete(self, system: str, user: str) -> str:
+        return (await self.complete_with_usage(system, user)).content
+
+    async def complete_with_usage(self, system: str, user: str) -> LLMCompletion:
         if not self.configured:
             if not self.offline_demo_mode:
                 raise RuntimeError("OPENAI_API_KEY is required unless OFFLINE_DEMO_MODE=true")
-            return self._offline_response(system, user)
+            return LLMCompletion(
+                self._offline_response(system, user),
+                ModelUsage(provider="offline_demo", model=self.model),
+            )
         payload = {
             "model": self.model,
             "messages": [
@@ -154,7 +180,7 @@ class LLMClient:
             "temperature": 0.2,
         }
         headers = {"Authorization": f"Bearer {self.api_key}"}
-        async with httpx.AsyncClient(timeout=120) as client:
+        async with httpx.AsyncClient(timeout=120, transport=self.transport) as client:
             response = await client.post(
                 f"{self.base_url}/chat/completions",
                 headers=headers,
@@ -162,7 +188,27 @@ class LLMClient:
             )
             response.raise_for_status()
             data = response.json()
-        return data["choices"][0]["message"]["content"]
+        raw_usage = data.get("usage") if isinstance(data, dict) else None
+        raw_usage = raw_usage if isinstance(raw_usage, dict) else {}
+        prompt_tokens = int(raw_usage.get("prompt_tokens", raw_usage.get("input_tokens", 0)) or 0)
+        completion_tokens = int(raw_usage.get("completion_tokens", raw_usage.get("output_tokens", 0)) or 0)
+        total_tokens = int(raw_usage.get("total_tokens", prompt_tokens + completion_tokens) or 0)
+        usage_reported = any(
+            key in raw_usage
+            for key in ("prompt_tokens", "input_tokens", "completion_tokens", "output_tokens", "total_tokens")
+        )
+        return LLMCompletion(
+            str(data["choices"][0]["message"]["content"]),
+            ModelUsage(
+                provider=urlparse(self.base_url).hostname or self.base_url,
+                model=self.model,
+                request_count=1,
+                reported_request_count=1 if usage_reported else 0,
+                prompt_tokens=prompt_tokens,
+                completion_tokens=completion_tokens,
+                total_tokens=total_tokens,
+            ),
+        )
 
     @staticmethod
     def _offline_response(system: str, user: str) -> str:
@@ -180,11 +226,26 @@ class RoutedAgentExecutor:
         self.llm = llm or LLMClient(self.offline_demo_mode)
         self.sandbox = SandboxClient()
 
+    async def _complete_with_usage(self, system: str, user: str) -> LLMCompletion:
+        complete_with_usage = getattr(self.llm, "complete_with_usage", None)
+        if callable(complete_with_usage):
+            return await complete_with_usage(system, user)
+        content = await self.llm.complete(system, user)
+        return LLMCompletion(
+            content,
+            ModelUsage(
+                provider=str(getattr(self.llm, "provider", "")),
+                model=str(getattr(self.llm, "model", "")),
+                request_count=1,
+            ),
+        )
+
     async def execute(self, task: TaskNode, plan: PlanGraph) -> TaskExecutionResult:
         inputs = self._effective_inputs(task, plan)
         research_task_types = {
             "paper_code_execute", "fix_and_rerun", "dataset_profile", "benchmark_adapter_generate",
             "benchmark_adapter_preflight", "benchmark_execute", "benchmark_validate",
+            "autoresearch_spec_freeze", "autoresearch_run", "autoresearch_validate",
         }
         if task.assigned_to == "research_coding_agent" and task.type not in research_task_types:
             return TaskExecutionResult(status="failed", error=f"research_coding_agent does not accept task type {task.type}")
@@ -261,6 +322,7 @@ class RoutedAgentExecutor:
                 plan.id,
                 inputs.get("uploaded_files", []),
                 reproduction_inputs=inputs,
+                repository_revision=str(inputs.get("repository_revision") or ""),
             )
             manifest_json = json.dumps(prepared["repo_manifest"], ensure_ascii=False)
             workspace = prepared["workspace_path"]
@@ -275,10 +337,113 @@ class RoutedAgentExecutor:
                 "reproduction_mode_report": mode_report,
             }
             return TaskExecutionResult(status="completed", result=manifest_json, code=code, structured_data=manifest_json, artifact_values=values, logs=[f"repository prepared at {workspace}", f"materialized {len(prepared['materialized_uploads'])} uploads"])
+        if task.type == "autoresearch_spec_freeze":
+            try:
+                workspace = Path(str(inputs.get("workspace_path") or "")).resolve(strict=True)
+                manifest = self._json_object(inputs.get("repo_manifest"))
+                payload, source = locate_research_spec(workspace)
+                spec = freeze_research_spec(workspace, payload, manifest, source_path=source)
+            except Exception as exc:
+                return TaskExecutionResult(status="failed", error=f"AutoResearch spec freeze failed: {exc}")
+            encoded = spec.model_dump_json()
+            return TaskExecutionResult(
+                status="completed",
+                result=encoded,
+                structured_data=encoded,
+                artifact_values={"research_spec": encoded, "research_spec_report": json.dumps({"status": "frozen", "spec_sha256": spec.spec_sha256, "source_path": source}, ensure_ascii=False)},
+                logs=[f"frozen AutoResearch spec {spec.spec_sha256[:12]}", f"editable_files={len(spec.editable_files)} protected_files={len(spec.protected_files)}"],
+            )
+        if task.type == "autoresearch_run":
+            if not self.sandbox.configured:
+                return TaskExecutionResult(status="failed", error="configured persistent sandbox is required for AutoResearch")
+            if not self.llm.configured:
+                return TaskExecutionResult(status="failed", error="OPENAI_API_KEY is required for AutoResearch candidate generation")
+            try:
+                workspace = Path(str(inputs.get("workspace_path") or "")).resolve(strict=True)
+                runtime = self._runtime_id(inputs)
+                if not runtime or runtime == "offline-runtime":
+                    raise ValueError("prepared sandbox runtime is required for AutoResearch")
+                spec = ResearchSpec.model_validate_json(str(inputs.get("research_spec") or ""))
+                llm_base_url = str(getattr(self.llm, "base_url", ""))
+                model_usage = ModelUsage(
+                    provider=urlparse(llm_base_url).hostname or llm_base_url,
+                    model=str(getattr(self.llm, "model", "")),
+                )
+
+                async def evaluator(command: list[str]) -> CommandResult:
+                    started = time.monotonic()
+                    result = await self.sandbox.command(runtime, command)
+                    return CommandResult(
+                        command=command,
+                        exit_code=int(result.get("exit_code", 1)),
+                        stdout=str(result.get("stdout", "")),
+                        stderr=str(result.get("stderr", "")),
+                        duration_ms=int((time.monotonic() - started) * 1000),
+                    )
+
+                async def proposer(context: dict[str, Any]) -> CandidateProposal:
+                    completion = await self._complete_with_usage(
+                        "You are a bounded AutoResearch candidate proposer. Return strict JSON only with status, diagnosis, hypothesis, reason and patches. Patches may replace at most three listed editable files. Never modify evaluators, tests, metrics, commands, dependencies or budgets; never add network access, subprocesses, fake metrics or fake predictions.",
+                        json.dumps(context, ensure_ascii=False)[:120000],
+                    )
+                    model_usage.record(completion.usage)
+                    return CandidateProposal.model_validate(self._json_object(self._clean_json(completion.content)))
+
+                ledger = await run_autoresearch(workspace, spec, evaluator, proposer)
+                ledger.model_usage = model_usage
+            except Exception as exc:
+                return TaskExecutionResult(status="failed", error=f"AutoResearch run failed: {exc}")
+            encoded = ledger.model_dump_json()
+            best = json.dumps({"spec_sha256": ledger.spec_sha256, "score": ledger.best_score, "files": ledger.best_candidate_files, "accepted_trials": ledger.accepted_trials}, ensure_ascii=False)
+            return TaskExecutionResult(
+                status="completed",
+                result=encoded,
+                structured_data=encoded,
+                artifact_values={"research_trial_ledger": encoded, "research_best_candidate": best, "research_best_metrics": json.dumps({spec.metric_key: ledger.best_score}, ensure_ascii=False)},
+                logs=[f"AutoResearch completed trials={ledger.completed_trials}", f"best {spec.metric_key}={ledger.best_score:.8g}", f"model requests={ledger.model_usage.request_count} total_tokens={ledger.model_usage.total_tokens}", f"stop={ledger.stop_reason}"],
+            )
+        if task.type == "autoresearch_validate":
+            if not self.sandbox.configured:
+                return TaskExecutionResult(status="failed", error="configured persistent sandbox is required for AutoResearch validation")
+            try:
+                workspace = Path(str(inputs.get("workspace_path") or "")).resolve(strict=True)
+                runtime = self._runtime_id(inputs)
+                if not runtime or runtime == "offline-runtime":
+                    raise ValueError("prepared sandbox runtime is required for AutoResearch validation")
+                spec = ResearchSpec.model_validate_json(str(inputs.get("research_spec") or ""))
+                ledger = TrialLedger.model_validate_json(str(inputs.get("research_trial_ledger") or ""))
+
+                async def evaluator(command: list[str]) -> CommandResult:
+                    started = time.monotonic()
+                    result = await self.sandbox.command(runtime, command)
+                    return CommandResult(command=command, exit_code=int(result.get("exit_code", 1)), stdout=str(result.get("stdout", "")), stderr=str(result.get("stderr", "")), duration_ms=int((time.monotonic() - started) * 1000))
+
+                report = await validate_autoresearch(workspace, spec, ledger, evaluator)
+            except Exception as exc:
+                return TaskExecutionResult(status="failed", error=f"AutoResearch validation failed: {exc}")
+            encoded = report.model_dump_json()
+            if report.status != "passed":
+                return TaskExecutionResult(status="failed", result=encoded, structured_data=encoded, error=f"AutoResearch validation failed: {report.reason}")
+            return TaskExecutionResult(
+                status="completed",
+                result=encoded,
+                structured_data=encoded,
+                artifact_values={"research_validation_report": encoded, "validated_research_metrics": json.dumps({spec.metric_key: report.observed_score, "validation_mode": report.validation_mode}, ensure_ascii=False)},
+                logs=[f"AutoResearch validation passed mode={report.validation_mode}", f"runs={report.passed_runs}/{spec.validation_runs}"],
+            )
         if task.type == "resolve_dependencies":
-            code = str(inputs.get("generated_code") or next((value for key, value in inputs.items() if key.endswith("_generated_code")), ""))
-            packages = resolve_python_dependencies(code, str(inputs.get("workspace_path") or ""), str(inputs.get("code_file_path") or ""))
-            payload = json.dumps({"packages": packages, "python": "3.11", "source": "repository_aware_static_analysis"}, ensure_ascii=False)
+            if inputs.get("research_spec"):
+                try:
+                    research_spec = ResearchSpec.model_validate_json(str(inputs["research_spec"]))
+                    packages = list(research_spec.dependencies)
+                except Exception as exc:
+                    return TaskExecutionResult(status="failed", error=f"invalid frozen AutoResearch dependency contract: {exc}")
+                source = "frozen_autoresearch_contract"
+            else:
+                code = str(inputs.get("generated_code") or next((value for key, value in inputs.items() if key.endswith("_generated_code")), ""))
+                packages = resolve_python_dependencies(code, str(inputs.get("workspace_path") or ""), str(inputs.get("code_file_path") or ""))
+                source = "repository_aware_static_analysis"
+            payload = json.dumps({"packages": packages, "python": "3.11", "source": source}, ensure_ascii=False)
             return TaskExecutionResult(status="completed", result=payload, structured_data=payload, artifact_values={name: payload for name in task.output_artifacts}, logs=[f"detected {len(packages)} external dependencies"])
         if task.type == "prepare_runtime":
             if not self.sandbox.configured:

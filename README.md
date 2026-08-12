@@ -27,7 +27,7 @@
 - **Durable execution** — DAG 状态、事件和 Artifact 原子持久化；服务重启后恢复未完成节点。
 - **Governed agents** — 每个节点声明依赖、输入输出、工具权限、超时、重试和预算，不依赖隐式对话状态推进。
 - **Evidence before claims** — 指标由 Validator 重算，论文主张必须引用真实 Artifact，证据不足时明确降级。
-- **Bounded code repair** — Research Coding Agent 只能修改已提供上下文中的文件，并记录哈希、回滚失败补丁。
+- **Bounded code repair** — Research Coding Agent 与 AutoResearch 只修改已授权文件，由冻结评测契约决定 Keep/Reject，并记录哈希和回滚失败候选。
 - **Isolated execution** — 代码在独立 Docker Sandbox 中运行，应用镜像、挂载、网络、资源和权限限制。
 
 ## Engineering highlights
@@ -193,7 +193,7 @@ SSE 事件覆盖节点 ready、start、log、Artifact、终态、Reassign、迟�
 
 | Check | Result |
 |---|---|
-| Backend | `133 passed, 2 skipped` |
+| Backend | `146 passed, 2 skipped` |
 | Docker Sandbox | `7 passed` |
 | Frontend | ESLint、TypeScript、Vite production build 通过 |
 | Dependency Audit | `npm audit --omit=dev`：`0 vulnerabilities` |
@@ -261,6 +261,7 @@ ReproPilot/
 │   │   ├── scheduler.py            # scheduling, leases, budgets, recovery
 │   │   ├── agents.py               # agent routing and execution contracts
 │   │   ├── research_coding.py      # bounded repair, rollback, rerun
+│   │   ├── autoresearch.py         # frozen experiments, trial ledger, holdout validation
 │   │   ├── benchmark*.py           # dataset contracts and metric validation
 │   │   ├── claim_evidence.py       # rubric and evidence graph
 │   │   ├── safe_http.py            # PDF SSRF and response boundaries
@@ -281,6 +282,7 @@ ReproPilot/
 - [System architecture](docs/project_architecture.md)
 - [Agent Runtime reliability and governance](docs/agent_runtime_p0_p1.md)
 - [Research Coding Agent and Benchmark Harness](docs/research_coding_agent.md)
+- [Governed AutoResearch](docs/autoresearch.md)
 - [Claim-to-Evidence Graph](docs/claim_evidence_graph.md)
 - [ToT ablation, uploads, and security](docs/tot_ablation_and_uploads.md)
 - [Local startup guide](docs/local_startup_guide.md)

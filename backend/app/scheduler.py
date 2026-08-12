@@ -341,6 +341,10 @@ class DAGScheduler:
                     created_artifact_keys.append(artifact_name)
                 event_type = "task_completed"
             else:
+                task.result = result.result or None
+                task.code = result.code or None
+                task.structured_data = result.structured_data or None
+                task.image_base64 = result.image_base64 or None
                 task.error = result.error or f"executor returned status {result.status}"
                 event_type = self._schedule_retry_or_fail(task)
         except TimeoutError:

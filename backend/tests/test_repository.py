@@ -133,3 +133,32 @@ async def test_prepare_tries_trusted_candidates_until_clone_succeeds(tmp_path):
     assert calls == ["https://github.com/example/broken", "https://github.com/example/working"]
     assert result["repo_url"] == "https://github.com/example/working"
     assert [attempt["status"] for attempt in result["repo_manifest"]["clone_attempts"]] == ["failed", "ok"]
+
+
+@pytest.mark.asyncio
+async def test_prepare_repository_checks_out_exact_revision(tmp_path, monkeypatch):
+    revision = "a" * 40
+    calls = []
+
+    async def fake_git(command, cwd):
+        calls.append(command)
+        if command[1] == "clone":
+            target = Path(command[-1])
+            (target / ".git").mkdir(parents=True)
+            (target / ".git" / "config").write_text('[remote "origin"]\n  url = https://github.com/example/repo.git\n', encoding="utf-8")
+            (target / "main.py").write_text("print('pinned')\n", encoding="utf-8")
+
+    monkeypatch.setattr("app.repository.repository_head", lambda _workspace: revision)
+    result = await prepare_repository(
+        "https://github.com/example/repo",
+        tmp_path / "workspaces",
+        "plan-pinned",
+        command_runner=fake_git,
+        repository_revision=revision,
+    )
+    assert calls[0][1:4] == ["clone", "--no-checkout", "--filter=blob:none"]
+    assert calls[1][-2:] == ["origin", revision]
+    assert calls[2][-2:] == ["--detach", revision]
+    assert result["repo_manifest"]["requested_revision"] == revision
+    assert result["repo_manifest"]["repository_commit"] == revision
+    assert result["repo_manifest"]["acquisition_method"] == "git_detached_checkout"

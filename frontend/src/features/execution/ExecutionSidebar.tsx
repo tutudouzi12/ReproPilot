@@ -7,6 +7,7 @@ import rehypeKatex from 'rehype-katex';
 import type { ExecutionDisplayMode } from '../../app/hooks/useReproPilotRuntime';
 import type { Task } from '../../contracts/api';
 import { ClaimEvidenceGraphView } from '../claim-evidence/ClaimEvidenceGraphView';
+import { AutoResearchTrialView } from '../autoresearch/AutoResearchTrialView';
 import { getAgentIcon } from '../shared/agentVisuals';
 import { containsUnverifiedDemo } from '../shared/executionEvidence';
 
@@ -685,6 +686,7 @@ function ArtifactsTab({
 
       {activeMode && artifactModes.includes(activeMode) && (
         <ArtifactPreview
+          taskType={selectedTask.Type}
           activeMode={activeMode}
           executionResult={executionResult}
           executionCode={executionCode}
@@ -712,6 +714,7 @@ function ArtifactsTab({
 }
 
 function ArtifactPreview({
+  taskType,
   activeMode,
   executionResult,
   executionCode,
@@ -719,6 +722,7 @@ function ArtifactPreview({
   executionImage,
   onChangeDisplayMode,
 }: {
+  taskType?: string;
   activeMode: CompactMode;
   executionResult: string;
   executionCode: string;
@@ -758,15 +762,21 @@ function ArtifactPreview({
           <ClaimEvidenceGraphView rawGraph={executionStructuredData} />
         </div>
       ) : (
-        <div className="artifact-preview__report prose max-w-none">
-          <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
-            {executionResult}
-          </ReactMarkdown>
-        </div>
+        selectedTaskTypeIsAutoResearch(executionStructuredData) ? (
+          <AutoResearchTrialView raw={executionStructuredData || executionResult} taskType={taskType} />
+        ) : (
+          <div className="artifact-preview__report prose max-w-none">
+            <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
+              {executionResult}
+            </ReactMarkdown>
+          </div>
+        )
       )}
     </div>
   );
 }
+
+const selectedTaskTypeIsAutoResearch = (raw: string): boolean => raw.includes('autoresearch.ledger/v1') || raw.includes('autoresearch.validation/v1');
 
 function EmptyInspectorState({ text }: { text: string }) {
   return <div className="execution-empty-state">{text}</div>;

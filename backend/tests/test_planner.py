@@ -108,3 +108,29 @@ def test_framework_benchmark_uses_isolated_branches():
     assert len(execute_nodes) == 2
     assert len(runtime_nodes) == 2
     assert execute_nodes[0].required_artifacts != execute_nodes[1].required_artifacts
+
+
+def test_autoresearch_builds_fixed_eight_node_harness():
+    planner = Planner()
+    context = planner.classify("对 https://github.com/example/research-repo 做 AutoResearch")
+    context.intent_type = "AutoResearch"
+    context.entities["uploaded_files"] = [{"id": "spec-1", "name": "autoresearch.json", "storage_path": "/tmp/autoresearch.json", "text_excerpt": "hidden"}]
+    context.entities["repository_revision"] = "a" * 40
+    plan = planner.build_plan(context)
+    assert [node.type for node in plan.nodes] == [
+        "repo_discovery",
+        "repo_prepare",
+        "autoresearch_spec_freeze",
+        "resolve_dependencies",
+        "prepare_runtime",
+        "install_dependencies",
+        "autoresearch_run",
+        "autoresearch_validate",
+    ]
+    prepare = by_type(plan, "repo_prepare")
+    assert prepare.inputs["repository_revision"] == "a" * 40
+    assert "text_excerpt" not in prepare.inputs["uploaded_files"][0]
+    assert by_type(plan, "autoresearch_run").assigned_to == "research_coding_agent"
+    assert by_type(plan, "autoresearch_validate").required_artifacts == [
+        "workspace_path", "prepared_runtime", "research_spec", "research_trial_ledger", "research_best_candidate"
+    ]

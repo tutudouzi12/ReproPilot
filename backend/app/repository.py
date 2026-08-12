@@ -5,6 +5,7 @@ import hashlib
 import json
 import re
 import shutil
+import subprocess
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -13,6 +14,7 @@ from .reproduction import prepare_reproduction_entry
 
 
 GITHUB_RE = re.compile(r"^https://github\.com/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+?)(?:\.git)?/?$")
+REVISION_RE = re.compile(r"^[0-9a-fA-F]{40}(?:[0-9a-fA-F]{24})?$")
 
 
 def normalize_github_url(value: str) -> str:
@@ -139,7 +141,30 @@ def sha256_path(path: str | Path) -> str:
     return digest.hexdigest()
 
 
-def repository_manifest(workspace: str | Path, repo_url: str) -> dict[str, Any]:
+def repository_head(workspace: str | Path) -> str:
+    root = Path(workspace).resolve(strict=True)
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "HEAD"],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    value = completed.stdout.strip().lower()
+    return value if REVISION_RE.fullmatch(value) else ""
+
+
+def repository_manifest(
+    workspace: str | Path,
+    repo_url: str,
+    *,
+    requested_revision: str = "",
+    repository_commit: str = "",
+    acquisition_method: str = "git_clone",
+) -> dict[str, Any]:
     root = Path(workspace).resolve(strict=True)
     files = []
     for path in sorted(root.rglob("*")):
@@ -150,7 +175,14 @@ def repository_manifest(workspace: str | Path, repo_url: str) -> dict[str, Any]:
             files.append({"path": relative.as_posix(), "size": path.stat().st_size})
         if len(files) >= 500:
             break
-    payload = {"repo_url": normalize_github_url(repo_url), "workspace": str(root), "files": files}
+    payload = {
+        "repo_url": normalize_github_url(repo_url),
+        "workspace": str(root),
+        "requested_revision": requested_revision,
+        "repository_commit": repository_commit or repository_head(root),
+        "acquisition_method": acquisition_method,
+        "files": files,
+    }
     canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     payload["fingerprint"] = hashlib.sha256(canonical.encode()).hexdigest()
     return payload
@@ -163,11 +195,15 @@ async def prepare_repository(
     uploads: Any = None,
     command_runner=None,
     reproduction_inputs: dict[str, Any] | None = None,
+    repository_revision: str = "",
 ) -> dict[str, Any]:
     url = normalize_github_url(repo_url)
+    revision = repository_revision.strip().lower()
+    if revision and not REVISION_RE.fullmatch(revision):
+        raise ValueError("repository revision must be a full 40- or 64-character commit SHA")
     root = Path(workspace_root).resolve()
     root.mkdir(parents=True, exist_ok=True)
-    slug = hashlib.sha256(f"{plan_id}\0{url}".encode()).hexdigest()[:16]
+    slug = hashlib.sha256(f"{plan_id}\0{url}\0{revision}".encode()).hexdigest()[:16]
     target = root / slug
     if root not in target.resolve().parents:
         raise ValueError("repository workspace escaped configured root")
@@ -175,15 +211,30 @@ async def prepare_repository(
     if target.exists():
         if not target.is_dir() or target.is_symlink() or not workspace_matches_repo_url(target, url):
             raise ValueError("existing workspace does not match requested repository")
+        if revision and repository_head(target) != revision:
+            raise ValueError("existing workspace does not match requested repository revision")
         reused = True
     else:
         runner = command_runner or _run_git
-        await runner(["git", "clone", "--depth", "1", "--", url, str(target)], root)
+        if revision:
+            await runner(["git", "clone", "--no-checkout", "--filter=blob:none", "--", url, str(target)], root)
+            await runner(["git", "-C", str(target), "fetch", "--depth", "1", "origin", revision], root)
+            await runner(["git", "-C", str(target), "checkout", "--detach", revision], root)
+        else:
+            await runner(["git", "clone", "--depth", "1", "--", url, str(target)], root)
         if not workspace_matches_repo_url(target, url):
             raise ValueError("cloned workspace remote does not match requested repository")
+        if revision and repository_head(target) != revision:
+            raise ValueError("checked out repository commit does not match requested revision")
     materialized = materialize_uploaded_files(target, uploads or [])
     entry = prepare_reproduction_entry(target, {**(reproduction_inputs or {}), "repo_url": url})
-    manifest = repository_manifest(target, url)
+    manifest = repository_manifest(
+        target,
+        url,
+        requested_revision=revision,
+        repository_commit=repository_head(target),
+        acquisition_method="git_detached_checkout" if revision else "git_clone",
+    )
     manifest["materialized_uploads"] = materialized
     manifest["reused_workspace"] = reused
     manifest["selected_code_file"] = Path(entry.selected_code_file).relative_to(target).as_posix() if entry.selected_code_file else ""
@@ -212,6 +263,7 @@ async def prepare_first_available_repository(
     uploads: Any = None,
     command_runner=None,
     reproduction_inputs: dict[str, Any] | None = None,
+    repository_revision: str = "",
 ) -> dict[str, Any]:
     urls = repo_prepare_candidate_urls(primary_url, candidates)[:5]
     if not urls:
@@ -226,6 +278,7 @@ async def prepare_first_available_repository(
                 uploads,
                 command_runner,
                 reproduction_inputs,
+                repository_revision,
             )
             attempts.append({"url": url, "status": "ok"})
             prepared["repo_manifest"]["clone_attempts"] = attempts
@@ -235,7 +288,7 @@ async def prepare_first_available_repository(
     raise RuntimeError(f"clone repo failed after {len(attempts)} candidate(s): {json.dumps(attempts, ensure_ascii=False)}")
 
 
-async def _run_git(command: list[str], cwd: Path) -> None:
+async def _run_git(command: list[str], cwd: Path) -> str:
     process = await asyncio.create_subprocess_exec(
         *command,
         cwd=str(cwd),
@@ -244,4 +297,5 @@ async def _run_git(command: list[str], cwd: Path) -> None:
     )
     stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=300)
     if process.returncode != 0:
-        raise RuntimeError(f"git clone failed: {(stderr or stdout).decode('utf-8', errors='replace')[:2000]}")
+        raise RuntimeError(f"git command failed: {(stderr or stdout).decode('utf-8', errors='replace')[:2000]}")
+    return stdout.decode("utf-8", errors="replace").strip()

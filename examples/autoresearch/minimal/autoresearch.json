@@ -1,0 +1,22 @@
+{
+  "version": "autoresearch.spec/v1",
+  "name": "minimal-bounded-improvement",
+  "objective": "Improve the frozen accuracy metric without changing either evaluator.",
+  "repository_revision": "7d5120eb81a3f9fcd0bca690a3f204f435ba39e2",
+  "editable_files": [".repropilot/uploads/01-candidate.py"],
+  "protected_files": [".repropilot/uploads/02-evaluator.py", ".repropilot/uploads/03-holdout_evaluator.py"],
+  "eval_command": ["python", ".repropilot/uploads/02-evaluator.py"],
+  "holdout_command": ["python", ".repropilot/uploads/03-holdout_evaluator.py"],
+  "guard_commands": [["python", "-m", "py_compile", ".repropilot/uploads/01-candidate.py"]],
+  "metric_key": "metrics.accuracy",
+  "direction": "maximize",
+  "min_delta": 0.01,
+  "holdout_min_delta": 0.01,
+  "target_score": 1.0,
+  "max_trials": 3,
+  "max_wall_seconds": 300,
+  "search_runs": 3,
+  "search_aggregation": "worst",
+  "validation_runs": 3,
+  "dependencies": []
+}

@@ -277,6 +277,52 @@ def test_upload_ownership_and_dataset_routing(tmp_path, monkeypatch):
         assert "review,label" in internal_upload["text_excerpt"]
 
 
+def test_uploaded_autoresearch_spec_routes_before_json_benchmark(tmp_path, monkeypatch):
+    store = FilePlanStore(tmp_path / "plans.json")
+    events = EventBus(store)
+    monkeypatch.setattr(main, "store", store)
+    monkeypatch.setattr(main, "events", events)
+    monkeypatch.setattr(main, "scheduler", DAGScheduler(store, events, RoutedAgentExecutor()))
+    monkeypatch.setattr(main, "UPLOAD_ROOT", tmp_path / "uploads")
+    revision = "a" * 40
+    spec = {
+        "version": "autoresearch.spec/v1",
+        "name": "api-route",
+        "objective": "Improve the frozen score",
+        "repository_revision": revision,
+        "editable_files": ["candidate.py"],
+        "protected_files": ["evaluator.py", "holdout.py"],
+        "eval_command": ["python", "evaluator.py"],
+        "holdout_command": ["python", "holdout.py"],
+        "metric_key": "metrics.score",
+    }
+
+    with TestClient(main.app) as client:
+        uploaded = client.post(
+            "/api/uploads",
+            files={"file": ("autoresearch.json", json.dumps(spec).encode(), "application/json")},
+            headers={"X-User-Id": "research-owner"},
+        )
+        assert uploaded.status_code == 200
+        created = client.post(
+            "/api/plan",
+            json={"intent": "用 https://github.com/example/research-repo 跑 benchmark AutoResearch", "attachments": [uploaded.json()["id"]]},
+            headers={"X-User-Id": "research-owner"},
+        )
+
+    assert created.status_code == 200
+    graph = created.json()["plan_graph"]
+    assert graph["intent_type"] == "AutoResearch"
+    assert [node["type"] for node in graph["nodes"]] == [
+        "repo_discovery", "repo_prepare", "autoresearch_spec_freeze", "resolve_dependencies",
+        "prepare_runtime", "install_dependencies", "autoresearch_run", "autoresearch_validate",
+    ]
+    prepare = next(node for node in graph["nodes"] if node["type"] == "repo_prepare")
+    assert prepare["inputs"]["repository_revision"] == revision
+    assert "storage_path" not in created.text
+    assert "text_excerpt" not in created.text
+
+
 def test_full_reproduction_requires_owner_approval(tmp_path, monkeypatch):
     store = FilePlanStore(tmp_path / "plans.json")
     events = EventBus(store)

@@ -99,6 +99,7 @@ class Planner:
 
     def build_plan(self, context: IntentContext) -> PlanGraph:
         builders = {
+            "AutoResearch": self._autoresearch,
             "Paper_Reproduction": self._paper_reproduction,
             "Framework_Evaluation": self._framework_evaluation,
             "Code_Execution": self._code_execution,
@@ -193,6 +194,72 @@ class Planner:
         evidence = self._node("claim_evidence", "构建主张到证据图", "claim_evidence_build", "data_agent", [rubric.id, last.id], evidence_required, ["claim_evidence_graph", "claim_verification_report"], context, False)
         nodes.append(evidence)
         return nodes
+
+    def _autoresearch(self, context: IntentContext) -> list[TaskNode]:
+        uploads = self._strip_excerpts(context.entities.get("uploaded_files", []))
+        revision = str(context.entities.get("repository_revision") or "")
+        discover = self._node(
+            "repo_discovery",
+            "验证 AutoResearch 目标仓库",
+            "repo_discovery",
+            "coder_agent",
+            [],
+            [],
+            ["candidate_repositories", "repo_validation_report", "repo_url"],
+            context,
+            inputs={key: context.entities[key] for key in ("preferred_repo_url",) if key in context.entities},
+        )
+        prepare = self._node(
+            "repo_prepare",
+            "按精确提交准备研究工作区",
+            "repo_prepare",
+            "coder_agent",
+            [discover.id],
+            ["repo_url", "candidate_repositories", "repo_validation_report"],
+            ["workspace_path", "code_file_path", "generated_code", "repo_manifest", "reproduction_mode_report"],
+            context,
+            False,
+            {"requested_reproduction_mode": "smoke", "full_reproduction_requested": False, "uploaded_files": uploads, "repository_revision": revision},
+        )
+        freeze = self._node(
+            "autoresearch_spec_freeze",
+            "冻结 AutoResearch 规格与哈希",
+            "autoresearch_spec_freeze",
+            "research_coding_agent",
+            [prepare.id],
+            ["workspace_path", "repo_manifest"],
+            ["research_spec", "research_spec_report"],
+            context,
+            False,
+        )
+        resolve = self._node("resolve_dependencies", "解析冻结研究依赖", "resolve_dependencies", "coder_agent", [freeze.id], ["workspace_path", "code_file_path", "generated_code", "repo_manifest", "research_spec"], ["dependency_spec"], context, False)
+        runtime = self._node("prepare_runtime", "创建隔离研究运行时", "prepare_runtime", "sandbox_agent", [resolve.id], ["workspace_path", "dependency_spec"], ["runtime_session"], context, False)
+        install = self._node("install_dependencies", "安装冻结依赖", "install_dependencies", "sandbox_agent", [runtime.id], ["workspace_path", "runtime_session", "dependency_spec"], ["prepared_runtime", "dependency_install_report"], context, False)
+        run = self._node(
+            "autoresearch_run",
+            "执行受治理候选实验循环",
+            "autoresearch_run",
+            "research_coding_agent",
+            [install.id],
+            ["workspace_path", "repo_manifest", "prepared_runtime", "research_spec"],
+            ["research_trial_ledger", "research_best_candidate", "research_best_metrics"],
+            context,
+            False,
+        )
+        validate = self._node(
+            "autoresearch_validate",
+            "执行独立重复与隐藏验收",
+            "autoresearch_validate",
+            "research_coding_agent",
+            [run.id],
+            ["workspace_path", "prepared_runtime", "research_spec", "research_trial_ledger", "research_best_candidate"],
+            ["research_validation_report", "validated_research_metrics"],
+            context,
+            False,
+        )
+        for node in (prepare, resolve, runtime, install, freeze, run, validate):
+            node.timeout_seconds = max(node.timeout_seconds, 900 if node.type in {"install_dependencies", "autoresearch_run", "autoresearch_validate"} else 300)
+        return [discover, prepare, freeze, resolve, runtime, install, run, validate]
 
     def _framework_evaluation(self, context: IntentContext) -> list[TaskNode]:
         frameworks = list(context.entities.get("frameworks") or self._frameworks(context.raw_intent))
