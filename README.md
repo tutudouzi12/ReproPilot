@@ -13,7 +13,7 @@
     <a href="#四个核心工程亮点">核心亮点</a> ·
     <a href="#15-秒端到端演示">演示</a> ·
     <a href="#系统如何工作">工作流程</a> ·
-    <a href="#四点主流程">主流程</a> ·
+    <a href="#核心执行架构">执行架构</a> ·
     <a href="#快速启动">快速启动</a>
   </p>
 </div>
@@ -64,50 +64,11 @@ Research Coding Agent 只负责诊断、假设和候选修改，确定性 Harnes
 | `Validation Report` | 汇总独立重算指标、隐藏验收和文件完整性检查 |
 | `Claim-to-Evidence Graph` | 将论文主张绑定到论文位置、运行指标和真实 Artifact |
 
-## 四点主流程
+## 核心执行架构
 
-```mermaid
-flowchart LR
-    U[研究目标<br/>论文 · 仓库 · 数据] --> RS
+![ReproPilot 核心执行架构：契约编译、可靠调度、多 Agent 协作、隔离验收与证据交付](docs/assets/repropilot-core-architecture.svg)
 
-    subgraph A[① 契约与可靠运行时]
-        RS[ResearchSpec<br/>版本 · 文件 · 预算] --> PG[PlanGraph]
-        PG --> SCH[Scheduler<br/>lease · epoch · 恢复]
-    end
-
-    subgraph B[② 多 Agent 受治理协作]
-        AG[Librarian · Coder · Research Coding · Data]
-        RC[模型提出候选<br/>Harness 决定写入与回滚]
-        AG --> RC
-    end
-
-    subgraph C[③ 隔离执行与确定性验收]
-        SB[Docker Sandbox<br/>资源 · 网络 · 超时边界]
-        VA[Validator<br/>重算指标 · Keep / Reject]
-        SB --> VA
-    end
-
-    subgraph D[④ 可审计证据]
-        TL[Trial Ledger]
-        VR[Validation Report]
-        CE[Claim-to-Evidence Graph]
-    end
-
-    SCH -->|typed Artifact| AG
-    RC --> SB
-    VA --> TL
-    VA --> VR
-    TL --> CE
-
-    classDef runtime fill:#f2e4da,stroke:#b8683e,color:#302821;
-    classDef agent fill:#f6f2eb,stroke:#9b8e84,color:#302821;
-    classDef verify fill:#e8f0ea,stroke:#537c62,color:#302821;
-    class RS,PG,SCH runtime;
-    class AG,RC agent;
-    class SB,VA,TL,VR,CE verify;
-```
-
-这张图也是建议的面试讲解顺序：先说明为什么要把开放任务冻结成契约，再讲多 Agent 如何按权限协作，随后说明代码为什么必须进入隔离执行与确定性验收，最后落到可审计证据。四段对应上面的四个核心亮点，不额外制造新的叙事分支。核心边界是：LLM 负责理解任务并提出结构化候选；确定性组件负责权限、持久化、真实执行、指标计算和最终验收。设计原因与限制见 [设计取舍与已知限制](docs/design-decisions.md)。
+开放式研究目标首先被冻结为可执行契约，再由可靠调度器驱动专业 Agent 协作。LLM 只提出结构化候选；文件写入、隔离执行、指标重算、结果接受与证据持久化由确定性运行时控制。设计原因与限制见 [设计取舍与已知限制](docs/design-decisions.md)。
 
 ## 验证状态
 
@@ -168,7 +129,7 @@ OPENAI_MODEL=your-model
 
 - [端到端演示](docs/end-to-end-demo.md)
 - [设计取舍与已知限制](docs/design-decisions.md)
-- [面试讲解指南](docs/interview-guide.md)
+- [项目说明与常见问题](docs/interview-guide.md)
 - [系统架构](docs/project_architecture.md)
 - [Agent Runtime 可靠性](docs/agent_runtime_p0_p1.md)
 - [Research Coding 与 Benchmark Harness](docs/research_coding_agent.md)
