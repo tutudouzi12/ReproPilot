@@ -1,0 +1,47 @@
+{
+  "recorded_at": "2026-08-12T07:27:37Z",
+  "plan_id": "4cb64b8bd9ff44feb5e5ff50d30e7be3",
+  "plan_status": "completed",
+  "plan_nodes": 8,
+  "plan_duration_seconds": 25.56,
+  "target_repository": "https://github.com/tutudouzi12/ReproPilot",
+  "repository_revision": "7d5120eb81a3f9fcd0bca690a3f204f435ba39e2",
+  "acquisition_method": "git_detached_checkout",
+  "agents": [
+    "coder_agent",
+    "research_coding_agent",
+    "sandbox_agent"
+  ],
+  "search": {
+    "metric_key": "metrics.accuracy",
+    "aggregation": "worst",
+    "runs_per_measurement": 3,
+    "baseline_score": 0.6666666666666666,
+    "best_score": 1.0,
+    "completed_trials": 2,
+    "accepted_trials": 1,
+    "stop_reason": "target_score_reached"
+  },
+  "validation": {
+    "status": "passed",
+    "mode": "hidden_holdout",
+    "holdout_baseline_score": 0.3333333333333333,
+    "observed_scores": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "candidate_intact": true,
+    "protected_files_intact": true
+  },
+  "model_usage": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "request_count": 2,
+    "prompt_tokens": 1794,
+    "completion_tokens": 443,
+    "total_tokens": 2237
+  },
+  "task_containers_remaining": 0,
+  "evidence_boundary": "A bounded contract fixture proving the execution and governance path, not large-scale research performance."
+}

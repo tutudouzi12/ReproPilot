@@ -12,6 +12,9 @@ ReproPilot 的运行说明以仓库根目录 `README.md` 和以下 Python 实现
 
 核心主题：
 
+- `end-to-end-demo.md`：真实模型与 Docker 标准案例
+- `design-decisions.md`：关键工程取舍、替代方案和已知限制
+- `interview-guide.md`：Agent / AI 应用岗位的四点简历与面试表达
 - `project_architecture.md`：系统组件、DAG 主链和安全边界
 - `local_startup_guide.md`：本地与 Compose 启动方式
 - `research_coding_agent.md`：论文调试、受限补丁和 Benchmark Harness
