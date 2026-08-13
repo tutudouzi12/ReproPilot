@@ -15,6 +15,7 @@ dependencies = [
 dev = [
   "pytest>=8.3,<9",
   "pytest-asyncio>=0.24,<1",
+  "pytest-cov>=6,<7",
 ]
 sandbox = ["docker>=7.1,<8"]
 

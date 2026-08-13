@@ -18,6 +18,8 @@ coverage/
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.coverage
+coverage.json
 .mypy_cache/
 .ruff_cache/
 *.egg-info/
