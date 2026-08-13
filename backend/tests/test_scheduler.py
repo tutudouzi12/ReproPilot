@@ -299,3 +299,41 @@ async def test_canceled_plan_cannot_be_resurrected_by_late_result(tmp_path):
     assert saved.status == "canceled"
     assert saved.nodes[0].status == "canceled"
     assert saved.nodes[0].result is None
+
+
+@pytest.mark.asyncio
+async def test_external_scheduler_cancellation_invalidates_running_lease(tmp_path):
+    class BlockingExecutor:
+        def __init__(self):
+            self.started = asyncio.Event()
+
+        async def execute(self, task, plan):
+            self.started.set()
+            await asyncio.Event().wait()
+
+    store = FilePlanStore(tmp_path / "plans.json")
+    node = Planner().build_plan(Planner().classify("run Python code")).nodes[0]
+    node.dependencies = []
+    plan = Planner().build_plan(Planner().classify("run Python code"))
+    plan.nodes = [node]
+    plan.edges = []
+    await store.save_plan(plan)
+    executor = BlockingExecutor()
+    scheduler = DAGScheduler(store, EventBus(store), executor, 1)
+
+    running = asyncio.create_task(scheduler.execute_plan(plan.id))
+    await asyncio.wait_for(executor.started.wait(), timeout=2)
+    running.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await running
+
+    saved = await store.get_plan(plan.id)
+    assert saved.status == "canceled"
+    assert saved.usage.finished_at is not None
+    assert saved.nodes[0].status == "canceled"
+    assert saved.nodes[0].error == "scheduler execution was canceled"
+    assert saved.nodes[0].execution_epoch == 2
+    assert saved.nodes[0].execution_id is None
+    assert saved.nodes[0].lease_owner is None
+    assert saved.nodes[0].lease_expires_at is None
+    assert saved.nodes[0].finished_at is not None
