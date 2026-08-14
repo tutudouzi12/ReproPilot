@@ -1,0 +1,53 @@
+{
+  "version": "autoresearch.validation/v1",
+  "spec_sha256": "afd0cf5efb68b1e2e5079d350b6d8ad8377a58a6bfcdbb8ac8fe02472ec7dccc",
+  "status": "failed",
+  "validation_mode": "hidden_holdout",
+  "expected_score": 0.3333333333333333,
+  "observed_scores": [
+    0.3333333333333333,
+    0.3333333333333333,
+    0.3333333333333333
+  ],
+  "observed_score": 0.3333333333333333,
+  "mean_score": 0.3333333333333333,
+  "stddev": 0.0,
+  "passed_runs": 3,
+  "failed_runs": 0,
+  "score_matches": false,
+  "candidate_intact": true,
+  "protected_files_intact": true,
+  "command_results": [
+    {
+      "command": [
+        "python",
+        "holdout_evaluator.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"metrics\": {\"accuracy\": 0.3333333333333333}, \"passed\": 1, \"total\": 3}\r\n",
+      "stderr": "",
+      "duration_ms": 110
+    },
+    {
+      "command": [
+        "python",
+        "holdout_evaluator.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"metrics\": {\"accuracy\": 0.3333333333333333}, \"passed\": 1, \"total\": 3}\r\n",
+      "stderr": "",
+      "duration_ms": 155
+    },
+    {
+      "command": [
+        "python",
+        "holdout_evaluator.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"metrics\": {\"accuracy\": 0.3333333333333333}, \"passed\": 1, \"total\": 3}\r\n",
+      "stderr": "",
+      "duration_ms": 125
+    }
+  ],
+  "reason": "fresh validation score did not satisfy the frozen acceptance rule"
+}

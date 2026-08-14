@@ -1,0 +1,75 @@
+{
+  "schema_version": "repropilot.evaluation-scenario/v1",
+  "id": "identifier-normalization-success",
+  "title": "Whitespace normalization passes hidden validation",
+  "description": "A candidate removes surrounding whitespace while preserving lowercase normalization.",
+  "objective": "Normalize identifiers by trimming surrounding whitespace and converting to lowercase.",
+  "function": "normalize_identifier",
+  "expected_outcome": "validation_passed",
+  "allow_live_model": true,
+  "public_evaluation": {
+    "cases": [
+      {
+        "args": [
+          " Alice "
+        ],
+        "expected": "alice"
+      },
+      {
+        "args": [
+          "BOB"
+        ],
+        "expected": "bob"
+      },
+      {
+        "args": [
+          "carol"
+        ],
+        "expected": "carol"
+      }
+    ]
+  },
+  "hidden_evaluation": {
+    "cases": [
+      {
+        "args": [
+          "  Delta"
+        ],
+        "expected": "delta"
+      },
+      {
+        "args": [
+          "ECHO  "
+        ],
+        "expected": "echo"
+      },
+      {
+        "args": [
+          "\tFoxtrot\n"
+        ],
+        "expected": "foxtrot"
+      }
+    ]
+  },
+  "spec": {
+    "max_trials": 2,
+    "search_runs": 3,
+    "validation_runs": 3
+  },
+  "scripted_proposals": [
+    {
+      "diagnosis": "The function lowercases but does not trim surrounding whitespace.",
+      "hypothesis": "Strip before lowercasing satisfies the frozen contract.",
+      "patches": [
+        {
+          "path": "candidate.py",
+          "content": "def normalize_identifier(value: str) -> str:\n    return value.strip().lower()\n"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    "Tests one pure string-normalization function.",
+    "Does not measure repository-scale code understanding."
+  ]
+}

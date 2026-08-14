@@ -1,0 +1,51 @@
+{
+  "version": "autoresearch.spec/v1",
+  "name": "zero-boundary-success",
+  "objective": "Correct score_items so zero is not counted as a positive value.",
+  "repository_revision": "4ff55f8b1dea077e054c05ec966f843a866e344b",
+  "editable_files": [
+    "candidate.py"
+  ],
+  "protected_files": [
+    "evaluator.py",
+    "holdout_evaluator.py",
+    "public_cases.json",
+    "hidden_cases.json"
+  ],
+  "eval_command": [
+    "python",
+    "evaluator.py"
+  ],
+  "holdout_command": [
+    "python",
+    "holdout_evaluator.py"
+  ],
+  "guard_commands": [
+    [
+      "python",
+      "-m",
+      "py_compile",
+      "candidate.py"
+    ]
+  ],
+  "metric_key": "metrics.accuracy",
+  "direction": "maximize",
+  "min_delta": 0.01,
+  "holdout_min_delta": 0.01,
+  "target_score": 1.0,
+  "max_trials": 2,
+  "max_wall_seconds": 60,
+  "search_runs": 3,
+  "search_aggregation": "worst",
+  "validation_runs": 3,
+  "dependencies": [],
+  "frozen_files": {
+    "evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a",
+    "holdout_evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a",
+    "public_cases.json": "298e64ac7ede9841051d16c773ac0e646423298302e15bf586c3bc8567c897a0",
+    "hidden_cases.json": "a9fb071085ef3ceeed95e3597ae4a08d910a7c8cd9a6822cb077309d2ee72c30"
+  },
+  "frozen_workspace_sha256": "b67f7ecc6db7a772e2b8ac1053a5ded88a20a6c05d9412766ef70ac74aaec061",
+  "source_path": "autoresearch.json",
+  "spec_sha256": "2f30544465cd474de8c07e4f63496e88881b36924e991b333c90780c2423f11f"
+}

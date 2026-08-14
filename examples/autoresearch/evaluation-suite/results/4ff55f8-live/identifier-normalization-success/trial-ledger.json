@@ -1,0 +1,151 @@
+{
+  "version": "autoresearch.ledger/v1",
+  "spec_sha256": "b9da5c0f439e0e6636f1b4e217efdcd1c91f806ce7e419f7ced44391f194f954",
+  "status": "completed",
+  "metric_key": "metrics.accuracy",
+  "direction": "maximize",
+  "baseline_score": 0.6666666666666666,
+  "best_score": 0.6666666666666666,
+  "holdout_baseline_score": 0.0,
+  "max_trials": 2,
+  "completed_trials": 2,
+  "accepted_trials": 0,
+  "stop_reason": "trial_budget_exhausted",
+  "best_candidate_files": {
+    "candidate.py": "b257c3d43f2ccd463e9042dab750fdce4892c17e6773cd0aeac93fa11aee5995"
+  },
+  "trials": [
+    {
+      "number": 0,
+      "status": "baseline",
+      "decision": "keep",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "frozen baseline",
+      "patches": [],
+      "metric": 0.6666666666666666,
+      "metric_samples": [
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "candidate.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 204
+        },
+        {
+          "command": [
+            "python",
+            "evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"accuracy\": 0.6666666666666666}, \"passed\": 2, \"total\": 3}\r\n",
+          "stderr": "",
+          "duration_ms": 125
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "candidate.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 155
+        },
+        {
+          "command": [
+            "python",
+            "evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"accuracy\": 0.6666666666666666}, \"passed\": 2, \"total\": 3}\r\n",
+          "stderr": "",
+          "duration_ms": 94
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "candidate.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 155
+        },
+        {
+          "command": [
+            "python",
+            "evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"accuracy\": 0.6666666666666666}, \"passed\": 2, \"total\": 3}\r\n",
+          "stderr": "",
+          "duration_ms": 156
+        }
+      ],
+      "started_at": "2026-08-14T08:13:22.617185Z",
+      "finished_at": "2026-08-14T08:13:22.617185Z"
+    },
+    {
+      "number": 1,
+      "status": "rejected",
+      "decision": "reject",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "1 validation error for CandidateProposal\nstatus\n  Input should be 'candidate' or 'stop' [type=literal_error, input_value='proposed', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/literal_error",
+      "patches": [],
+      "metric": null,
+      "metric_samples": [],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "",
+      "command_results": [],
+      "started_at": "2026-08-14T08:13:22.911116Z",
+      "finished_at": "2026-08-14T08:13:30.864936Z"
+    },
+    {
+      "number": 2,
+      "status": "rejected",
+      "decision": "reject",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "",
+      "patches": [],
+      "metric": null,
+      "metric_samples": [],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "",
+      "command_results": [],
+      "started_at": "2026-08-14T08:13:30.864936Z",
+      "finished_at": "2026-08-14T08:13:37.395871Z"
+    }
+  ],
+  "command_runs": 8,
+  "command_duration_ms": 1168,
+  "model_usage": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "request_count": 1,
+    "reported_request_count": 1,
+    "prompt_tokens": 715,
+    "completion_tokens": 150,
+    "total_tokens": 865
+  },
+  "started_at": "2026-08-14T08:13:21.707140Z",
+  "finished_at": "2026-08-14T08:13:37.418215Z"
+}
