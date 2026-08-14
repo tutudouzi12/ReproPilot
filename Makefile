@@ -32,9 +32,9 @@ test:
 
 coverage:
 	cd backend && python3 -m pytest -q --cov=app --cov-branch --cov-report=term-missing --cov-report=json:coverage.json
-	python3 scripts/coverage_summary.py Backend backend/coverage.json
+	python3 scripts/coverage_summary.py Backend backend/coverage.json --min-line 83 --min-branch 68
 	cd docker-sandbox && python3 -m pytest -q --cov=app --cov-branch --cov-report=term-missing --cov-report=json:coverage.json
-	python3 scripts/coverage_summary.py Sandbox docker-sandbox/coverage.json
+	python3 scripts/coverage_summary.py Sandbox docker-sandbox/coverage.json --min-line 88 --min-branch 80
 
 run-sandbox:
 	./scripts/unix/start-sandbox.sh
