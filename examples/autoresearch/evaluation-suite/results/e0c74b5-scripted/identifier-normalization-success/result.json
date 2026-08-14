@@ -1,0 +1,159 @@
+{
+  "version": "repropilot.evaluation-result/v1",
+  "recorded_at": "2026-08-14T08:01:58.246004Z",
+  "scenario_id": "identifier-normalization-success",
+  "title": "Whitespace normalization passes hidden validation",
+  "description": "A candidate removes surrounding whitespace while preserving lowercase normalization.",
+  "repository_revision": "e0c74b53846d02ba0499c85af90655e2a634ba2b",
+  "source_tree_dirty": false,
+  "fixture_sha256": "972b8abf8a7b9fc479c65bdc38c0995c48404404df3ab8c9fcaff0b2b7e680b3",
+  "input_hashes": {
+    "scenario.json": "b84454f87344139163d3fe491d962fd156b31b472e70bee2884fe21ef4a0a6ae",
+    "candidate.py": "b257c3d43f2ccd463e9042dab750fdce4892c17e6773cd0aeac93fa11aee5995",
+    "shared_evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a"
+  },
+  "expected_outcome": "validation_passed",
+  "observed_outcome": "validation_passed",
+  "expectation_met": true,
+  "execution": {
+    "engine": "local_subprocess",
+    "command_timeout_seconds": 3.0,
+    "proposer_mode": "scripted_fault_injection",
+    "live_request_cap": 0
+  },
+  "commands": {
+    "guard": [
+      [
+        "python",
+        "-m",
+        "py_compile",
+        "candidate.py"
+      ]
+    ],
+    "public_evaluation": [
+      "python",
+      "evaluator.py"
+    ],
+    "hidden_evaluation": [
+      "python",
+      "holdout_evaluator.py"
+    ],
+    "search_runs": 3,
+    "validation_runs": 3
+  },
+  "baseline": {
+    "public_score": 0.6666666666666666,
+    "hidden_score": 0.0,
+    "preflight_artifact": "identifier-normalization-success/baseline-preflight.json"
+  },
+  "search": {
+    "best_score": 1.0,
+    "completed_trials": 1,
+    "accepted_trials": 1,
+    "stop_reason": "target_score_reached",
+    "decisions": [
+      {
+        "number": 0,
+        "status": "baseline",
+        "decision": "keep",
+        "metric": 0.6666666666666666,
+        "reason": "frozen baseline"
+      },
+      {
+        "number": 1,
+        "status": "kept",
+        "decision": "keep",
+        "metric": 1.0,
+        "reason": "metrics.accuracy improved from 0.66666667 to 1"
+      }
+    ]
+  },
+  "model": {
+    "provider": "",
+    "model": "",
+    "request_count": 0,
+    "reported_request_count": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0,
+    "mode": "scripted_fault_injection"
+  },
+  "cost": {
+    "status": "exact_zero",
+    "currency": "USD",
+    "amount": 0.0,
+    "basis": "no provider request was made"
+  },
+  "validation": {
+    "version": "autoresearch.validation/v1",
+    "spec_sha256": "03fc42f7a5f10e7cefcf2f180e4980c93180e89dfb000bacf6d88d82fa24195d",
+    "status": "passed",
+    "validation_mode": "hidden_holdout",
+    "expected_score": 0.0,
+    "observed_scores": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "observed_score": 1.0,
+    "mean_score": 1.0,
+    "stddev": 0.0,
+    "passed_runs": 3,
+    "failed_runs": 0,
+    "score_matches": true,
+    "candidate_intact": true,
+    "protected_files_intact": true,
+    "command_results": [
+      {
+        "command": [
+          "python",
+          "holdout_evaluator.py"
+        ],
+        "exit_code": 0,
+        "stdout": "{\"metrics\": {\"accuracy\": 1.0}, \"passed\": 3, \"total\": 3}\r\n",
+        "stderr": "",
+        "duration_ms": 125
+      },
+      {
+        "command": [
+          "python",
+          "holdout_evaluator.py"
+        ],
+        "exit_code": 0,
+        "stdout": "{\"metrics\": {\"accuracy\": 1.0}, \"passed\": 3, \"total\": 3}\r\n",
+        "stderr": "",
+        "duration_ms": 171
+      },
+      {
+        "command": [
+          "python",
+          "holdout_evaluator.py"
+        ],
+        "exit_code": 0,
+        "stdout": "{\"metrics\": {\"accuracy\": 1.0}, \"passed\": 3, \"total\": 3}\r\n",
+        "stderr": "",
+        "duration_ms": 170
+      }
+    ],
+    "reason": ""
+  },
+  "failure": null,
+  "final_hashes": {
+    "candidate.py": "c008307af18de2bf25d2f05ef6f2263098f8bba1422a5c79241a5225f4b59da1",
+    "evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a",
+    "holdout_evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a"
+  },
+  "boundaries": [
+    "Tests one pure string-normalization function.",
+    "Does not measure repository-scale code understanding."
+  ],
+  "artifacts": {
+    "scenario_input": "identifier-normalization-success/scenario-input.json",
+    "baseline_preflight": "identifier-normalization-success/baseline-preflight.json",
+    "frozen_spec": "identifier-normalization-success/frozen-spec.json",
+    "trial_ledger": "identifier-normalization-success/trial-ledger.json",
+    "validation_report": "identifier-normalization-success/validation-report.json",
+    "initial_candidate": "identifier-normalization-success/initial-candidate.py",
+    "final_candidate": "identifier-normalization-success/final-candidate.py"
+  }
+}

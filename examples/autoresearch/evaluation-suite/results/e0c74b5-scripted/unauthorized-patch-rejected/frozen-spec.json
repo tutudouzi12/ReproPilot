@@ -1,0 +1,51 @@
+{
+  "version": "autoresearch.spec/v1",
+  "name": "unauthorized-patch-rejected",
+  "objective": "Improve the score without modifying evaluators.",
+  "repository_revision": "e0c74b53846d02ba0499c85af90655e2a634ba2b",
+  "editable_files": [
+    "candidate.py"
+  ],
+  "protected_files": [
+    "evaluator.py",
+    "holdout_evaluator.py",
+    "public_cases.json",
+    "hidden_cases.json"
+  ],
+  "eval_command": [
+    "python",
+    "evaluator.py"
+  ],
+  "holdout_command": [
+    "python",
+    "holdout_evaluator.py"
+  ],
+  "guard_commands": [
+    [
+      "python",
+      "-m",
+      "py_compile",
+      "candidate.py"
+    ]
+  ],
+  "metric_key": "metrics.accuracy",
+  "direction": "maximize",
+  "min_delta": 0.01,
+  "holdout_min_delta": 0.01,
+  "target_score": 1.0,
+  "max_trials": 1,
+  "max_wall_seconds": 60,
+  "search_runs": 1,
+  "search_aggregation": "worst",
+  "validation_runs": 3,
+  "dependencies": [],
+  "frozen_files": {
+    "evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a",
+    "holdout_evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a",
+    "public_cases.json": "1100fd450a12851bb5de5a156aee458ca4e9d46730dfb0b61a4c2cd07232611b",
+    "hidden_cases.json": "ed191d703375fcc1c98cbab67f18d54176ace31bf708949b16cd566c010d8af3"
+  },
+  "frozen_workspace_sha256": "badc371a2b7732daeb3b56f77ea63cfe9d43677465ca8cb43f986450f318522b",
+  "source_path": "autoresearch.json",
+  "spec_sha256": "4a5525398a7c59fe05923ae0758d33773f88e8a7c7689d92e7a5bf85a1a35f20"
+}

@@ -1,0 +1,159 @@
+{
+  "version": "repropilot.evaluation-result/v1",
+  "recorded_at": "2026-08-14T08:01:55.279713Z",
+  "scenario_id": "hidden-holdout-failed",
+  "title": "Public improvement fails hidden generalization",
+  "description": "A public-set fix is kept during search but does not improve the hidden cases.",
+  "repository_revision": "e0c74b53846d02ba0499c85af90655e2a634ba2b",
+  "source_tree_dirty": false,
+  "fixture_sha256": "471bd2e0c59b25e1716cb83342078fe51e1bd6f2875f1f786169088594a53520",
+  "input_hashes": {
+    "scenario.json": "55899ab23063c600927228b199eb857e560bb56d69900ffd00934ede91ce53cd",
+    "candidate.py": "73ffa0409bf3698ea2798eca28c5f70d89ee5abc0dd4f9333f8335225b014017",
+    "shared_evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a"
+  },
+  "expected_outcome": "hidden_validation_failed",
+  "observed_outcome": "hidden_validation_failed",
+  "expectation_met": true,
+  "execution": {
+    "engine": "local_subprocess",
+    "command_timeout_seconds": 3.0,
+    "proposer_mode": "scripted_fault_injection",
+    "live_request_cap": 0
+  },
+  "commands": {
+    "guard": [
+      [
+        "python",
+        "-m",
+        "py_compile",
+        "candidate.py"
+      ]
+    ],
+    "public_evaluation": [
+      "python",
+      "evaluator.py"
+    ],
+    "hidden_evaluation": [
+      "python",
+      "holdout_evaluator.py"
+    ],
+    "search_runs": 1,
+    "validation_runs": 3
+  },
+  "baseline": {
+    "public_score": 0.6666666666666666,
+    "hidden_score": 0.3333333333333333,
+    "preflight_artifact": "hidden-holdout-failed/baseline-preflight.json"
+  },
+  "search": {
+    "best_score": 1.0,
+    "completed_trials": 1,
+    "accepted_trials": 1,
+    "stop_reason": "target_score_reached",
+    "decisions": [
+      {
+        "number": 0,
+        "status": "baseline",
+        "decision": "keep",
+        "metric": 0.6666666666666666,
+        "reason": "frozen baseline"
+      },
+      {
+        "number": 1,
+        "status": "kept",
+        "decision": "keep",
+        "metric": 1.0,
+        "reason": "metrics.accuracy improved from 0.66666667 to 1"
+      }
+    ]
+  },
+  "model": {
+    "provider": "",
+    "model": "",
+    "request_count": 0,
+    "reported_request_count": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0,
+    "mode": "scripted_fault_injection"
+  },
+  "cost": {
+    "status": "exact_zero",
+    "currency": "USD",
+    "amount": 0.0,
+    "basis": "no provider request was made"
+  },
+  "validation": {
+    "version": "autoresearch.validation/v1",
+    "spec_sha256": "b9ba5d656907d32960cb92a85e2c8f1f874cc5c2f5ac8f61e1cb8e6b5698d851",
+    "status": "failed",
+    "validation_mode": "hidden_holdout",
+    "expected_score": 0.3333333333333333,
+    "observed_scores": [
+      0.3333333333333333,
+      0.3333333333333333,
+      0.3333333333333333
+    ],
+    "observed_score": 0.3333333333333333,
+    "mean_score": 0.3333333333333333,
+    "stddev": 0.0,
+    "passed_runs": 3,
+    "failed_runs": 0,
+    "score_matches": false,
+    "candidate_intact": true,
+    "protected_files_intact": true,
+    "command_results": [
+      {
+        "command": [
+          "python",
+          "holdout_evaluator.py"
+        ],
+        "exit_code": 0,
+        "stdout": "{\"metrics\": {\"accuracy\": 0.3333333333333333}, \"passed\": 1, \"total\": 3}\r\n",
+        "stderr": "",
+        "duration_ms": 110
+      },
+      {
+        "command": [
+          "python",
+          "holdout_evaluator.py"
+        ],
+        "exit_code": 0,
+        "stdout": "{\"metrics\": {\"accuracy\": 0.3333333333333333}, \"passed\": 1, \"total\": 3}\r\n",
+        "stderr": "",
+        "duration_ms": 125
+      },
+      {
+        "command": [
+          "python",
+          "holdout_evaluator.py"
+        ],
+        "exit_code": 0,
+        "stdout": "{\"metrics\": {\"accuracy\": 0.3333333333333333}, \"passed\": 1, \"total\": 3}\r\n",
+        "stderr": "",
+        "duration_ms": 139
+      }
+    ],
+    "reason": "fresh validation score did not satisfy the frozen acceptance rule"
+  },
+  "failure": null,
+  "final_hashes": {
+    "candidate.py": "06bd9bcc3d4af67a120e7f3fa65b266e2800b3bba7d4b26c29c9fd7e029ee6b7",
+    "evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a",
+    "holdout_evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a"
+  },
+  "boundaries": [
+    "The hidden cases are excluded from proposal context.",
+    "A deterministic overfit fixture demonstrates rejection semantics, not model overfitting frequency."
+  ],
+  "artifacts": {
+    "scenario_input": "hidden-holdout-failed/scenario-input.json",
+    "baseline_preflight": "hidden-holdout-failed/baseline-preflight.json",
+    "frozen_spec": "hidden-holdout-failed/frozen-spec.json",
+    "trial_ledger": "hidden-holdout-failed/trial-ledger.json",
+    "validation_report": "hidden-holdout-failed/validation-report.json",
+    "initial_candidate": "hidden-holdout-failed/initial-candidate.py",
+    "final_candidate": "hidden-holdout-failed/final-candidate.py"
+  }
+}
