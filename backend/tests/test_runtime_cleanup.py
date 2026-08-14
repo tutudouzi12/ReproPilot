@@ -130,3 +130,34 @@ async def test_scheduler_cleans_runtime_after_downstream_failure(tmp_path):
     assert saved.status == "failed"
     assert executor.cleanup_calls == 1
     assert saved.artifacts["runtime_cleanup_report"]["value"]["deleted"] == ["sandbox-failed-plan"]
+
+
+@pytest.mark.asyncio
+async def test_scheduler_persists_cleanup_failure_without_overwriting_plan_status(tmp_path):
+    class FailingCleanupExecutor:
+        async def execute(self, task, plan):
+            return TaskExecutionResult(status="completed", result="sandbox-1")
+
+        async def cleanup_plan(self, plan):
+            raise RuntimeError("Docker daemon unavailable during cleanup")
+
+    node = TaskNode(
+        id="runtime",
+        name="runtime",
+        type="prepare_runtime",
+        description="runtime",
+        assigned_to="sandbox_agent",
+    )
+    plan = PlanGraph(user_intent="run", intent_type="Code_Execution", nodes=[node], edges=[])
+    store = FilePlanStore(tmp_path / "plans.json")
+    await store.save_plan(plan)
+
+    await DAGScheduler(store, EventBus(store), FailingCleanupExecutor(), 1).execute_plan(plan.id)
+
+    saved = await store.get_plan(plan.id)
+    report = saved.artifacts["runtime_cleanup_report"]["value"]
+    assert saved.status == "completed"
+    assert saved.nodes[0].status == "completed"
+    assert report["status"] == "failed"
+    assert report["deleted"] == []
+    assert report["failures"] == [{"error": "Docker daemon unavailable during cleanup"}]
