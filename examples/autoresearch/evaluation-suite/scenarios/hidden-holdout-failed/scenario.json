@@ -1,0 +1,32 @@
+{
+  "schema_version": "repropilot.evaluation-scenario/v1",
+  "id": "hidden-holdout-failed",
+  "title": "Public improvement fails hidden generalization",
+  "description": "A public-set fix is kept during search but does not improve the hidden cases.",
+  "objective": "Normalize tokens for the frozen public and hidden contracts.",
+  "function": "normalize_token",
+  "expected_outcome": "hidden_validation_failed",
+  "allow_live_model": false,
+  "public_evaluation": {
+    "cases": [
+      {"args": [" Alpha "], "expected": "alpha"},
+      {"args": ["BRAVO"], "expected": "bravo"},
+      {"args": ["charlie"], "expected": "charlie"}
+    ]
+  },
+  "hidden_evaluation": {
+    "cases": [
+      {"args": ["delta  echo"], "expected": "delta echo"},
+      {"args": ["FOXTROT   GOLF"], "expected": "foxtrot golf"},
+      {"args": ["hotel"], "expected": "hotel"}
+    ]
+  },
+  "scripted_proposals": [
+    {
+      "diagnosis": "The public failure is caused by surrounding whitespace.",
+      "hypothesis": "Stripping the ends improves the visible score but misses internal whitespace normalization.",
+      "patches": [{"path": "candidate.py", "content": "def normalize_token(value: str) -> str:\n    return value.strip().lower()\n"}]
+    }
+  ],
+  "boundaries": ["The hidden cases are excluded from proposal context.", "A deterministic overfit fixture demonstrates rejection semantics, not model overfitting frequency."]
+}
