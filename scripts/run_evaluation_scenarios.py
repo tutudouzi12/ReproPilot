@@ -204,7 +204,7 @@ def live_proposer(client: LLMClient, usage: ModelUsage, request_cap: int):
         if usage.request_count >= request_cap:
             return CandidateProposal(status="stop", reason=f"live request cap reached ({request_cap})")
         completion = await client.complete_with_usage(
-            "You are a bounded AutoResearch candidate proposer. Return strict JSON only with status, diagnosis, hypothesis, reason and patches. Patch only listed editable files. Never modify evaluators, tests, metrics, commands, dependencies or budgets; never add network access, subprocesses, fake metrics or fake predictions.",
+            "You are a bounded AutoResearch candidate proposer. Return strict JSON only with status, diagnosis, hypothesis, reason and patches. The status value MUST be exactly 'candidate' when proposing patches or 'stop' when no safe patch should be attempted. Each patch must contain path and complete replacement content. Patch only listed editable files. Never modify evaluators, tests, metrics, commands, dependencies or budgets; never add network access, subprocesses, fake metrics or fake predictions.",
             json.dumps(context, ensure_ascii=False)[:120000],
         )
         usage.record(completion.usage)
@@ -258,6 +258,9 @@ def cost_record(usage: ModelUsage, args: argparse.Namespace) -> dict[str, Any]:
         "input_cost_per_million": args.input_cost_per_million,
         "output_cost_per_million": args.output_cost_per_million,
         "basis": "provider-reported tokens multiplied by caller-supplied rates",
+        "pricing_source": args.pricing_source,
+        "pricing_tier": args.pricing_tier,
+        "pricing_verified_at": args.pricing_verified_at,
     }
 
 
@@ -411,6 +414,17 @@ def markdown_summary(summary: dict[str, Any]) -> str:
         "Scripted fault-injection scenarios validate deterministic governance and failure handling; they are not model-quality claims. Live-model scenarios record provider-reported token usage and calculate monetary cost only when explicit rates are supplied.",
         "",
     ])
+    priced = next((result["cost"] for result in summary["scenarios"] if result["cost"].get("pricing_source")), None)
+    if priced is not None:
+        lines.extend([
+            "## Cost provenance",
+            "",
+            f"- Pricing source: <{priced['pricing_source']}>",
+            f"- Pricing tier: {priced.get('pricing_tier') or 'not specified'}",
+            f"- Rate verified at: {priced.get('pricing_verified_at') or 'not specified'}",
+            "- Cost is derived from provider-reported tokens and the supplied public list rates; it is not a billing-console receipt.",
+            "",
+        ])
     return "\n".join(lines)
 
 
@@ -462,6 +476,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--input-cost-per-million", type=float)
     parser.add_argument("--output-cost-per-million", type=float)
     parser.add_argument("--currency", default="USD")
+    parser.add_argument("--pricing-source", help="Billing page URL used to verify supplied rates.")
+    parser.add_argument("--pricing-tier", help="Provider pricing tier applicable to this run.")
+    parser.add_argument("--pricing-verified-at", help="Date or timestamp when supplied rates were verified.")
     parser.add_argument("--allow-dirty", action="store_true")
     parser.add_argument("--fail-on-mismatch", action=argparse.BooleanOptionalAction, default=True)
     return parser.parse_args()

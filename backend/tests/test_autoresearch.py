@@ -202,6 +202,20 @@ async def test_run_restores_workspace_after_protected_mutation(tmp_path):
 
 
 @pytest.mark.asyncio
+async def test_run_retains_exception_type_when_proposer_message_is_empty(tmp_path):
+    root = workspace(tmp_path)
+    spec = freeze(root, max_trials=1, search_runs=1)
+
+    async def propose(_context):
+        raise TimeoutError()
+
+    ledger = await run_autoresearch(root, spec, evaluator_for(root), propose)
+
+    assert ledger.trials[-1].status == "rejected"
+    assert ledger.trials[-1].reason == "TimeoutError"
+
+
+@pytest.mark.asyncio
 async def test_validation_rejects_candidate_hash_drift(tmp_path):
     root = workspace(tmp_path)
     spec = freeze(root, max_trials=1, search_runs=1)

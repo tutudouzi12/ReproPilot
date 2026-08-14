@@ -49,10 +49,13 @@ py -3.11 .\scripts\run_evaluation_scenarios.py `
   --input-cost-per-million <verified-input-rate> `
   --output-cost-per-million <verified-output-rate> `
   --currency USD `
+  --pricing-source <provider-billing-page-url> `
+  --pricing-tier <applicable-token-tier> `
+  --pricing-verified-at <YYYY-MM-DD> `
   --output data\evaluation-results\live-run
 ```
 
-Only pass rates verified against the provider's current billing page. Without them, the report records `cost.status=not_calculated` instead of inventing a monetary value.
+Only pass rates verified against the provider's current billing page. Record the URL, applicable tier, and verification date so a reviewer can audit the calculation. Without rates, the report records `cost.status=not_calculated` instead of inventing a monetary value.
 
 ## Retained evidence
 

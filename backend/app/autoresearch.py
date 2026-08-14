@@ -598,7 +598,7 @@ async def run_autoresearch(workspace: str | Path, spec: ResearchSpec, evaluator:
                 restore_files(root, best)
         except Exception as exc:
             trial.status = "rejected"
-            trial.reason = str(exc)[:4000]
+            trial.reason = f"{type(exc).__name__}: {exc}".rstrip(": ")[:4000]
             rejected_feedback = trial.reason
             restore_files(root, best)
             try:
