@@ -1,0 +1,51 @@
+{
+  "version": "autoresearch.spec/v1",
+  "name": "hidden-holdout-failed",
+  "objective": "Normalize tokens for the frozen public and hidden contracts.",
+  "repository_revision": "e0c74b53846d02ba0499c85af90655e2a634ba2b",
+  "editable_files": [
+    "candidate.py"
+  ],
+  "protected_files": [
+    "evaluator.py",
+    "holdout_evaluator.py",
+    "public_cases.json",
+    "hidden_cases.json"
+  ],
+  "eval_command": [
+    "python",
+    "evaluator.py"
+  ],
+  "holdout_command": [
+    "python",
+    "holdout_evaluator.py"
+  ],
+  "guard_commands": [
+    [
+      "python",
+      "-m",
+      "py_compile",
+      "candidate.py"
+    ]
+  ],
+  "metric_key": "metrics.accuracy",
+  "direction": "maximize",
+  "min_delta": 0.01,
+  "holdout_min_delta": 0.01,
+  "target_score": 1.0,
+  "max_trials": 1,
+  "max_wall_seconds": 60,
+  "search_runs": 1,
+  "search_aggregation": "worst",
+  "validation_runs": 3,
+  "dependencies": [],
+  "frozen_files": {
+    "evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a",
+    "holdout_evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a",
+    "public_cases.json": "323ec927600010e1b0834bb8155c23b7fb74f6c70a2a2491bd06bcb4f80563b5",
+    "hidden_cases.json": "1b9dab5229a03bc73b9c948235ce070ff39dec2a89074cd72d4c47dff87e715a"
+  },
+  "frozen_workspace_sha256": "1be92274b276c0f9d6252b34cea493c82c7f984ca274c1a427d98578f522648a",
+  "source_path": "autoresearch.json",
+  "spec_sha256": "b9ba5d656907d32960cb92a85e2c8f1f874cc5c2f5ac8f61e1cb8e6b5698d851"
+}

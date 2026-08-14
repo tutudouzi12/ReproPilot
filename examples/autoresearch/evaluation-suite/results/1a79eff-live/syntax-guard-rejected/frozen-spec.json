@@ -1,0 +1,51 @@
+{
+  "version": "autoresearch.spec/v1",
+  "name": "syntax-guard-rejected",
+  "objective": "Correct the zero boundary while preserving valid Python.",
+  "repository_revision": "1a79eff1d84d30be1e600b672defba18c2f39e3d",
+  "editable_files": [
+    "candidate.py"
+  ],
+  "protected_files": [
+    "evaluator.py",
+    "holdout_evaluator.py",
+    "public_cases.json",
+    "hidden_cases.json"
+  ],
+  "eval_command": [
+    "python",
+    "evaluator.py"
+  ],
+  "holdout_command": [
+    "python",
+    "holdout_evaluator.py"
+  ],
+  "guard_commands": [
+    [
+      "python",
+      "-m",
+      "py_compile",
+      "candidate.py"
+    ]
+  ],
+  "metric_key": "metrics.accuracy",
+  "direction": "maximize",
+  "min_delta": 0.01,
+  "holdout_min_delta": 0.01,
+  "target_score": 1.0,
+  "max_trials": 1,
+  "max_wall_seconds": 60,
+  "search_runs": 1,
+  "search_aggregation": "worst",
+  "validation_runs": 3,
+  "dependencies": [],
+  "frozen_files": {
+    "evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a",
+    "holdout_evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a",
+    "public_cases.json": "01327a82c89c3b0e23106fc4da0b1b32f403005ca8fc80e14f28909b192bd449",
+    "hidden_cases.json": "b73ce6de56716ef57a0e4be58a0c9cae7640f6bdd2ca25448efb6cefb8243f9f"
+  },
+  "frozen_workspace_sha256": "d22ad23a3abd8326cf342f2970ddd57e954be20b4e6a8e5e28c30c203f324681",
+  "source_path": "autoresearch.json",
+  "spec_sha256": "7e0ebd95eeb71534c849ceb0435299af7fa4ec7508c37774cf660e44aedba6ff"
+}

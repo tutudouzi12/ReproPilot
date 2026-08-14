@@ -1,0 +1,159 @@
+{
+  "version": "repropilot.evaluation-result/v1",
+  "recorded_at": "2026-08-14T08:02:05.317053Z",
+  "scenario_id": "zero-boundary-success",
+  "title": "Zero-boundary correction passes hidden validation",
+  "description": "A bounded candidate corrects zero being counted as positive and generalizes to unseen cases.",
+  "repository_revision": "e0c74b53846d02ba0499c85af90655e2a634ba2b",
+  "source_tree_dirty": false,
+  "fixture_sha256": "208b6aa018fe4a8821152ab48102e6ff566ceaefb789cddd199664cf65911f60",
+  "input_hashes": {
+    "scenario.json": "00ad894267c0d466340c666c27cf4043dab007fe776ef513c3b5e4947087c461",
+    "candidate.py": "3fcb657425e0c37384980334242ab33f686146458f8ac972376f8f2e9d533dab",
+    "shared_evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a"
+  },
+  "expected_outcome": "validation_passed",
+  "observed_outcome": "validation_passed",
+  "expectation_met": true,
+  "execution": {
+    "engine": "local_subprocess",
+    "command_timeout_seconds": 3.0,
+    "proposer_mode": "scripted_fault_injection",
+    "live_request_cap": 0
+  },
+  "commands": {
+    "guard": [
+      [
+        "python",
+        "-m",
+        "py_compile",
+        "candidate.py"
+      ]
+    ],
+    "public_evaluation": [
+      "python",
+      "evaluator.py"
+    ],
+    "hidden_evaluation": [
+      "python",
+      "holdout_evaluator.py"
+    ],
+    "search_runs": 3,
+    "validation_runs": 3
+  },
+  "baseline": {
+    "public_score": 0.6666666666666666,
+    "hidden_score": 0.3333333333333333,
+    "preflight_artifact": "zero-boundary-success/baseline-preflight.json"
+  },
+  "search": {
+    "best_score": 1.0,
+    "completed_trials": 1,
+    "accepted_trials": 1,
+    "stop_reason": "target_score_reached",
+    "decisions": [
+      {
+        "number": 0,
+        "status": "baseline",
+        "decision": "keep",
+        "metric": 0.6666666666666666,
+        "reason": "frozen baseline"
+      },
+      {
+        "number": 1,
+        "status": "kept",
+        "decision": "keep",
+        "metric": 1.0,
+        "reason": "metrics.accuracy improved from 0.66666667 to 1"
+      }
+    ]
+  },
+  "model": {
+    "provider": "",
+    "model": "",
+    "request_count": 0,
+    "reported_request_count": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0,
+    "mode": "scripted_fault_injection"
+  },
+  "cost": {
+    "status": "exact_zero",
+    "currency": "USD",
+    "amount": 0.0,
+    "basis": "no provider request was made"
+  },
+  "validation": {
+    "version": "autoresearch.validation/v1",
+    "spec_sha256": "16ce35f0fbd580760063e95ef89befa412b3732094de921486b28b1d03a2fcba",
+    "status": "passed",
+    "validation_mode": "hidden_holdout",
+    "expected_score": 0.3333333333333333,
+    "observed_scores": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "observed_score": 1.0,
+    "mean_score": 1.0,
+    "stddev": 0.0,
+    "passed_runs": 3,
+    "failed_runs": 0,
+    "score_matches": true,
+    "candidate_intact": true,
+    "protected_files_intact": true,
+    "command_results": [
+      {
+        "command": [
+          "python",
+          "holdout_evaluator.py"
+        ],
+        "exit_code": 0,
+        "stdout": "{\"metrics\": {\"accuracy\": 1.0}, \"passed\": 3, \"total\": 3}\r\n",
+        "stderr": "",
+        "duration_ms": 125
+      },
+      {
+        "command": [
+          "python",
+          "holdout_evaluator.py"
+        ],
+        "exit_code": 0,
+        "stdout": "{\"metrics\": {\"accuracy\": 1.0}, \"passed\": 3, \"total\": 3}\r\n",
+        "stderr": "",
+        "duration_ms": 140
+      },
+      {
+        "command": [
+          "python",
+          "holdout_evaluator.py"
+        ],
+        "exit_code": 0,
+        "stdout": "{\"metrics\": {\"accuracy\": 1.0}, \"passed\": 3, \"total\": 3}\r\n",
+        "stderr": "",
+        "duration_ms": 125
+      }
+    ],
+    "reason": ""
+  },
+  "failure": null,
+  "final_hashes": {
+    "candidate.py": "bd98d2d7afa07a0339f22ffbfdcf1366e173289a6bcf3d50fc939f03d328b69a",
+    "evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a",
+    "holdout_evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a"
+  },
+  "boundaries": [
+    "Small deterministic classification fixture.",
+    "Success does not establish large-repository repair performance."
+  ],
+  "artifacts": {
+    "scenario_input": "zero-boundary-success/scenario-input.json",
+    "baseline_preflight": "zero-boundary-success/baseline-preflight.json",
+    "frozen_spec": "zero-boundary-success/frozen-spec.json",
+    "trial_ledger": "zero-boundary-success/trial-ledger.json",
+    "validation_report": "zero-boundary-success/validation-report.json",
+    "initial_candidate": "zero-boundary-success/initial-candidate.py",
+    "final_candidate": "zero-boundary-success/final-candidate.py"
+  }
+}

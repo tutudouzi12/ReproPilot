@@ -1,0 +1,228 @@
+{
+  "version": "autoresearch.ledger/v1",
+  "spec_sha256": "2f30544465cd474de8c07e4f63496e88881b36924e991b333c90780c2423f11f",
+  "status": "completed",
+  "metric_key": "metrics.accuracy",
+  "direction": "maximize",
+  "baseline_score": 0.6666666666666666,
+  "best_score": 1.0,
+  "holdout_baseline_score": 0.3333333333333333,
+  "max_trials": 2,
+  "completed_trials": 2,
+  "accepted_trials": 1,
+  "stop_reason": "target_score_reached",
+  "best_candidate_files": {
+    "candidate.py": "bd98d2d7afa07a0339f22ffbfdcf1366e173289a6bcf3d50fc939f03d328b69a"
+  },
+  "trials": [
+    {
+      "number": 0,
+      "status": "baseline",
+      "decision": "keep",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "frozen baseline",
+      "patches": [],
+      "metric": 0.6666666666666666,
+      "metric_samples": [
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "candidate.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 125
+        },
+        {
+          "command": [
+            "python",
+            "evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"accuracy\": 0.6666666666666666}, \"passed\": 2, \"total\": 3}\r\n",
+          "stderr": "",
+          "duration_ms": 139
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "candidate.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 125
+        },
+        {
+          "command": [
+            "python",
+            "evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"accuracy\": 0.6666666666666666}, \"passed\": 2, \"total\": 3}\r\n",
+          "stderr": "",
+          "duration_ms": 125
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "candidate.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 140
+        },
+        {
+          "command": [
+            "python",
+            "evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"accuracy\": 0.6666666666666666}, \"passed\": 2, \"total\": 3}\r\n",
+          "stderr": "",
+          "duration_ms": 109
+        }
+      ],
+      "started_at": "2026-08-14T08:13:42.950265Z",
+      "finished_at": "2026-08-14T08:13:42.950265Z"
+    },
+    {
+      "number": 1,
+      "status": "rejected",
+      "decision": "reject",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "1 validation error for CandidateProposal\nstatus\n  Input should be 'candidate' or 'stop' [type=literal_error, input_value='proposed', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/literal_error",
+      "patches": [],
+      "metric": null,
+      "metric_samples": [],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "",
+      "command_results": [],
+      "started_at": "2026-08-14T08:13:43.212459Z",
+      "finished_at": "2026-08-14T08:13:57.338865Z"
+    },
+    {
+      "number": 2,
+      "status": "kept",
+      "decision": "keep",
+      "diagnosis": "The current implementation counts zero as a positive value because it uses `value >= 0` which includes zero. The requirement is to not count zero as positive, so we need to change the condition to `value > 0`.",
+      "hypothesis": "Changing the condition from `value >= 0` to `value > 0` will correctly exclude zero from being counted as a positive value, which should improve the accuracy metric.",
+      "reason": "metrics.accuracy improved from 0.66666667 to 1",
+      "patches": [
+        {
+          "path": "candidate.py",
+          "before_sha256": "3fcb657425e0c37384980334242ab33f686146458f8ac972376f8f2e9d533dab",
+          "after_sha256": "bd98d2d7afa07a0339f22ffbfdcf1366e173289a6bcf3d50fc939f03d328b69a"
+        }
+      ],
+      "metric": 1.0,
+      "metric_samples": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "candidate.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 155
+        },
+        {
+          "command": [
+            "python",
+            "evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"accuracy\": 1.0}, \"passed\": 3, \"total\": 3}\r\n",
+          "stderr": "",
+          "duration_ms": 125
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "candidate.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 155
+        },
+        {
+          "command": [
+            "python",
+            "evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"accuracy\": 1.0}, \"passed\": 3, \"total\": 3}\r\n",
+          "stderr": "",
+          "duration_ms": 141
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "candidate.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 202
+        },
+        {
+          "command": [
+            "python",
+            "evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"accuracy\": 1.0}, \"passed\": 3, \"total\": 3}\r\n",
+          "stderr": "",
+          "duration_ms": 219
+        }
+      ],
+      "started_at": "2026-08-14T08:13:57.338865Z",
+      "finished_at": "2026-08-14T08:14:09.531149Z"
+    }
+  ],
+  "command_runs": 14,
+  "command_duration_ms": 2024,
+  "model_usage": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "request_count": 2,
+    "reported_request_count": 2,
+    "prompt_tokens": 1694,
+    "completion_tokens": 375,
+    "total_tokens": 2069
+  },
+  "started_at": "2026-08-14T08:13:42.154451Z",
+  "finished_at": "2026-08-14T08:14:09.568277Z"
+}

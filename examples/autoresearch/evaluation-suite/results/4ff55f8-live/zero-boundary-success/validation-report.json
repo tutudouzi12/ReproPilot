@@ -1,0 +1,53 @@
+{
+  "version": "autoresearch.validation/v1",
+  "spec_sha256": "2f30544465cd474de8c07e4f63496e88881b36924e991b333c90780c2423f11f",
+  "status": "passed",
+  "validation_mode": "hidden_holdout",
+  "expected_score": 0.3333333333333333,
+  "observed_scores": [
+    1.0,
+    1.0,
+    1.0
+  ],
+  "observed_score": 1.0,
+  "mean_score": 1.0,
+  "stddev": 0.0,
+  "passed_runs": 3,
+  "failed_runs": 0,
+  "score_matches": true,
+  "candidate_intact": true,
+  "protected_files_intact": true,
+  "command_results": [
+    {
+      "command": [
+        "python",
+        "holdout_evaluator.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"metrics\": {\"accuracy\": 1.0}, \"passed\": 3, \"total\": 3}\r\n",
+      "stderr": "",
+      "duration_ms": 204
+    },
+    {
+      "command": [
+        "python",
+        "holdout_evaluator.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"metrics\": {\"accuracy\": 1.0}, \"passed\": 3, \"total\": 3}\r\n",
+      "stderr": "",
+      "duration_ms": 203
+    },
+    {
+      "command": [
+        "python",
+        "holdout_evaluator.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"metrics\": {\"accuracy\": 1.0}, \"passed\": 3, \"total\": 3}\r\n",
+      "stderr": "",
+      "duration_ms": 186
+    }
+  ],
+  "reason": ""
+}

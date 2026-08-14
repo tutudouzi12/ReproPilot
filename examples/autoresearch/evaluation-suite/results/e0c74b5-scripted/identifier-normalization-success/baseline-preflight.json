@@ -1,0 +1,26 @@
+{
+  "public_score": 0.6666666666666666,
+  "hidden_score": 0.0,
+  "command_results": [
+    {
+      "command": [
+        "python",
+        "evaluator.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"metrics\": {\"accuracy\": 0.6666666666666666}, \"passed\": 2, \"total\": 3}\r\n",
+      "stderr": "",
+      "duration_ms": 141
+    },
+    {
+      "command": [
+        "python",
+        "holdout_evaluator.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"metrics\": {\"accuracy\": 0.0}, \"passed\": 0, \"total\": 3}\r\n",
+      "stderr": "",
+      "duration_ms": 187
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "version": "autoresearch.ledger/v1",
+  "spec_sha256": "ad4a56819c2be10c88e3b3f18d3f663e02d87859bc085cb1ad6ff33981b9bc64",
+  "status": "completed",
+  "metric_key": "metrics.accuracy",
+  "direction": "maximize",
+  "baseline_score": 1.0,
+  "best_score": 1.0,
+  "holdout_baseline_score": 1.0,
+  "max_trials": 1,
+  "completed_trials": 1,
+  "accepted_trials": 0,
+  "stop_reason": "trial_budget_exhausted",
+  "best_candidate_files": {
+    "candidate.py": "a2525562ac0ddbff63acf326e8c1b9f69b25f36629a0c33ad4301de1fdd009ab"
+  },
+  "trials": [
+    {
+      "number": 0,
+      "status": "baseline",
+      "decision": "keep",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "frozen baseline",
+      "patches": [],
+      "metric": 1.0,
+      "metric_samples": [
+        1.0
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "candidate.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 141
+        },
+        {
+          "command": [
+            "python",
+            "evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"accuracy\": 1.0}, \"passed\": 2, \"total\": 2}\r\n",
+          "stderr": "",
+          "duration_ms": 125
+        }
+      ],
+      "started_at": "2026-08-14T08:01:52.365424Z",
+      "finished_at": "2026-08-14T08:01:52.365424Z"
+    },
+    {
+      "number": 1,
+      "status": "rejected",
+      "decision": "reject",
+      "diagnosis": "Simulate a repair that introduces blocking work.",
+      "hypothesis": "The command timeout should reject this candidate.",
+      "reason": "evaluator command failed: command timed out after 0.25s",
+      "patches": [
+        {
+          "path": "candidate.py",
+          "before_sha256": "a2525562ac0ddbff63acf326e8c1b9f69b25f36629a0c33ad4301de1fdd009ab",
+          "after_sha256": "ddeec63c36fdca26f7f076deb6d6a0fa038c9d113221cfa2f13eb61b249a8480"
+        }
+      ],
+      "metric": null,
+      "metric_samples": [],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "",
+      "command_results": [],
+      "started_at": "2026-08-14T08:01:52.648587Z",
+      "finished_at": "2026-08-14T08:01:53.098256Z"
+    }
+  ],
+  "command_runs": 4,
+  "command_duration_ms": 530,
+  "model_usage": {
+    "provider": "",
+    "model": "",
+    "request_count": 0,
+    "reported_request_count": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0
+  },
+  "started_at": "2026-08-14T08:01:52.082951Z",
+  "finished_at": "2026-08-14T08:01:53.118779Z"
+}

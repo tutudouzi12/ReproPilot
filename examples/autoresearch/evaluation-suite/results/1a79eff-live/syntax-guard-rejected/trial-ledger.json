@@ -1,0 +1,95 @@
+{
+  "version": "autoresearch.ledger/v1",
+  "spec_sha256": "7e0ebd95eeb71534c849ceb0435299af7fa4ec7508c37774cf660e44aedba6ff",
+  "status": "completed",
+  "metric_key": "metrics.accuracy",
+  "direction": "maximize",
+  "baseline_score": 0.5,
+  "best_score": 0.5,
+  "holdout_baseline_score": 0.5,
+  "max_trials": 1,
+  "completed_trials": 1,
+  "accepted_trials": 0,
+  "stop_reason": "trial_budget_exhausted",
+  "best_candidate_files": {
+    "candidate.py": "3fcb657425e0c37384980334242ab33f686146458f8ac972376f8f2e9d533dab"
+  },
+  "trials": [
+    {
+      "number": 0,
+      "status": "baseline",
+      "decision": "keep",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "frozen baseline",
+      "patches": [],
+      "metric": 0.5,
+      "metric_samples": [
+        0.5
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "candidate.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 172
+        },
+        {
+          "command": [
+            "python",
+            "evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"accuracy\": 0.5}, \"passed\": 1, \"total\": 2}\r\n",
+          "stderr": "",
+          "duration_ms": 155
+        }
+      ],
+      "started_at": "2026-08-14T08:28:41.408528Z",
+      "finished_at": "2026-08-14T08:28:41.408528Z"
+    },
+    {
+      "number": 1,
+      "status": "rejected",
+      "decision": "reject",
+      "diagnosis": "The comparison includes zero.",
+      "hypothesis": "A malformed edit simulates a failed repair.",
+      "reason": "RuntimeError: guard command failed:   File \"candidate.py\", line 1\r\n    def score_items(values: list[int]) -> int\r\n                                             ^\r\nSyntaxError: expected ':'\r\n",
+      "patches": [
+        {
+          "path": "candidate.py",
+          "before_sha256": "3fcb657425e0c37384980334242ab33f686146458f8ac972376f8f2e9d533dab",
+          "after_sha256": "967fac1b07b6117c5785473c65b0b6cbe436a795910cbe73b447b71d9e143429"
+        }
+      ],
+      "metric": null,
+      "metric_samples": [],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "",
+      "command_results": [],
+      "started_at": "2026-08-14T08:28:41.773456Z",
+      "finished_at": "2026-08-14T08:28:42.056934Z"
+    }
+  ],
+  "command_runs": 4,
+  "command_duration_ms": 669,
+  "model_usage": {
+    "provider": "",
+    "model": "",
+    "request_count": 0,
+    "reported_request_count": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0
+  },
+  "started_at": "2026-08-14T08:28:41.070978Z",
+  "finished_at": "2026-08-14T08:28:42.084443Z"
+}

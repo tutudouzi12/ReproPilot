@@ -26,6 +26,7 @@ jobs:
       - run: python -m pytest -q --cov=app --cov-branch --cov-report=term-missing --cov-report=json:coverage.json
         working-directory: docker-sandbox
       - run: python scripts/coverage_summary.py Sandbox docker-sandbox/coverage.json --min-line 88 --min-branch 80
+      - run: python scripts/run_evaluation_scenarios.py --mode scripted --output data/evaluation-ci
       - run: npm ci
         working-directory: frontend
       - run: npm audit --omit=dev --audit-level=high

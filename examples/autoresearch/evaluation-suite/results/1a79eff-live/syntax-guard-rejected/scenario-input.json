@@ -1,0 +1,70 @@
+{
+  "schema_version": "repropilot.evaluation-scenario/v1",
+  "id": "syntax-guard-rejected",
+  "title": "Invalid repair fails the syntax guard",
+  "description": "An authorized replacement contains invalid Python and is rejected before metric evaluation.",
+  "objective": "Correct the zero boundary while preserving valid Python.",
+  "function": "score_items",
+  "expected_outcome": "candidate_rejected_guard",
+  "allow_live_model": false,
+  "public_evaluation": {
+    "cases": [
+      {
+        "args": [
+          [
+            0,
+            1
+          ]
+        ],
+        "expected": 1
+      },
+      {
+        "args": [
+          [
+            1,
+            -1
+          ]
+        ],
+        "expected": 1
+      }
+    ]
+  },
+  "hidden_evaluation": {
+    "cases": [
+      {
+        "args": [
+          [
+            0,
+            0
+          ]
+        ],
+        "expected": 0
+      },
+      {
+        "args": [
+          [
+            3,
+            -2
+          ]
+        ],
+        "expected": 1
+      }
+    ]
+  },
+  "scripted_proposals": [
+    {
+      "diagnosis": "The comparison includes zero.",
+      "hypothesis": "A malformed edit simulates a failed repair.",
+      "patches": [
+        {
+          "path": "candidate.py",
+          "content": "def score_items(values: list[int]) -> int\n    return sum(value > 0 for value in values)\n"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    "Scripted malformed patch for deterministic guard coverage.",
+    "Does not estimate how often a live model emits invalid syntax."
+  ]
+}

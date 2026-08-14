@@ -1,0 +1,23 @@
+{
+  "schema_version": "repropilot.evaluation-scenario/v1",
+  "id": "protected-mutation-aborts",
+  "title": "Protected evaluator mutation aborts the campaign",
+  "description": "The fault-injection evaluator mutates a protected holdout file after detecting the candidate marker.",
+  "objective": "Improve the score while preserving every protected file.",
+  "function": "score_items",
+  "expected_outcome": "integrity_abort",
+  "allow_live_model": false,
+  "public_evaluation": {
+    "mutation": {"candidate_marker": "MUTATE_PROTECTED", "target": "holdout_evaluator.py"},
+    "cases": [{"args": [[0, 1]], "expected": 1}, {"args": [[1, -1]], "expected": 1}]
+  },
+  "hidden_evaluation": {"cases": [{"args": [[0, 0]], "expected": 0}, {"args": [[2, -1]], "expected": 1}]},
+  "scripted_proposals": [
+    {
+      "diagnosis": "Trigger the integrity fault after an authorized candidate write.",
+      "hypothesis": "The campaign must abort and restore the workspace.",
+      "patches": [{"path": "candidate.py", "content": "# MUTATE_PROTECTED\ndef score_items(values: list[int]) -> int:\n    return sum(value > 0 for value in values)\n"}]
+    }
+  ],
+  "boundaries": ["Mutation is deterministic fault injection performed by the evaluator fixture.", "Validates abort and restoration, not resistance to a hostile Docker daemon."]
+}

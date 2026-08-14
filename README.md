@@ -74,8 +74,9 @@ ReproPilot 关注的不是一次模型问答，而是一条完整的研究执行
 
 | 检查项 | 结果 |
 |---|---|
-| Backend | `146 passed, 2 skipped` |
+| Backend | Linux CI `150 passed`；行覆盖率门槛 83%，分支覆盖率门槛 68% |
 | Docker Sandbox | `7 passed` |
+| AutoResearch scenarios | 7 个固定场景覆盖成功、契约拒绝、语法失败、超时、隐藏验收失败与完整性中止 |
 | Frontend | ESLint、TypeScript、Vite production build 通过 |
 | Dependency audit | `npm audit --omit=dev`：`0 vulnerabilities` |
 | Docker Compose | Frontend、Backend、Sandbox 健康启动 |
@@ -128,6 +129,7 @@ OPENAI_MODEL=your-model
 ## 文档导航
 
 - [端到端演示](docs/end-to-end-demo.md)
+- [固定评测场景套件](examples/autoresearch/evaluation-suite/)
 - [设计说明与已知限制](docs/design-decisions.md)
 - [本地启动指南](docs/local_startup_guide.md)
 - [用户手册](docs/user_manual.md)
