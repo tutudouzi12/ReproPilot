@@ -1,0 +1,51 @@
+{
+  "version": "autoresearch.spec/v1",
+  "name": "identifier-normalization-success",
+  "objective": "Normalize identifiers by trimming surrounding whitespace and converting to lowercase.",
+  "repository_revision": "1a79eff1d84d30be1e600b672defba18c2f39e3d",
+  "editable_files": [
+    "candidate.py"
+  ],
+  "protected_files": [
+    "evaluator.py",
+    "holdout_evaluator.py",
+    "public_cases.json",
+    "hidden_cases.json"
+  ],
+  "eval_command": [
+    "python",
+    "evaluator.py"
+  ],
+  "holdout_command": [
+    "python",
+    "holdout_evaluator.py"
+  ],
+  "guard_commands": [
+    [
+      "python",
+      "-m",
+      "py_compile",
+      "candidate.py"
+    ]
+  ],
+  "metric_key": "metrics.accuracy",
+  "direction": "maximize",
+  "min_delta": 0.01,
+  "holdout_min_delta": 0.01,
+  "target_score": 1.0,
+  "max_trials": 2,
+  "max_wall_seconds": 60,
+  "search_runs": 3,
+  "search_aggregation": "worst",
+  "validation_runs": 3,
+  "dependencies": [],
+  "frozen_files": {
+    "evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a",
+    "holdout_evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a",
+    "public_cases.json": "e19b8902e27e4b8b2ec482b21fc0f91024fafc6f6387249253af3755cde41cb9",
+    "hidden_cases.json": "69bbddbed3a67008f92b3ecf91ea844525f128c84d6feb0f45b8353eb0a96287"
+  },
+  "frozen_workspace_sha256": "3098ab987e6448e8d86f8c61f9458a4892cbd9e643218a002bd75c82d6c862c1",
+  "source_path": "autoresearch.json",
+  "spec_sha256": "5fed80fe50dd4987ec3b4aac7c6d7ae0de82c24c6802e87b043c7349f2b11f26"
+}

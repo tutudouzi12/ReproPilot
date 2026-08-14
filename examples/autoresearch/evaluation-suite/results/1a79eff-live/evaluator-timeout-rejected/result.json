@@ -1,0 +1,159 @@
+{
+  "version": "repropilot.evaluation-result/v1",
+  "recorded_at": "2026-08-14T08:28:26.166746Z",
+  "scenario_id": "evaluator-timeout-rejected",
+  "title": "Evaluator timeout rejects and rolls back the candidate",
+  "description": "A syntactically valid candidate blocks long enough to exceed the frozen command timeout.",
+  "repository_revision": "1a79eff1d84d30be1e600b672defba18c2f39e3d",
+  "source_tree_dirty": false,
+  "fixture_sha256": "5f35afaa7966db46e1f851a1f9d249c47f7990b072296f3cd35f8e8029fa57b2",
+  "input_hashes": {
+    "scenario.json": "6aa21e250200bb1f0ff100b171b7a505ac3d829919507d314cc60ca0e1fe1913",
+    "candidate.py": "a2525562ac0ddbff63acf326e8c1b9f69b25f36629a0c33ad4301de1fdd009ab",
+    "shared_evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a"
+  },
+  "expected_outcome": "candidate_rejected_timeout",
+  "observed_outcome": "candidate_rejected_timeout",
+  "expectation_met": true,
+  "execution": {
+    "engine": "local_subprocess",
+    "command_timeout_seconds": 0.25,
+    "proposer_mode": "scripted_fault_injection",
+    "live_request_cap": 0
+  },
+  "commands": {
+    "guard": [
+      [
+        "python",
+        "-m",
+        "py_compile",
+        "candidate.py"
+      ]
+    ],
+    "public_evaluation": [
+      "python",
+      "evaluator.py"
+    ],
+    "hidden_evaluation": [
+      "python",
+      "holdout_evaluator.py"
+    ],
+    "search_runs": 1,
+    "validation_runs": 3
+  },
+  "baseline": {
+    "public_score": 1.0,
+    "hidden_score": 1.0,
+    "preflight_artifact": "evaluator-timeout-rejected/baseline-preflight.json"
+  },
+  "search": {
+    "best_score": 1.0,
+    "completed_trials": 1,
+    "accepted_trials": 0,
+    "stop_reason": "trial_budget_exhausted",
+    "decisions": [
+      {
+        "number": 0,
+        "status": "baseline",
+        "decision": "keep",
+        "metric": 1.0,
+        "reason": "frozen baseline"
+      },
+      {
+        "number": 1,
+        "status": "rejected",
+        "decision": "reject",
+        "metric": null,
+        "reason": "RuntimeError: evaluator command failed: command timed out after 0.25s"
+      }
+    ]
+  },
+  "model": {
+    "provider": "",
+    "model": "",
+    "request_count": 0,
+    "reported_request_count": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0,
+    "mode": "scripted_fault_injection"
+  },
+  "cost": {
+    "status": "exact_zero",
+    "currency": "CNY",
+    "amount": 0.0,
+    "basis": "no provider request was made"
+  },
+  "validation": {
+    "version": "autoresearch.validation/v1",
+    "spec_sha256": "5331344270c2549249b6c710017fd5647b1f4655a4eefaffea8d1f8157859424",
+    "status": "failed",
+    "validation_mode": "hidden_holdout",
+    "expected_score": 1.0,
+    "observed_scores": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "observed_score": 1.0,
+    "mean_score": 1.0,
+    "stddev": 0.0,
+    "passed_runs": 3,
+    "failed_runs": 0,
+    "score_matches": false,
+    "candidate_intact": true,
+    "protected_files_intact": true,
+    "command_results": [
+      {
+        "command": [
+          "python",
+          "holdout_evaluator.py"
+        ],
+        "exit_code": 0,
+        "stdout": "{\"metrics\": {\"accuracy\": 1.0}, \"passed\": 2, \"total\": 2}\r\n",
+        "stderr": "",
+        "duration_ms": 125
+      },
+      {
+        "command": [
+          "python",
+          "holdout_evaluator.py"
+        ],
+        "exit_code": 0,
+        "stdout": "{\"metrics\": {\"accuracy\": 1.0}, \"passed\": 2, \"total\": 2}\r\n",
+        "stderr": "",
+        "duration_ms": 139
+      },
+      {
+        "command": [
+          "python",
+          "holdout_evaluator.py"
+        ],
+        "exit_code": 0,
+        "stdout": "{\"metrics\": {\"accuracy\": 1.0}, \"passed\": 2, \"total\": 2}\r\n",
+        "stderr": "",
+        "duration_ms": 125
+      }
+    ],
+    "reason": "fresh validation score did not satisfy the frozen acceptance rule"
+  },
+  "failure": null,
+  "final_hashes": {
+    "candidate.py": "a2525562ac0ddbff63acf326e8c1b9f69b25f36629a0c33ad4301de1fdd009ab",
+    "evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a",
+    "holdout_evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a"
+  },
+  "boundaries": [
+    "Uses a local subprocess timeout, not a Docker CPU or wall-clock kill.",
+    "Docker timeout behavior remains covered by Docker smoke tests."
+  ],
+  "artifacts": {
+    "scenario_input": "evaluator-timeout-rejected/scenario-input.json",
+    "baseline_preflight": "evaluator-timeout-rejected/baseline-preflight.json",
+    "frozen_spec": "evaluator-timeout-rejected/frozen-spec.json",
+    "trial_ledger": "evaluator-timeout-rejected/trial-ledger.json",
+    "validation_report": "evaluator-timeout-rejected/validation-report.json",
+    "initial_candidate": "evaluator-timeout-rejected/initial-candidate.py",
+    "final_candidate": "evaluator-timeout-rejected/final-candidate.py"
+  }
+}

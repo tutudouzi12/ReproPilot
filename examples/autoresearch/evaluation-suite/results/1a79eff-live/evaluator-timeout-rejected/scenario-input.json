@@ -1,0 +1,68 @@
+{
+  "schema_version": "repropilot.evaluation-scenario/v1",
+  "id": "evaluator-timeout-rejected",
+  "title": "Evaluator timeout rejects and rolls back the candidate",
+  "description": "A syntactically valid candidate blocks long enough to exceed the frozen command timeout.",
+  "objective": "Preserve count_items correctness without exceeding the execution budget.",
+  "function": "count_items",
+  "expected_outcome": "candidate_rejected_timeout",
+  "allow_live_model": false,
+  "command_timeout_seconds": 0.25,
+  "public_evaluation": {
+    "cases": [
+      {
+        "args": [
+          [
+            1,
+            2
+          ]
+        ],
+        "expected": 2
+      },
+      {
+        "args": [
+          []
+        ],
+        "expected": 0
+      }
+    ]
+  },
+  "hidden_evaluation": {
+    "cases": [
+      {
+        "args": [
+          [
+            3
+          ]
+        ],
+        "expected": 1
+      },
+      {
+        "args": [
+          [
+            1,
+            2,
+            3
+          ]
+        ],
+        "expected": 3
+      }
+    ]
+  },
+  "scripted_proposals": [
+    {
+      "diagnosis": "Simulate a repair that introduces blocking work.",
+      "hypothesis": "The command timeout should reject this candidate.",
+      "patches": [
+        {
+          "path": "candidate.py",
+          "content": "import time\n\ndef count_items(values: list[int]) -> int:\n    time.sleep(2)\n    return len(values)\n"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    "Uses a local subprocess timeout, not a Docker CPU or wall-clock kill.",
+    "Docker timeout behavior remains covered by Docker smoke tests."
+  ]
+}

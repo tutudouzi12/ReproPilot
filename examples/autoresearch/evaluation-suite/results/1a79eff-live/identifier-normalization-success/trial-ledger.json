@@ -1,0 +1,212 @@
+{
+  "version": "autoresearch.ledger/v1",
+  "spec_sha256": "5fed80fe50dd4987ec3b4aac7c6d7ae0de82c24c6802e87b043c7349f2b11f26",
+  "status": "completed",
+  "metric_key": "metrics.accuracy",
+  "direction": "maximize",
+  "baseline_score": 0.6666666666666666,
+  "best_score": 1.0,
+  "holdout_baseline_score": 0.0,
+  "max_trials": 2,
+  "completed_trials": 1,
+  "accepted_trials": 1,
+  "stop_reason": "target_score_reached",
+  "best_candidate_files": {
+    "candidate.py": "c008307af18de2bf25d2f05ef6f2263098f8bba1422a5c79241a5225f4b59da1"
+  },
+  "trials": [
+    {
+      "number": 0,
+      "status": "baseline",
+      "decision": "keep",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "frozen baseline",
+      "patches": [],
+      "metric": 0.6666666666666666,
+      "metric_samples": [
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "candidate.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 140
+        },
+        {
+          "command": [
+            "python",
+            "evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"accuracy\": 0.6666666666666666}, \"passed\": 2, \"total\": 3}\r\n",
+          "stderr": "",
+          "duration_ms": 156
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "candidate.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 233
+        },
+        {
+          "command": [
+            "python",
+            "evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"accuracy\": 0.6666666666666666}, \"passed\": 2, \"total\": 3}\r\n",
+          "stderr": "",
+          "duration_ms": 141
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "candidate.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 155
+        },
+        {
+          "command": [
+            "python",
+            "evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"accuracy\": 0.6666666666666666}, \"passed\": 2, \"total\": 3}\r\n",
+          "stderr": "",
+          "duration_ms": 125
+        }
+      ],
+      "started_at": "2026-08-14T08:28:29.510625Z",
+      "finished_at": "2026-08-14T08:28:29.510625Z"
+    },
+    {
+      "number": 1,
+      "status": "kept",
+      "decision": "keep",
+      "diagnosis": "The current implementation only converts to lowercase but does not trim whitespace. This causes identifiers with leading/trailing spaces to remain unnormalized, resulting in lower accuracy.",
+      "hypothesis": "Adding whitespace trimming before lowercase conversion will improve normalization accuracy by handling identifiers with surrounding spaces.",
+      "reason": "metrics.accuracy improved from 0.66666667 to 1",
+      "patches": [
+        {
+          "path": "candidate.py",
+          "before_sha256": "b257c3d43f2ccd463e9042dab750fdce4892c17e6773cd0aeac93fa11aee5995",
+          "after_sha256": "c008307af18de2bf25d2f05ef6f2263098f8bba1422a5c79241a5225f4b59da1"
+        }
+      ],
+      "metric": 1.0,
+      "metric_samples": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "candidate.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 375
+        },
+        {
+          "command": [
+            "python",
+            "evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"accuracy\": 1.0}, \"passed\": 3, \"total\": 3}\r\n",
+          "stderr": "",
+          "duration_ms": 156
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "candidate.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 187
+        },
+        {
+          "command": [
+            "python",
+            "evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"accuracy\": 1.0}, \"passed\": 3, \"total\": 3}\r\n",
+          "stderr": "",
+          "duration_ms": 250
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "candidate.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 343
+        },
+        {
+          "command": [
+            "python",
+            "evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"accuracy\": 1.0}, \"passed\": 3, \"total\": 3}\r\n",
+          "stderr": "",
+          "duration_ms": 172
+        }
+      ],
+      "started_at": "2026-08-14T08:28:29.786778Z",
+      "finished_at": "2026-08-14T08:28:38.124668Z"
+    }
+  ],
+  "command_runs": 14,
+  "command_duration_ms": 2682,
+  "model_usage": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "request_count": 1,
+    "reported_request_count": 1,
+    "prompt_tokens": 745,
+    "completion_tokens": 139,
+    "total_tokens": 884
+  },
+  "started_at": "2026-08-14T08:28:28.553089Z",
+  "finished_at": "2026-08-14T08:28:38.145910Z"
+}

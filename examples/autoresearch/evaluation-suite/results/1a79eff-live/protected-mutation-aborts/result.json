@@ -1,0 +1,94 @@
+{
+  "version": "repropilot.evaluation-result/v1",
+  "recorded_at": "2026-08-14T08:28:40.617399Z",
+  "scenario_id": "protected-mutation-aborts",
+  "title": "Protected evaluator mutation aborts the campaign",
+  "description": "The fault-injection evaluator mutates a protected holdout file after detecting the candidate marker.",
+  "repository_revision": "1a79eff1d84d30be1e600b672defba18c2f39e3d",
+  "source_tree_dirty": false,
+  "fixture_sha256": "0f8e520d71b35f21b860e67e03f4ad6146d7be07b49c51bcdce64fee764a05de",
+  "input_hashes": {
+    "scenario.json": "f26a3ab264099f0812a4ba058549fa6ae026cf26e91c7177fbedfe3a3eb2cb57",
+    "candidate.py": "3fcb657425e0c37384980334242ab33f686146458f8ac972376f8f2e9d533dab",
+    "shared_evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a"
+  },
+  "expected_outcome": "integrity_abort",
+  "observed_outcome": "integrity_abort",
+  "expectation_met": true,
+  "execution": {
+    "engine": "local_subprocess",
+    "command_timeout_seconds": 3.0,
+    "proposer_mode": "scripted_fault_injection",
+    "live_request_cap": 0
+  },
+  "commands": {
+    "guard": [
+      [
+        "python",
+        "-m",
+        "py_compile",
+        "candidate.py"
+      ]
+    ],
+    "public_evaluation": [
+      "python",
+      "evaluator.py"
+    ],
+    "hidden_evaluation": [
+      "python",
+      "holdout_evaluator.py"
+    ],
+    "search_runs": 1,
+    "validation_runs": 3
+  },
+  "baseline": {
+    "public_score": 0.5,
+    "hidden_score": 0.5,
+    "preflight_artifact": "protected-mutation-aborts/baseline-preflight.json"
+  },
+  "search": {
+    "best_score": null,
+    "completed_trials": 0,
+    "accepted_trials": 0,
+    "stop_reason": "run_aborted",
+    "decisions": []
+  },
+  "model": {
+    "provider": "",
+    "model": "",
+    "request_count": 0,
+    "reported_request_count": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0,
+    "mode": "scripted_fault_injection"
+  },
+  "cost": {
+    "status": "exact_zero",
+    "currency": "CNY",
+    "amount": 0.0,
+    "basis": "no provider request was made"
+  },
+  "validation": null,
+  "failure": {
+    "error": "RuntimeError: AutoResearch protected evaluator or data changed"
+  },
+  "final_hashes": {
+    "candidate.py": "3fcb657425e0c37384980334242ab33f686146458f8ac972376f8f2e9d533dab",
+    "evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a",
+    "holdout_evaluator.py": "7a5b5f69538e98b8e9ce27d22120669997565ca05ae0491a924cf9913ddfb07a"
+  },
+  "boundaries": [
+    "Mutation is deterministic fault injection performed by the evaluator fixture.",
+    "Validates abort and restoration, not resistance to a hostile Docker daemon."
+  ],
+  "artifacts": {
+    "scenario_input": "protected-mutation-aborts/scenario-input.json",
+    "baseline_preflight": "protected-mutation-aborts/baseline-preflight.json",
+    "frozen_spec": "protected-mutation-aborts/frozen-spec.json",
+    "trial_ledger": null,
+    "validation_report": null,
+    "initial_candidate": "protected-mutation-aborts/initial-candidate.py",
+    "final_candidate": "protected-mutation-aborts/final-candidate.py"
+  }
+}
