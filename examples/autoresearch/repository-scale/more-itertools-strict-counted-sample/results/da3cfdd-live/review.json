@@ -1,0 +1,51 @@
+{
+  "version": "repropilot.repository-evaluation-review/v1",
+  "status": "provider_requests_failed_no_candidate",
+  "automated_evidence": {
+    "public_baseline": 0.6666666666666666,
+    "public_best": 0.6666666666666666,
+    "hidden_baseline": 0.16666666666666666,
+    "hidden_validation_runs": [
+      0.16666666666666666,
+      0.16666666666666666,
+      0.16666666666666666
+    ],
+    "provider_attempts": 3,
+    "provider_usage_reports": 0,
+    "accepted_trials": 0,
+    "candidate_patch_empty": true,
+    "candidate_intact": true,
+    "protected_files_intact": true
+  },
+  "request_failures": [
+    {
+      "request_number": 1,
+      "error_type": "RemoteProtocolError",
+      "summary": "Server disconnected without sending a response."
+    },
+    {
+      "request_number": 2,
+      "error_type": "ReadTimeout",
+      "summary": "No response or token usage was returned before the client timeout."
+    },
+    {
+      "request_number": 3,
+      "error_type": "ReadTimeout",
+      "summary": "No response or token usage was returned before the client timeout."
+    }
+  ],
+  "manual_observations": [
+    {
+      "severity": "failure_classification",
+      "finding": "Every bounded provider attempt failed before returning model content, a parsed proposal, or usage data.",
+      "impact": "The run demonstrates provider/request-cap behavior but provides no evidence that a model-generated candidate could or could not repair the task.",
+      "disposition": "Retain the run as external-provider failure evidence. Do not count it as a candidate rejection or model capability failure."
+    },
+    {
+      "severity": "cost_boundary",
+      "finding": "The provider returned no token usage for any attempted request.",
+      "impact": "A token-derived monetary amount cannot be calculated from the retained evidence.",
+      "disposition": "Report cost as not calculated, not as zero cost or a billing receipt."
+    }
+  ]
+}
