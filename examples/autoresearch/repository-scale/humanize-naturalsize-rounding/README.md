@@ -28,4 +28,4 @@ py -3.11 scripts\run_repository_baseline.py `
   --output examples\autoresearch\repository-scale\humanize-naturalsize-rounding\baseline.json
 ```
 
-The task replays one historical bug fix; it is not an official Humanize benchmark and does not claim that a contract-passing candidate is identical to the upstream maintainer patch.
+The task replays one historical bug fix; it is not an official Humanize benchmark and does not claim that a contract-passing candidate is identical to the upstream maintainer patch. Retained live runs and their separate human reviews are indexed under [`results/`](results/).

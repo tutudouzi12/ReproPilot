@@ -1,0 +1,296 @@
+{
+  "version": "autoresearch.ledger/v1",
+  "spec_sha256": "b84c6c77b06dd20e0d132534995d703b11da6c09e6ac0feecab7896137c97199",
+  "status": "completed",
+  "metric_key": "metrics.rounding_score",
+  "direction": "maximize",
+  "baseline_score": 0.6666666666666666,
+  "best_score": 1.0,
+  "holdout_baseline_score": 0.16666666666666666,
+  "max_trials": 8,
+  "completed_trials": 1,
+  "accepted_trials": 1,
+  "stop_reason": "target_score_reached",
+  "best_candidate_files": {
+    "src/humanize/filesize.py": "52334afb73abe43672f7c0c8ff58cebc22d5b2065bb19b3cf34b44f4600e242b"
+  },
+  "trials": [
+    {
+      "number": 0,
+      "status": "baseline",
+      "decision": "keep",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "frozen baseline",
+      "patches": [],
+      "metric": 0.6666666666666666,
+      "metric_samples": [
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "src/humanize/filesize.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 172
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "--benchmark-disable",
+            "--color=no"
+          ],
+          "exit_code": 0,
+          "stdout": "........................................................................ [  9%]\r\n.............sssssssssssssssssssssssssssssssssssssssssssssssssssssssssss [ 18%]\r\nsssssssss......s........................................................ [ 28%]\r\n........................................................................ [ 37%]\r\n........................................................................ [ 46%]\r\n........................................................................ [ 56%]\r\n........................................................................ [ 65%]\r\n........................................................................ [ 74%]\r\n........................................................................ [ 84%]\r\n........................................................................ [ 93%]\r\n..................................................                       [100%]\r\n701 passed, 69 skipped in 3.11s\r\n",
+          "stderr": "",
+          "duration_ms": 4358
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"rounding_score\": 0.6666666666666666}, \"passed\": 4, \"total\": 6, \"cases\": [{\"value\": 999999, \"kwargs\": {}, \"expected\": \"1.0 MB\", \"observed\": \"1000.0 kB\", \"passed\": false}, {\"value\": -999999, \"kwargs\": {}, \"expected\": \"-1.0 MB\", \"observed\": \"-1000.0 kB\", \"passed\": false}, {\"value\": 1000, \"kwargs\": {}, \"expected\": \"1.0 kB\", \"observed\": \"1.0 kB\", \"passed\": true}, {\"value\": 1024, \"kwargs\": {\"binary\": true}, \"expected\": \"1.0 KiB\", \"observed\": \"1.0 KiB\", \"passed\": true}, {\"value\": 0, \"kwargs\": {}, \"expected\": \"0 Bytes\", \"observed\": \"0 Bytes\", \"passed\": true}, {\"value\": 30000000000000000000000000000000000, \"kwargs\": {}, \"expected\": \"30000.0 QB\", \"observed\": \"30000.0 QB\", \"passed\": true}]}\r\n",
+          "stderr": "",
+          "duration_ms": 172
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "src/humanize/filesize.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 202
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "--benchmark-disable",
+            "--color=no"
+          ],
+          "exit_code": 0,
+          "stdout": "........................................................................ [  9%]\r\n.............sssssssssssssssssssssssssssssssssssssssssssssssssssssssssss [ 18%]\r\nsssssssss......s........................................................ [ 28%]\r\n........................................................................ [ 37%]\r\n........................................................................ [ 46%]\r\n........................................................................ [ 56%]\r\n........................................................................ [ 65%]\r\n........................................................................ [ 74%]\r\n........................................................................ [ 84%]\r\n........................................................................ [ 93%]\r\n..................................................                       [100%]\r\n701 passed, 69 skipped in 2.83s\r\n",
+          "stderr": "",
+          "duration_ms": 4125
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"rounding_score\": 0.6666666666666666}, \"passed\": 4, \"total\": 6, \"cases\": [{\"value\": 999999, \"kwargs\": {}, \"expected\": \"1.0 MB\", \"observed\": \"1000.0 kB\", \"passed\": false}, {\"value\": -999999, \"kwargs\": {}, \"expected\": \"-1.0 MB\", \"observed\": \"-1000.0 kB\", \"passed\": false}, {\"value\": 1000, \"kwargs\": {}, \"expected\": \"1.0 kB\", \"observed\": \"1.0 kB\", \"passed\": true}, {\"value\": 1024, \"kwargs\": {\"binary\": true}, \"expected\": \"1.0 KiB\", \"observed\": \"1.0 KiB\", \"passed\": true}, {\"value\": 0, \"kwargs\": {}, \"expected\": \"0 Bytes\", \"observed\": \"0 Bytes\", \"passed\": true}, {\"value\": 30000000000000000000000000000000000, \"kwargs\": {}, \"expected\": \"30000.0 QB\", \"observed\": \"30000.0 QB\", \"passed\": true}]}\r\n",
+          "stderr": "",
+          "duration_ms": 156
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "src/humanize/filesize.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 156
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "--benchmark-disable",
+            "--color=no"
+          ],
+          "exit_code": 0,
+          "stdout": "........................................................................ [  9%]\r\n.............sssssssssssssssssssssssssssssssssssssssssssssssssssssssssss [ 18%]\r\nsssssssss......s........................................................ [ 28%]\r\n........................................................................ [ 37%]\r\n........................................................................ [ 46%]\r\n........................................................................ [ 56%]\r\n........................................................................ [ 65%]\r\n........................................................................ [ 74%]\r\n........................................................................ [ 84%]\r\n........................................................................ [ 93%]\r\n..................................................                       [100%]\r\n701 passed, 69 skipped in 3.02s\r\n",
+          "stderr": "",
+          "duration_ms": 4171
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"rounding_score\": 0.6666666666666666}, \"passed\": 4, \"total\": 6, \"cases\": [{\"value\": 999999, \"kwargs\": {}, \"expected\": \"1.0 MB\", \"observed\": \"1000.0 kB\", \"passed\": false}, {\"value\": -999999, \"kwargs\": {}, \"expected\": \"-1.0 MB\", \"observed\": \"-1000.0 kB\", \"passed\": false}, {\"value\": 1000, \"kwargs\": {}, \"expected\": \"1.0 kB\", \"observed\": \"1.0 kB\", \"passed\": true}, {\"value\": 1024, \"kwargs\": {\"binary\": true}, \"expected\": \"1.0 KiB\", \"observed\": \"1.0 KiB\", \"passed\": true}, {\"value\": 0, \"kwargs\": {}, \"expected\": \"0 Bytes\", \"observed\": \"0 Bytes\", \"passed\": true}, {\"value\": 30000000000000000000000000000000000, \"kwargs\": {}, \"expected\": \"30000.0 QB\", \"observed\": \"30000.0 QB\", \"passed\": true}]}\r\n",
+          "stderr": "",
+          "duration_ms": 141
+        }
+      ],
+      "started_at": "2026-08-19T09:08:54.766147Z",
+      "finished_at": "2026-08-19T09:08:54.766147Z"
+    },
+    {
+      "number": 1,
+      "status": "kept",
+      "decision": "keep",
+      "diagnosis": "The naturalsize() function has rounding issues where values that should round up to 1000/1024 at one suffix level don't properly carry over to the next suffix level. For example, a value that computes to 999.9+ and rounds to 1000.0 should use the next higher suffix instead of staying at the current one.",
+      "hypothesis": "The issue occurs because after computing the formatted value using the format string, we don't check if the formatted result rounds to the next threshold (1000 for decimal, 1024 for binary). We need to detect when rounding causes the mantissa to reach the next unit boundary and adjust accordingly.",
+      "reason": "metrics.rounding_score improved from 0.66666667 to 1",
+      "patches": [
+        {
+          "path": "src/humanize/filesize.py",
+          "before_sha256": "d876079211078c5c0c930d1ecee54c567d043dd7aa860711606e54162aa10ca8",
+          "after_sha256": "52334afb73abe43672f7c0c8ff58cebc22d5b2065bb19b3cf34b44f4600e242b"
+        }
+      ],
+      "metric": 1.0,
+      "metric_samples": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "src/humanize/filesize.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 156
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "--benchmark-disable",
+            "--color=no"
+          ],
+          "exit_code": 0,
+          "stdout": "........................................................................ [  9%]\r\n.............sssssssssssssssssssssssssssssssssssssssssssssssssssssssssss [ 18%]\r\nsssssssss......s........................................................ [ 28%]\r\n........................................................................ [ 37%]\r\n........................................................................ [ 46%]\r\n........................................................................ [ 56%]\r\n........................................................................ [ 65%]\r\n........................................................................ [ 74%]\r\n........................................................................ [ 84%]\r\n........................................................................ [ 93%]\r\n..................................................                       [100%]\r\n701 passed, 69 skipped in 2.79s\r\n",
+          "stderr": "",
+          "duration_ms": 3860
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"rounding_score\": 1.0}, \"passed\": 6, \"total\": 6, \"cases\": [{\"value\": 999999, \"kwargs\": {}, \"expected\": \"1.0 MB\", \"observed\": \"1.0 MB\", \"passed\": true}, {\"value\": -999999, \"kwargs\": {}, \"expected\": \"-1.0 MB\", \"observed\": \"-1.0 MB\", \"passed\": true}, {\"value\": 1000, \"kwargs\": {}, \"expected\": \"1.0 kB\", \"observed\": \"1.0 kB\", \"passed\": true}, {\"value\": 1024, \"kwargs\": {\"binary\": true}, \"expected\": \"1.0 KiB\", \"observed\": \"1.0 KiB\", \"passed\": true}, {\"value\": 0, \"kwargs\": {}, \"expected\": \"0 Bytes\", \"observed\": \"0 Bytes\", \"passed\": true}, {\"value\": 30000000000000000000000000000000000, \"kwargs\": {}, \"expected\": \"30000.0 QB\", \"observed\": \"30000.0 QB\", \"passed\": true}]}\r\n",
+          "stderr": "",
+          "duration_ms": 125
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "src/humanize/filesize.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 156
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "--benchmark-disable",
+            "--color=no"
+          ],
+          "exit_code": 0,
+          "stdout": "........................................................................ [  9%]\r\n.............sssssssssssssssssssssssssssssssssssssssssssssssssssssssssss [ 18%]\r\nsssssssss......s........................................................ [ 28%]\r\n........................................................................ [ 37%]\r\n........................................................................ [ 46%]\r\n........................................................................ [ 56%]\r\n........................................................................ [ 65%]\r\n........................................................................ [ 74%]\r\n........................................................................ [ 84%]\r\n........................................................................ [ 93%]\r\n..................................................                       [100%]\r\n701 passed, 69 skipped in 2.81s\r\n",
+          "stderr": "",
+          "duration_ms": 3827
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"rounding_score\": 1.0}, \"passed\": 6, \"total\": 6, \"cases\": [{\"value\": 999999, \"kwargs\": {}, \"expected\": \"1.0 MB\", \"observed\": \"1.0 MB\", \"passed\": true}, {\"value\": -999999, \"kwargs\": {}, \"expected\": \"-1.0 MB\", \"observed\": \"-1.0 MB\", \"passed\": true}, {\"value\": 1000, \"kwargs\": {}, \"expected\": \"1.0 kB\", \"observed\": \"1.0 kB\", \"passed\": true}, {\"value\": 1024, \"kwargs\": {\"binary\": true}, \"expected\": \"1.0 KiB\", \"observed\": \"1.0 KiB\", \"passed\": true}, {\"value\": 0, \"kwargs\": {}, \"expected\": \"0 Bytes\", \"observed\": \"0 Bytes\", \"passed\": true}, {\"value\": 30000000000000000000000000000000000, \"kwargs\": {}, \"expected\": \"30000.0 QB\", \"observed\": \"30000.0 QB\", \"passed\": true}]}\r\n",
+          "stderr": "",
+          "duration_ms": 141
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "src/humanize/filesize.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 139
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "--benchmark-disable",
+            "--color=no"
+          ],
+          "exit_code": 0,
+          "stdout": "........................................................................ [  9%]\r\n.............sssssssssssssssssssssssssssssssssssssssssssssssssssssssssss [ 18%]\r\nsssssssss......s........................................................ [ 28%]\r\n........................................................................ [ 37%]\r\n........................................................................ [ 46%]\r\n........................................................................ [ 56%]\r\n........................................................................ [ 65%]\r\n........................................................................ [ 74%]\r\n........................................................................ [ 84%]\r\n........................................................................ [ 93%]\r\n..................................................                       [100%]\r\n701 passed, 69 skipped in 2.63s\r\n",
+          "stderr": "",
+          "duration_ms": 3656
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"rounding_score\": 1.0}, \"passed\": 6, \"total\": 6, \"cases\": [{\"value\": 999999, \"kwargs\": {}, \"expected\": \"1.0 MB\", \"observed\": \"1.0 MB\", \"passed\": true}, {\"value\": -999999, \"kwargs\": {}, \"expected\": \"-1.0 MB\", \"observed\": \"-1.0 MB\", \"passed\": true}, {\"value\": 1000, \"kwargs\": {}, \"expected\": \"1.0 kB\", \"observed\": \"1.0 kB\", \"passed\": true}, {\"value\": 1024, \"kwargs\": {\"binary\": true}, \"expected\": \"1.0 KiB\", \"observed\": \"1.0 KiB\", \"passed\": true}, {\"value\": 0, \"kwargs\": {}, \"expected\": \"0 Bytes\", \"observed\": \"0 Bytes\", \"passed\": true}, {\"value\": 30000000000000000000000000000000000, \"kwargs\": {}, \"expected\": \"30000.0 QB\", \"observed\": \"30000.0 QB\", \"passed\": true}]}\r\n",
+          "stderr": "",
+          "duration_ms": 141
+        }
+      ],
+      "started_at": "2026-08-19T09:08:59.189228Z",
+      "finished_at": "2026-08-19T09:09:40.090991Z"
+    }
+  ],
+  "command_runs": 21,
+  "command_duration_ms": 30134,
+  "model_usage": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "request_count": 1,
+    "reported_request_count": 1,
+    "prompt_tokens": 1755,
+    "completion_tokens": 1632,
+    "total_tokens": 3387
+  },
+  "started_at": "2026-08-19T09:08:40.954319Z",
+  "finished_at": "2026-08-19T09:09:40.255847Z"
+}

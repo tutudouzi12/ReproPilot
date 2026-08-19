@@ -1,0 +1,95 @@
+{
+  "version": "repropilot.repository-evaluation-result/v1",
+  "recorded_at": "2026-08-19T09:09:41.041149Z",
+  "task_id": "humanize-naturalsize-rounding",
+  "outcome": "validation_passed",
+  "harness": {
+    "revision": "651107835e1d0bab8d7bc5eacbcd5f480a515753",
+    "source_tree_dirty": false
+  },
+  "sanitization": {
+    "workspace_paths_replaced_with": "{workspace}"
+  },
+  "repository": {
+    "url": "https://github.com/python-humanize/humanize.git",
+    "revision": "976484a655df046aa6849f440a4f0cd44fc4918c",
+    "git_blob_sha256": {
+      "src/humanize/filesize.py": "1895d6dad77e0e87089417d1a76a5d40abc0cb6bfc23be5d1ae46c865e50bd20",
+      "tests/test_filesize.py": "c321179cc329551367fb7979a1c1a064623262700150a6c8cd963fca61d3fbe5",
+      "pyproject.toml": "65e95e9627c0bff62e6469703fbe0d1041c3a788ffe911728e13a0b6a466a536",
+      "LICENCE": "8ba6c18112a431400ad3c743f70670079b302545d98884fc2f28a91c383a0380"
+    },
+    "editable_files": [
+      "src/humanize/filesize.py"
+    ],
+    "working_tree_matches_git_blobs": true
+  },
+  "baseline_artifact_sha256": "12d7e57131e4ee468887d5580921b81364432f7c318a5e9cb61187a56a1a1984",
+  "search": {
+    "baseline_score": 0.6666666666666666,
+    "best_score": 1.0,
+    "completed_trials": 1,
+    "accepted_trials": 1,
+    "stop_reason": "target_score_reached",
+    "request_cap": 3
+  },
+  "model": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "request_count": 1,
+    "reported_request_count": 1,
+    "prompt_tokens": 1755,
+    "completion_tokens": 1632,
+    "total_tokens": 3387,
+    "attempted_request_count": 1,
+    "mode": "live_model"
+  },
+  "cost": {
+    "status": "calculated_from_supplied_rates",
+    "currency": "CNY",
+    "amount": 0.033132,
+    "input_cost_per_million": 4.0,
+    "output_cost_per_million": 16.0,
+    "basis": "provider-reported tokens multiplied by caller-supplied public list rates; not a billing receipt",
+    "pricing_source": "https://help.aliyun.com/zh/model-studio/model-pricing",
+    "pricing_tier": "Mainland China, 0<Token<=32K",
+    "pricing_verified_at": "2026-08-19"
+  },
+  "validation": {
+    "status": "passed",
+    "mode": "hidden_holdout",
+    "baseline_score": 0.16666666666666666,
+    "observed_scores": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "observed_score": 1.0,
+    "candidate_intact": true,
+    "protected_files_intact": true,
+    "reason": ""
+  },
+  "failure": {
+    "error": ""
+  },
+  "boundaries": [
+    "The task replays one historical Humanize pull request against its pre-fix base commit; it is not an official project benchmark.",
+    "The public and hidden cases are a ReproPilot split of upstream regression examples plus explicit non-regression cases.",
+    "The historical fix commit is retained as provenance for human review and is not included in candidate proposer context.",
+    "A contract pass proves the frozen cases and upstream suite passed; it does not prove semantic equivalence with the maintainer patch.",
+    "The candidate was executed by local subprocess with a stripped environment, not a network-isolated container.",
+    "The hidden evaluator content was excluded from proposer context but remains inspectable in this public evidence package.",
+    "Any monetary amount is token-derived from the cited public rate and is not a billing-console receipt."
+  ],
+  "artifact_sha256": {
+    "candidate.patch": "39844d107ae8bab7f2feaa8f65c7bddd0be80044c8efde2064ee262a1e053bab",
+    "final-files/src/humanize/filesize.py": "52334afb73abe43672f7c0c8ff58cebc22d5b2065bb19b3cf34b44f4600e242b",
+    "frozen-spec.json": "0707b990c08f043c8113a062f890b168423aa4831cbd336a4d4272de5920a7e9",
+    "initial-files/src/humanize/filesize.py": "1895d6dad77e0e87089417d1a76a5d40abc0cb6bfc23be5d1ae46c865e50bd20",
+    "model-responses.json": "a581ac42dff92f477b323f8e831fb7dfebd5afa00e5b94648eab717538f4152d",
+    "README.md": "aee96c65b034d80faa9611fb4ea5a8d596879e7c07d0ced0652044b264f66df8",
+    "task-input.json": "caceeca62d7e82e96ab716062b65ae0ca519fa43aefed97950a282ff23f7c52f",
+    "trial-ledger.json": "68da22056462582a4c5d84b0f833a16179685a01c9ab7325ff1385a2a5abf26b",
+    "validation-report.json": "54ee4995d2a8cee0cae145d2d009977da9f5f8825b0ecb6c67d62f26cf42e1c9"
+  }
+}

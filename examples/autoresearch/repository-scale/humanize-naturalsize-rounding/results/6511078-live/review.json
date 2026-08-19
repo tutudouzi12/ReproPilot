@@ -1,0 +1,63 @@
+{
+  "version": "repropilot.repository-evaluation-review/v1",
+  "status": "contract_pass_with_review_boundary",
+  "automated_evidence": {
+    "public_search_runs": [1.0, 1.0, 1.0],
+    "hidden_validation_runs": [1.0, 1.0, 1.0],
+    "upstream_tests_per_search_run": "701 passed, 69 skipped",
+    "candidate_intact": true,
+    "protected_files_intact": true,
+    "model_requests": 1
+  },
+  "manual_checks": {
+    "historical_fix_commit": "4a7537012fe28aa70270000d1bdcfd08c820e188",
+    "differential_matrix_cases": 144,
+    "differential_matrix_differences": 0,
+    "comparison_method": "Load the retained candidate and the historical fix module with importlib.util.spec_from_file_location, then compare naturalsize outputs for the Cartesian product below.",
+    "candidate_file": "final-files/src/humanize/filesize.py",
+    "value_expressions": [
+      "999",
+      "1000",
+      "999949",
+      "999950",
+      "999999",
+      "1000000",
+      "-999999",
+      "1023",
+      "1024",
+      "1048524",
+      "1048525",
+      "1048575",
+      "1048576",
+      "-1048575",
+      "10**30",
+      "3*10**34"
+    ],
+    "modes": [
+      {"binary": false, "gnu": false},
+      {"binary": true, "gnu": false},
+      {"binary": false, "gnu": true}
+    ],
+    "formats": ["%.0f", "%.1f", "%.2f"],
+    "matrix_dimensions": [
+      "positive and negative values",
+      "decimal, binary, and GNU modes",
+      "%.0f, %.1f, and %.2f formats",
+      "ordinary, rollover, exact-unit, and maximum-suffix values"
+    ]
+  },
+  "manual_observations": [
+    {
+      "severity": "maintainability",
+      "finding": "The candidate implements the carry with several redundant bounds checks, an empty elif branch, and fallback branches that are unreachable because exp is already capped at len(suffix).",
+      "impact": "The behavior matched the historical maintainer fix in the added differential matrix, but the extra control flow makes the patch harder to review and maintain than the concise upstream change.",
+      "disposition": "Retain the automated contract pass as valid benchmark evidence. Do not present this exact patch as upstream-ready without simplifying it and rerunning the full contract."
+    },
+    {
+      "severity": "boundary",
+      "finding": "The additional differential matrix is a deterministic human-review check, not part of the frozen public or hidden acceptance contract.",
+      "impact": "It increases confidence in observed semantic equivalence for the sampled dimensions but does not prove equivalence for every numeric value or custom formatter.",
+      "disposition": "Report the 144 checked cases exactly and keep the broader upstream-readiness claim out of the result."
+    }
+  ]
+}
