@@ -72,6 +72,50 @@ def sanitize_workspace_paths(value: Any, workspace: Path) -> Any:
     return value
 
 
+def editable_sources(workspace: Path, relative_paths: list[str]) -> dict[str, str]:
+    root = workspace.resolve(strict=True)
+    sources: dict[str, str] = {}
+    for relative in relative_paths:
+        candidate = (root / relative).resolve(strict=True)
+        try:
+            candidate.relative_to(root)
+        except ValueError as exc:
+            raise ValueError(f"editable file escaped workspace: {relative}") from exc
+        if not candidate.is_file():
+            raise ValueError(f"editable path is not a file: {relative}")
+        sources[Path(relative).as_posix()] = candidate.read_text(encoding="utf-8")
+    return sources
+
+
+def candidate_patch(initial: dict[str, str], final: dict[str, str]) -> str:
+    if initial.keys() != final.keys():
+        raise ValueError("initial and final editable file sets differ")
+    chunks: list[str] = []
+    for relative in sorted(initial):
+        chunks.extend(
+            difflib.unified_diff(
+                initial[relative].splitlines(keepends=True),
+                final[relative].splitlines(keepends=True),
+                fromfile=f"a/{relative}",
+                tofile=f"b/{relative}",
+            )
+        )
+    return "".join(chunks)
+
+
+def write_editable_sources(output: Path, directory: str, sources: dict[str, str]) -> None:
+    root = (output / directory).resolve()
+    root.mkdir(parents=True, exist_ok=True)
+    for relative, source in sources.items():
+        destination = (root / relative).resolve()
+        try:
+            destination.relative_to(root)
+        except ValueError as exc:
+            raise ValueError(f"editable artifact escaped output directory: {relative}") from exc
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(source, encoding="utf-8", newline="\n")
+
+
 def load_env_file(path: Path | None) -> None:
     if path is None:
         return
@@ -245,7 +289,7 @@ def live_proposer(
         responses.append(record)
         try:
             completion = await client.complete_with_usage(
-                "You are a bounded AutoResearch candidate proposer. Return strict JSON only with status, diagnosis, hypothesis, reason and patches. The status value MUST be exactly 'candidate' when proposing patches or 'stop' when no safe patch should be attempted. Each patch must contain path and complete replacement content. Patch only listed editable files. Never modify evaluators, tests, metrics, commands, dependencies or budgets; never add network access, subprocesses, fake metrics or fake predictions. Preserve ordinary upstream behavior while fixing the stated boundary conditions.",
+                "You are a bounded AutoResearch candidate proposer. Return strict JSON only with status, diagnosis, hypothesis, reason and patches. The status value MUST be exactly 'candidate' when proposing patches or 'stop' when no safe patch should be attempted. Each patch must contain path and complete replacement content. Patch only listed editable files. Never modify evaluators, tests, metrics, commands, dependencies or budgets; never add network access, subprocesses, fake metrics or fake predictions. Preserve ordinary upstream behavior while fixing the stated task.",
                 sent_context,
             )
         except Exception as exc:
@@ -341,11 +385,11 @@ def classify_outcome(ledger: TrialLedger | None, report: ValidationReport | None
     return "hidden_validation_failed"
 
 
-def render_report(result: dict[str, Any], ledger: TrialLedger | None) -> str:
+def render_report(result: dict[str, Any], ledger: TrialLedger | None, task: dict[str, Any]) -> str:
     cost = result["cost"]
     amount = "not calculated" if cost.get("amount") is None else f"{cost['amount']} {cost['currency']}"
     lines = [
-        "# Rank-BM25 live repository evaluation",
+        f"# {task['title']} live repository evaluation",
         "",
         f"- Recorded at: `{result['recorded_at']}`",
         f"- Harness revision: `{result['harness']['revision']}`",
@@ -356,6 +400,7 @@ def render_report(result: dict[str, Any], ledger: TrialLedger | None) -> str:
         f"- Model: `{result['model']['provider']}/{result['model']['model']}`",
         f"- Requests/tokens: `{result['model']['request_count']}` / `{result['model']['total_tokens']}`",
         f"- Token-derived cost: `{amount}`",
+        f"- Editable files: `{', '.join(result['repository']['editable_files'])}`",
         "",
         "## Keep/Reject ledger",
         "",
@@ -436,15 +481,15 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
     ledger: TrialLedger | None = None
     report: ValidationReport | None = None
     run_error = ""
-    initial_source = ""
-    final_source = ""
+    initial_sources: dict[str, str] = {}
+    final_sources: dict[str, str] = {}
     frozen_spec: Any = None
     workspace_path: Path | None = None
     with tempfile.TemporaryDirectory(prefix=f"repropilot-{task['id']}-") as temporary:
         workspace = Path(temporary)
         workspace_path = workspace
         _, frozen_spec = materialize_workspace(checkout, task_dir, workspace)
-        initial_source = (workspace / "rank_bm25.py").read_text(encoding="utf-8")
+        initial_sources = editable_sources(workspace, frozen_spec.editable_files)
         evaluator = LocalRepositoryEvaluator(workspace, python, float(task.get("command_timeout_seconds", 60)))
         proposer = live_proposer(client, usage, args.max_live_requests, responses)
         try:
@@ -453,7 +498,7 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
             report = await validate_autoresearch(workspace, frozen_spec, ledger, evaluator)
         except Exception as exc:
             run_error = f"{type(exc).__name__}: {exc}"
-        final_source = (workspace / "rank_bm25.py").read_text(encoding="utf-8")
+        final_sources = editable_sources(workspace, frozen_spec.editable_files)
 
     outcome = classify_outcome(ledger, report, run_error)
     cost = cost_record(usage, len(responses), args)
@@ -469,6 +514,7 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
             "url": task["repository"]["url"],
             "revision": task["repository"]["revision"],
             "git_blob_sha256": task["repository"]["git_blob_sha256"],
+            "editable_files": frozen_spec.editable_files,
             "working_tree_matches_git_blobs": True,
         },
         "baseline_artifact_sha256": sha256_file(task_dir / "baseline.json"),
@@ -513,17 +559,9 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
     report_payload = sanitize_workspace_paths(report.model_dump(mode="json"), workspace_path) if report is not None else None
 
     output.mkdir(parents=True, exist_ok=False)
-    (output / "initial-rank_bm25.py").write_text(initial_source, encoding="utf-8", newline="\n")
-    (output / "final-rank_bm25.py").write_text(final_source, encoding="utf-8", newline="\n")
-    diff = "".join(
-        difflib.unified_diff(
-            initial_source.splitlines(keepends=True),
-            final_source.splitlines(keepends=True),
-            fromfile="a/rank_bm25.py",
-            tofile="b/rank_bm25.py",
-        )
-    )
-    (output / "candidate.patch").write_text(diff, encoding="utf-8", newline="\n")
+    write_editable_sources(output, "initial-files", initial_sources)
+    write_editable_sources(output, "final-files", final_sources)
+    (output / "candidate.patch").write_text(candidate_patch(initial_sources, final_sources), encoding="utf-8", newline="\n")
     write_json(output / "task-input.json", task)
     write_json(output / "frozen-spec.json", frozen_spec_payload)
     write_json(output / "model-responses.json", response_payload)
@@ -531,9 +569,11 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
         write_json(output / "trial-ledger.json", ledger_payload)
     if report_payload is not None:
         write_json(output / "validation-report.json", report_payload)
-    (output / "README.md").write_text(render_report(result, ledger), encoding="utf-8", newline="\n")
+    (output / "README.md").write_text(render_report(result, ledger, task), encoding="utf-8", newline="\n")
     result["artifact_sha256"] = {
-        path.name: sha256_file(path) for path in sorted(output.iterdir()) if path.is_file()
+        path.relative_to(output).as_posix(): sha256_file(path)
+        for path in sorted(output.rglob("*"))
+        if path.is_file()
     }
     write_json(output / "result.json", result)
     print(
