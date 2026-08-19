@@ -1,0 +1,58 @@
+{
+  "version": "repropilot.repository-evaluation-task/v1",
+  "id": "humanize-naturalsize-rounding",
+  "title": "Humanize naturalsize rounding rollover",
+  "repository": {
+    "url": "https://github.com/python-humanize/humanize.git",
+    "revision": "976484a655df046aa6849f440a4f0cd44fc4918c",
+    "git_blob_sha256": {
+      "src/humanize/filesize.py": "1895d6dad77e0e87089417d1a76a5d40abc0cb6bfc23be5d1ae46c865e50bd20",
+      "tests/test_filesize.py": "c321179cc329551367fb7979a1c1a064623262700150a6c8cd963fca61d3fbe5",
+      "pyproject.toml": "65e95e9627c0bff62e6469703fbe0d1041c3a788ffe911728e13a0b6a466a536",
+      "LICENCE": "8ba6c18112a431400ad3c743f70670079b302545d98884fc2f28a91c383a0380"
+    }
+  },
+  "provenance": {
+    "type": "historical_merged_pull_request",
+    "license": "MIT",
+    "pull_request_url": "https://github.com/python-humanize/humanize/pull/329",
+    "base_commit": "976484a655df046aa6849f440a4f0cd44fc4918c",
+    "fix_commit": "4a7537012fe28aa70270000d1bdcfd08c820e188",
+    "merged_commit": "823ad6096e1e5ba82ea876ce761fc2efebd76157"
+  },
+  "objective": "Fix naturalsize() so values whose formatted mantissa rounds to 1000 or 1024 carry into the next available decimal, binary, or GNU suffix without regressing ordinary exact-unit or maximum-suffix behavior.",
+  "runtime": {
+    "python": "3.11",
+    "dependencies": [
+      "editable pinned repository checkout",
+      "pytest==9.1.1",
+      "freezegun==1.5.5",
+      "pytest-benchmark==5.2.3",
+      "pytest-codspeed==5.0.3"
+    ],
+    "distributions": [
+      "humanize",
+      "pytest",
+      "freezegun",
+      "pytest-benchmark",
+      "pytest-codspeed"
+    ]
+  },
+  "commands": {
+    "upstream_tests": ["python", "-m", "pytest", "-q", "--benchmark-disable", "--color=no"],
+    "public_evaluator": ["python", "evaluator.py"],
+    "hidden_evaluator": ["python", "holdout_evaluator.py"]
+  },
+  "metric_key": "metrics.rounding_score",
+  "expected_baseline": {
+    "public_score": 0.6666666666666666,
+    "hidden_score": 0.16666666666666666
+  },
+  "command_timeout_seconds": 60,
+  "boundaries": [
+    "The task replays one historical Humanize pull request against its pre-fix base commit; it is not an official project benchmark.",
+    "The public and hidden cases are a ReproPilot split of upstream regression examples plus explicit non-regression cases.",
+    "The historical fix commit is retained as provenance for human review and is not included in candidate proposer context.",
+    "A contract pass proves the frozen cases and upstream suite passed; it does not prove semantic equivalence with the maintainer patch."
+  ]
+}

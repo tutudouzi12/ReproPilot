@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import subprocess
 import sys
 import time
@@ -80,10 +81,16 @@ def portable_command(command: list[str], python: Path, task_dir: Path) -> list[s
 
 def run_command(command: list[str], checkout: Path, timeout_seconds: float) -> dict[str, Any]:
     started = time.perf_counter()
+    environment = os.environ.copy()
+    source_root = checkout / "src"
+    if source_root.is_dir():
+        existing = environment.get("PYTHONPATH", "")
+        environment["PYTHONPATH"] = str(source_root) + (os.pathsep + existing if existing else "")
     try:
         completed = subprocess.run(
             command,
             cwd=checkout,
+            env=environment,
             capture_output=True,
             text=True,
             encoding="utf-8",

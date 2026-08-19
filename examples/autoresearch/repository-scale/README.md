@@ -6,11 +6,12 @@ The local `.gitattributes` disables checkout line-ending rewriting for frozen in
 
 These tasks exercise repository acquisition and real project code. They remain module-level repair experiments rather than claims about the full upstream product or a general software-engineering benchmark.
 
-## First task
+## Pilot tasks
 
-| Task | Frozen repository | Baseline | Scope |
-| --- | --- | ---: | --- |
-| [`rank-bm25-boundary-robustness`](rank-bm25-boundary-robustness/) | `dorianbrown/rank_bm25@47aa3ddf8dc1ebeb7ef4e65f2b4536af44594099` | public `5/9`, hidden `1/4` | One real module plus the upstream test suite |
+| Task | Provenance | Frozen repository | Baseline | Scope |
+| --- | --- | --- | ---: | --- |
+| [`rank-bm25-boundary-robustness`](rank-bm25-boundary-robustness/) | ReproPilot boundary contract | `dorianbrown/rank_bm25@47aa3ddf8dc1ebeb7ef4e65f2b4536af44594099` | public `5/9`, hidden `1/4` | One real module plus the upstream test suite |
+| [`humanize-naturalsize-rounding`](humanize-naturalsize-rounding/) | Historical merged PR [#329](https://github.com/python-humanize/humanize/pull/329) | `python-humanize/humanize@976484a655df046aa6849f440a4f0cd44fc4918c` | public `4/6`, hidden `1/6` | One historical defect plus 701 upstream tests |
 
 ## Baseline contract
 
@@ -25,3 +26,19 @@ After the baseline task is committed, `scripts/run_repository_evaluation.py` mat
 Use `--preflight-only` first to validate the frozen checkout and evaluator without making a provider request. Live evaluator subprocesses receive a stripped environment; they are local processes rather than a network-isolated sandbox, and the result states that boundary explicitly.
 
 Retained live evidence is indexed under each task's `results/` directory. Follow-up model requests receive deduplicated public evaluator stdout and stderr after partial improvements or rejections; hidden evaluator commands and content remain excluded from proposer context.
+
+## Batch preflight
+
+[`benchmark.json`](benchmark.json) freezes task membership, provenance, aggregate metric names, and the SHA-256 values of each retained contract artifact. Prepare every pinned checkout and fixed Python environment as described by its task README, then validate all tasks without making a model request:
+
+```powershell
+py -3.11 scripts\run_repository_benchmark_preflight.py `
+  --benchmark examples\autoresearch\repository-scale\benchmark.json `
+  --checkout rank-bm25-boundary-robustness=<rank-checkout> `
+  --python rank-bm25-boundary-robustness=<rank-python> `
+  --checkout humanize-naturalsize-rounding=<humanize-checkout> `
+  --python humanize-naturalsize-rounding=<humanize-python> `
+  --output <preflight-report.json>
+```
+
+The runner checks benchmark-to-task identity and contract hashes before delegating to the repository preflight. It continues across task failures, emits one aggregate result, and exits non-zero if any selected task fails. Retained output replaces local checkout and interpreter paths with task-scoped placeholders.

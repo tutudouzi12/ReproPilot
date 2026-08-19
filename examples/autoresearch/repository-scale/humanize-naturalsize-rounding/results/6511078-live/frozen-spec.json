@@ -1,0 +1,60 @@
+{
+  "version": "autoresearch.spec/v1",
+  "name": "humanize-naturalsize-rounding",
+  "objective": "Fix naturalsize() so values whose formatted mantissa rounds to 1000 or 1024 carry into the next available decimal, binary, or GNU suffix without regressing ordinary exact-unit or maximum-suffix behavior.",
+  "repository_revision": "976484a655df046aa6849f440a4f0cd44fc4918c",
+  "editable_files": [
+    "src/humanize/filesize.py"
+  ],
+  "protected_files": [
+    ".repropilot/uploads/02-evaluator.py",
+    ".repropilot/uploads/03-holdout_evaluator.py"
+  ],
+  "eval_command": [
+    "python",
+    ".repropilot/uploads/02-evaluator.py"
+  ],
+  "holdout_command": [
+    "python",
+    ".repropilot/uploads/03-holdout_evaluator.py"
+  ],
+  "guard_commands": [
+    [
+      "python",
+      "-m",
+      "py_compile",
+      "src/humanize/filesize.py"
+    ],
+    [
+      "python",
+      "-m",
+      "pytest",
+      "-q",
+      "--benchmark-disable",
+      "--color=no"
+    ]
+  ],
+  "metric_key": "metrics.rounding_score",
+  "direction": "maximize",
+  "min_delta": 0.1,
+  "holdout_min_delta": 0.8,
+  "target_score": 1.0,
+  "max_trials": 8,
+  "max_wall_seconds": 420,
+  "search_runs": 3,
+  "search_aggregation": "worst",
+  "validation_runs": 3,
+  "dependencies": [
+    "pytest==9.1.1",
+    "freezegun==1.5.5",
+    "pytest-benchmark==5.2.3",
+    "pytest-codspeed==5.0.3"
+  ],
+  "frozen_files": {
+    ".repropilot/uploads/02-evaluator.py": "f857bea3a2dd141987d07f36b266498d1bdbde87949987dae9def213b1625b94",
+    ".repropilot/uploads/03-holdout_evaluator.py": "94ed1bd1db84fcae4db8cd5cd8afbe2d8ef184fb52637106e7691c1a8d1954ac"
+  },
+  "frozen_workspace_sha256": "5a96943c209c6efa205491fdd28de3e6b32f993e575a26744b27c32f5b983b0d",
+  "source_path": ".repropilot/uploads/01-autoresearch.json",
+  "spec_sha256": "b84c6c77b06dd20e0d132534995d703b11da6c09e6ac0feecab7896137c97199"
+}

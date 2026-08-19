@@ -1,0 +1,58 @@
+--- a/src/humanize/filesize.py
++++ b/src/humanize/filesize.py
+@@ -96,7 +96,54 @@
+     if abs_bytes < base:
+         return f"{int(bytes_)}B" if gnu else _("%d Bytes") % int(bytes_)
+ 
++    # Calculate initial exponent
+     exp = int(min(log(abs_bytes, base), len(suffix)))
++    
++    # Check if we're at the max possible exponent to avoid index errors
++    if exp >= len(suffix):
++        exp = len(suffix)
++    
++    # Calculate the value at this exponent
++    unit_value = bytes_ / (base ** exp)
++    
++    # Format the value according to the format string
++    formatted_value_str = format % unit_value
++    formatted_value = float(formatted_value_str)
++    
++    # Check if the formatted value rounds up to the next threshold
++    # For decimal: if it rounds to 1000.0, we should go to the next unit
++    # For binary/GNU: if it rounds to 1024.0, we should go to the next unit
++    threshold = base
++    
++    # If the formatted value is >= threshold, we need to increment the exponent
++    # But make sure we don't exceed the available suffixes
++    if abs(formatted_value) >= threshold and exp < len(suffix):
++        exp += 1
++        if exp <= len(suffix):
++            # Recalculate the value with the new exponent
++            unit_value = bytes_ / (base ** exp)
++            formatted_value_str = format % unit_value
++    elif exp > 0 and exp <= len(suffix):
++        # Use the original calculation but ensure we don't go below 0
++        pass
++    
++    # Adjust exp for suffix indexing (original logic was exp - 1)
++    if exp == 0:
++        return f"{int(bytes_)}B" if gnu else _("%d Bytes") % int(bytes_)
++    
+     space = "" if gnu else " "
+-    ret: str = format % (bytes_ / (base**exp)) + space + _(suffix[exp - 1])
++    
++    # Make sure exp-1 doesn't go out of bounds
++    if exp - 1 < len(suffix):
++        ret: str = formatted_value_str + space + _(suffix[exp - 1])
++    else:
++        # If we've exceeded available suffixes, just use the highest one
++        highest_exp = min(len(suffix), exp)
++        if highest_exp > 0:
++            final_unit_value = bytes_ / (base ** highest_exp)
++            formatted_final = format % final_unit_value
++            ret: str = formatted_final + space + _(suffix[highest_exp - 1])
++        else:
++            ret: str = formatted_value_str + space + suffix[-1]  # fallback
++    
+     return ret
