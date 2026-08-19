@@ -1,0 +1,59 @@
+{
+  "version": "repropilot.repository-evaluation-task/v1",
+  "id": "more-itertools-strict-counted-sample-adversarial",
+  "title": "more-itertools strict counted sample adversarial follow-up",
+  "repository": {
+    "url": "https://github.com/more-itertools/more-itertools.git",
+    "revision": "18225d856665bfc3bfdfcdbfa585290f92645daf",
+    "git_blob_sha256": {
+      "more_itertools/more.py": "daf4ffc89d1ebafdb47a1ed1376ce017c281547130f456e6821a5e74eabad1df",
+      "tests/test_more.py": "a7bbbc3be1dd77ce4974d49b29dd6576463c986aae83ebbf4a2e655e6e790a1c",
+      "pyproject.toml": "74197e577189b7d63307a7a4fc7f71d67f3a0ef85c410561539a2d01e911baea",
+      "LICENSE": "09f1c8c9e941af3e584d59641ea9b87d83c0cb0fd007eb5ef391a7e2643c1a46"
+    }
+  },
+  "provenance": {
+    "type": "candidate_informed_adversarial_followup",
+    "license": "MIT",
+    "pull_request_url": "https://github.com/more-itertools/more-itertools/pull/944",
+    "base_commit": "18225d856665bfc3bfdfcdbfa585290f92645daf",
+    "merged_commit": "7b9889c0b7de2189e7dd77688f7a811ce43337cc",
+    "source_run": "../more-itertools-strict-counted-sample/results/c261d99-live"
+  },
+  "objective": "Fix counted sample() so strict=True raises ValueError whenever the requested sample is larger than the population represented by counts, including exhausted or zero-count iterators, without regressing exact-size, non-strict, weighted, or argument-validation behavior.",
+  "runtime": {
+    "python": "3.11",
+    "dependencies": [
+      "standard-library unittest only; no third-party runtime dependencies"
+    ],
+    "distributions": []
+  },
+  "commands": {
+    "upstream_tests": [
+      "python",
+      "-m",
+      "unittest",
+      "-q"
+    ],
+    "public_evaluator": [
+      "python",
+      "evaluator.py"
+    ],
+    "hidden_evaluator": [
+      "python",
+      "holdout_evaluator.py"
+    ]
+  },
+  "metric_key": "metrics.strict_counted_score",
+  "expected_baseline": {
+    "public_score": 0.6666666666666666,
+    "hidden_score": 0.2
+  },
+  "command_timeout_seconds": 90,
+  "boundaries": [
+    "This is a candidate-informed adversarial follow-up to the retained c261d99-live run, not an independent fourth repository.",
+    "The task reuses the pinned more-itertools base and public evaluator while adding hidden non-regression cases; it must remain distinct in aggregate reporting.",
+    "The source candidate and merged upstream patch are retained for human review only and are excluded from candidate proposer context.",
+    "A contract pass proves only the frozen cases and upstream suite, not production readiness or semantic equivalence with the maintainer patch."
+  ]
+}

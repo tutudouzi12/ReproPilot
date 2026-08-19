@@ -1,0 +1,95 @@
+{
+  "version": "repropilot.repository-evaluation-result/v1",
+  "recorded_at": "2026-08-19T16:10:13.974224Z",
+  "task_id": "more-itertools-strict-counted-sample-adversarial",
+  "outcome": "hidden_validation_failed",
+  "harness": {
+    "revision": "d7ad05b05f3b8298cbdac900d02466381776924d",
+    "source_tree_dirty": false
+  },
+  "sanitization": {
+    "workspace_paths_replaced_with": "{workspace}"
+  },
+  "repository": {
+    "url": "https://github.com/more-itertools/more-itertools.git",
+    "revision": "18225d856665bfc3bfdfcdbfa585290f92645daf",
+    "git_blob_sha256": {
+      "more_itertools/more.py": "daf4ffc89d1ebafdb47a1ed1376ce017c281547130f456e6821a5e74eabad1df",
+      "tests/test_more.py": "a7bbbc3be1dd77ce4974d49b29dd6576463c986aae83ebbf4a2e655e6e790a1c",
+      "pyproject.toml": "74197e577189b7d63307a7a4fc7f71d67f3a0ef85c410561539a2d01e911baea",
+      "LICENSE": "09f1c8c9e941af3e584d59641ea9b87d83c0cb0fd007eb5ef391a7e2643c1a46"
+    },
+    "editable_files": [
+      "more_itertools/more.py"
+    ],
+    "working_tree_matches_git_blobs": true
+  },
+  "baseline_artifact_sha256": "31a47bf99f685ac9171de2eba2e23000ca9caf309320ace5a94b086ee0f01252",
+  "search": {
+    "baseline_score": 0.6666666666666666,
+    "best_score": 1.0,
+    "completed_trials": 1,
+    "accepted_trials": 1,
+    "stop_reason": "target_score_reached",
+    "request_cap": 3
+  },
+  "model": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "request_count": 1,
+    "reported_request_count": 1,
+    "prompt_tokens": 9585,
+    "completion_tokens": 1261,
+    "total_tokens": 10846,
+    "attempted_request_count": 1,
+    "mode": "live_model"
+  },
+  "cost": {
+    "status": "calculated_from_supplied_rates",
+    "currency": "CNY",
+    "amount": 0.058516,
+    "input_cost_per_million": 4.0,
+    "output_cost_per_million": 16.0,
+    "basis": "provider-reported tokens multiplied by caller-supplied public list rates; not a billing receipt",
+    "pricing_source": "https://help.aliyun.com/zh/model-studio/model-pricing",
+    "pricing_tier": "Mainland China, 0<Token<=32K",
+    "pricing_verified_at": "2026-08-19"
+  },
+  "validation": {
+    "status": "failed",
+    "mode": "hidden_holdout",
+    "baseline_score": 0.2,
+    "observed_scores": [
+      0.9,
+      0.9,
+      0.9
+    ],
+    "observed_score": 0.9,
+    "candidate_intact": true,
+    "protected_files_intact": true,
+    "reason": "fresh validation score did not satisfy the frozen acceptance rule"
+  },
+  "failure": {
+    "error": ""
+  },
+  "boundaries": [
+    "This is a candidate-informed adversarial follow-up to the retained c261d99-live run, not an independent fourth repository.",
+    "The task reuses the pinned more-itertools base and public evaluator while adding hidden non-regression cases; it must remain distinct in aggregate reporting.",
+    "The source candidate and merged upstream patch are retained for human review only and are excluded from candidate proposer context.",
+    "A contract pass proves only the frozen cases and upstream suite, not production readiness or semantic equivalence with the maintainer patch.",
+    "The candidate was executed by local subprocess with a stripped environment, not a network-isolated container.",
+    "The hidden evaluator content was excluded from proposer context but remains inspectable in this public evidence package.",
+    "Any monetary amount is token-derived from the cited public rate and is not a billing-console receipt."
+  ],
+  "artifact_sha256": {
+    "candidate.patch": "91ee404cb15cb29409805f491ba6b79fe5457584ea4016c652838003956ee393",
+    "final-files/more_itertools/more.py": "bae5092d1b17d46527c13b3abea61e25a88faa47e2a9585f7097d30da30da14c",
+    "frozen-spec.json": "91bc2e31ba5e38a205254bd60dd061dbd5ed6a84ba4ab89d30334704e029c996",
+    "initial-files/more_itertools/more.py": "daf4ffc89d1ebafdb47a1ed1376ce017c281547130f456e6821a5e74eabad1df",
+    "model-responses.json": "a6426fc848ca19fc21b3045f1aad1b6ccd6f330a840a8d2759a511e69e82d609",
+    "README.md": "5c8e0075354cc7efe10f6270f7e039e084db5948cfa1b86582364b25f15ce962",
+    "task-input.json": "f041e68e0d52f525694bd68fac537fb4f73d850785920eff1745b48f866bd9b7",
+    "trial-ledger.json": "351fa859bb05a6226037b07acf3cd9721548761fc2baa95f56f2ca00126a2a7c",
+    "validation-report.json": "1e167aa5cfa5f1a92d914debbd40bc4af97ca07b486d2452a1c1a49b677acd01"
+  }
+}
