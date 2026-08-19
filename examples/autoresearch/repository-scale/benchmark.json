@@ -67,10 +67,27 @@
         "holdout_evaluator.py": "c24e0134c3bf355e35f5b11290848ccc68ad4c722c9c31d0125552638b90455d",
         "baseline.json": "b8e5790eb9c144d08637441b233f677fa32aedd4b036b4c7c10b98e2d13213ef"
       }
+    },
+    {
+      "id": "more-itertools-strict-counted-sample-adversarial",
+      "path": "more-itertools-strict-counted-sample-adversarial",
+      "repository_url": "https://github.com/more-itertools/more-itertools.git",
+      "revision": "18225d856665bfc3bfdfcdbfa585290f92645daf",
+      "provenance_type": "candidate_informed_adversarial_followup",
+      "difficulty": "single_module_lazy_iterator_regression",
+      "aggregate_eligibility": "followup_only_not_independent_repository_sample",
+      "contract_sha256": {
+        "task.json": "5dd5467da6ac22600efc3cc826365ede86bfb95e18c649546a500626c7db1aa3",
+        "autoresearch.json": "796eee254062174ca78f9d251097a86a57dd5f68e765170b94ea04664c1c4de7",
+        "evaluator.py": "1721e9293d98898cd0a1998f67ba0e9814891d0220eac8fd9dd111143eca4868",
+        "holdout_evaluator.py": "c1327c26ad82653b526a4f7e978db782dc548d44dfc7324bc36792efdac3ee90",
+        "baseline.json": "31a47bf99f685ac9171de2eba2e23000ca9caf309320ace5a94b086ee0f01252"
+      }
     }
   ],
   "boundaries": [
-    "This pilot contains three repositories and is not a statistically representative software-engineering benchmark.",
+    "This pilot contains four tasks across three unique repositories and is not a statistically representative software-engineering benchmark.",
+    "The candidate-informed adversarial follow-up reuses the more-itertools base and must not be counted as an independent repository sample.",
     "Historical bug provenance and ReproPilot-authored boundary contracts are labeled separately and must not be aggregated without retaining that distinction.",
     "A contract pass does not establish equivalence with an upstream maintainer patch or production readiness.",
     "Model cost is token-derived from caller-supplied public rates and is not a billing receipt."

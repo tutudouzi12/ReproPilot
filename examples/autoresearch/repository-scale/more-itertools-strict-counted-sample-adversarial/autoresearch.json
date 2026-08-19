@@ -1,0 +1,36 @@
+{
+  "version": "autoresearch.spec/v1",
+  "name": "more-itertools-strict-counted-sample-adversarial",
+  "repository_revision": "18225d856665bfc3bfdfcdbfa585290f92645daf",
+  "objective": "Fix counted sample() so strict=True raises ValueError whenever the requested sample is larger than the population represented by counts, including exhausted or zero-count iterators, without regressing exact-size, non-strict, weighted, or argument-validation behavior.",
+  "editable_files": [
+    "more_itertools/more.py"
+  ],
+  "protected_files": [
+    ".repropilot/uploads/02-evaluator.py",
+    ".repropilot/uploads/03-holdout_evaluator.py"
+  ],
+  "eval_command": [
+    "python",
+    ".repropilot/uploads/02-evaluator.py"
+  ],
+  "holdout_command": [
+    "python",
+    ".repropilot/uploads/03-holdout_evaluator.py"
+  ],
+  "guard_commands": [
+    ["python", "-m", "py_compile", "more_itertools/more.py"],
+    ["python", "-m", "unittest", "-q"]
+  ],
+  "metric_key": "metrics.strict_counted_score",
+  "direction": "maximize",
+  "min_delta": 0.1,
+  "holdout_min_delta": 0.8,
+  "target_score": 1.0,
+  "max_trials": 8,
+  "max_wall_seconds": 600,
+  "search_runs": 3,
+  "search_aggregation": "worst",
+  "validation_runs": 3,
+  "dependencies": []
+}
