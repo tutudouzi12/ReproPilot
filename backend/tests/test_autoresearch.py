@@ -267,6 +267,11 @@ async def test_run_keeps_improvement_rolls_back_regression_and_hides_holdout(tmp
     report = await validate_autoresearch(root, spec, ledger, evaluator_for(root))
     assert report.status == "passed"
     assert report.validation_mode == "hidden_holdout"
+    assert report.expected_score == 0.75
+    assert report.baseline_score == 0.75
+    assert report.acceptance_rule == "minimum_improvement"
+    assert report.acceptance_delta == 0.1
+    assert report.acceptance_target_score == 0.85
     assert report.observed_scores == [1.75, 1.75, 1.75]
 
 

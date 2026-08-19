@@ -209,6 +209,12 @@ class ValidationReport(BaseModel):
     status: Literal["passed", "failed"]
     validation_mode: Literal["hidden_holdout", "public_replay"]
     expected_score: float
+    baseline_score: float | None = None
+    acceptance_rule: Literal["minimum_improvement", "public_replay_tolerance"] = (
+        "public_replay_tolerance"
+    )
+    acceptance_delta: float = 0.0
+    acceptance_target_score: float | None = None
     observed_scores: list[float]
     observed_score: float | None
     mean_score: float | None
@@ -812,9 +818,15 @@ async def validate_autoresearch(workspace: str | Path, spec: ResearchSpec, ledge
     observed = aggregate_scores(scores, spec.search_aggregation, spec.direction) if scores else None
     if mode == "hidden_holdout":
         threshold = spec.holdout_min_delta if spec.holdout_min_delta is not None else spec.min_delta
+        acceptance_rule: Literal["minimum_improvement", "public_replay_tolerance"] = "minimum_improvement"
+        acceptance_delta = threshold
+        acceptance_target = expected + threshold if spec.direction == "maximize" else expected - threshold
         score_matches = observed is not None and len(scores) == spec.validation_runs and improved(observed, expected, spec.direction, threshold)
     else:
         tolerance = max(1e-9, spec.min_delta)
+        acceptance_rule = "public_replay_tolerance"
+        acceptance_delta = tolerance
+        acceptance_target = expected
         score_matches = observed is not None and len(scores) == spec.validation_runs and abs(observed - expected) <= tolerance
     passed = candidate_intact and protected_intact and score_matches
     if not candidate_intact:
@@ -828,6 +840,10 @@ async def validate_autoresearch(workspace: str | Path, spec: ResearchSpec, ledge
         status="passed" if passed else "failed",
         validation_mode=mode,
         expected_score=expected,
+        baseline_score=expected,
+        acceptance_rule=acceptance_rule,
+        acceptance_delta=acceptance_delta,
+        acceptance_target_score=acceptance_target,
         observed_scores=scores,
         observed_score=observed,
         mean_score=statistics.fmean(scores) if scores else None,
