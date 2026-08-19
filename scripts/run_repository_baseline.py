@@ -37,6 +37,13 @@ def git(checkout: Path, *arguments: str) -> str:
     ).strip()
 
 
+def git_bytes(checkout: Path, *arguments: str) -> bytes:
+    return subprocess.check_output(
+        ["git", "-C", str(checkout), *arguments],
+        timeout=30,
+    )
+
+
 def normalize_repository_url(value: str) -> str:
     normalized = value.strip().replace("git@github.com:", "https://github.com/")
     if normalized.endswith(".git"):
@@ -164,13 +171,20 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     if dirty:
         raise ValueError("repository baseline requires a clean target checkout")
 
-    source_hashes: dict[str, str] = {}
-    for relative, expected_hash in repository["source_sha256"].items():
-        path = checkout / relative
-        actual_hash = sha256_file(path)
+    git_blob_hashes: dict[str, str] = {}
+    for relative, expected_hash in repository["git_blob_sha256"].items():
+        relative_path = Path(relative)
+        if relative_path.is_absolute() or ".." in relative_path.parts:
+            raise ValueError(f"invalid frozen repository path: {relative}")
+        blob = git_bytes(checkout, "show", f"{expected_revision}:{relative}")
+        actual_hash = hashlib.sha256(blob).hexdigest()
         if actual_hash != str(expected_hash).lower():
-            raise ValueError(f"source hash mismatch for {relative}")
-        source_hashes[relative] = actual_hash
+            raise ValueError(f"Git blob hash mismatch for {relative}")
+        expected_oid = git(checkout, "rev-parse", f"{expected_revision}:{relative}")
+        working_oid = git(checkout, "hash-object", f"--path={relative}", relative)
+        if working_oid != expected_oid:
+            raise ValueError(f"working tree content does not match the frozen Git blob for {relative}")
+        git_blob_hashes[relative] = actual_hash
 
     timeout_seconds = float(task.get("command_timeout_seconds", 30))
     commands = task["commands"]
@@ -218,7 +232,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "requested_revision": expected_revision,
             "actual_revision": actual_revision,
             "source_tree_dirty": False,
-            "source_sha256": source_hashes,
+            "git_blob_sha256": git_blob_hashes,
+            "working_tree_matches_git_blobs": True,
         },
         "environment": python_environment(python, list(task["runtime"]["distributions"])),
         "commands": {

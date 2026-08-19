@@ -99,6 +99,13 @@ def git(path: Path, *arguments: str) -> str:
     ).strip()
 
 
+def git_bytes(path: Path, *arguments: str) -> bytes:
+    return subprocess.check_output(
+        ["git", "-C", str(path), *arguments],
+        timeout=30,
+    )
+
+
 def normalize_repository_url(value: str) -> str:
     normalized = value.strip().replace("git@github.com:", "https://github.com/")
     if normalized.endswith(".git"):
@@ -121,10 +128,17 @@ def validate_target(task_dir: Path, checkout: Path) -> tuple[dict[str, Any], dic
         raise ValueError("checkout origin does not match the frozen repository URL")
     if git(checkout, "status", "--porcelain"):
         raise ValueError("repository evaluation requires a clean target checkout")
-    for relative, expected_hash in repository["source_sha256"].items():
-        actual_hash = sha256_file(checkout / relative)
+    for relative, expected_hash in repository["git_blob_sha256"].items():
+        relative_path = Path(relative)
+        if relative_path.is_absolute() or ".." in relative_path.parts:
+            raise ValueError(f"invalid frozen repository path: {relative}")
+        actual_hash = sha256_bytes(git_bytes(checkout, "show", f"{expected_revision}:{relative}"))
         if actual_hash != str(expected_hash).lower():
-            raise ValueError(f"source hash mismatch for {relative}")
+            raise ValueError(f"Git blob hash mismatch for {relative}")
+        expected_oid = git(checkout, "rev-parse", f"{expected_revision}:{relative}")
+        working_oid = git(checkout, "hash-object", f"--path={relative}", relative)
+        if working_oid != expected_oid:
+            raise ValueError(f"working tree content does not match the frozen Git blob for {relative}")
     retained = baseline.get("baseline", {})
     expected = task["expected_baseline"]
     if float(retained.get("public_score")) != float(expected["public_score"]):
@@ -452,7 +466,8 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
         "repository": {
             "url": task["repository"]["url"],
             "revision": task["repository"]["revision"],
-            "source_sha256": task["repository"]["source_sha256"],
+            "git_blob_sha256": task["repository"]["git_blob_sha256"],
+            "working_tree_matches_git_blobs": True,
         },
         "baseline_artifact_sha256": sha256_file(task_dir / "baseline.json"),
         "search": {
