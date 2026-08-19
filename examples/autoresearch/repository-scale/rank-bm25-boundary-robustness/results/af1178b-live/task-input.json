@@ -1,0 +1,55 @@
+{
+  "version": "repropilot.repository-evaluation-task/v1",
+  "id": "rank-bm25-boundary-robustness",
+  "title": "Rank-BM25 boundary robustness",
+  "repository": {
+    "url": "https://github.com/dorianbrown/rank_bm25.git",
+    "revision": "47aa3ddf8dc1ebeb7ef4e65f2b4536af44594099",
+    "source_sha256": {
+      "rank_bm25.py": "a593c6f67ba46e1812a6286b02cf692cc0119ce742cde0720e5ee666fd7ee5e6",
+      "requirements.txt": "457e45615e94382f80e281e64bb96095df4a11779dfa61cf6071c6d5d8ab89b2",
+      "tests/test_loading.py": "f2613dba52aaf1bb96a04fec91dd10a86c75af7074fb65f769e1ab8fd35f5531"
+    }
+  },
+  "objective": "Make all three BM25 variants handle empty corpora, all-empty documents, non-positive top_n values, and negative batch document indices without regressing ordinary ranking behavior.",
+  "runtime": {
+    "python": "3.11",
+    "dependencies": [
+      "numpy==2.1.3",
+      "pytest==8.3.5"
+    ],
+    "distributions": [
+      "numpy",
+      "pytest"
+    ]
+  },
+  "commands": {
+    "upstream_tests": [
+      "python",
+      "-m",
+      "pytest",
+      "-q",
+      "tests"
+    ],
+    "public_evaluator": [
+      "python",
+      "evaluator.py"
+    ],
+    "hidden_evaluator": [
+      "python",
+      "holdout_evaluator.py"
+    ]
+  },
+  "metric_key": "metrics.robustness_score",
+  "expected_baseline": {
+    "public_score": 0.5555555555555556,
+    "hidden_score": 0.25
+  },
+  "command_timeout_seconds": 60,
+  "boundaries": [
+    "The task evaluates boundary behavior in rank_bm25.py, not the full quality of the rank-bm25 project.",
+    "The public and hidden cases are ReproPilot contracts, not upstream-maintainer tests or an official benchmark.",
+    "A passing original test suite establishes compatibility with two upstream loading tests only.",
+    "This baseline contains no model request, candidate patch, Keep decision, or hidden-validation pass claim."
+  ]
+}

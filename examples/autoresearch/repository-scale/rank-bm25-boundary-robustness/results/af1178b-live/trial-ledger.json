@@ -1,0 +1,570 @@
+{
+  "version": "autoresearch.ledger/v1",
+  "spec_sha256": "80961fea134cf1682514abfe9b67d36f1c1b40710f790e67e4a6e479dcef66ef",
+  "status": "completed",
+  "metric_key": "metrics.robustness_score",
+  "direction": "maximize",
+  "baseline_score": 0.5555555555555556,
+  "best_score": 0.8888888888888888,
+  "holdout_baseline_score": 0.25,
+  "max_trials": 8,
+  "completed_trials": 3,
+  "accepted_trials": 1,
+  "stop_reason": "candidate_stopped",
+  "best_candidate_files": {
+    "rank_bm25.py": "a842f9de0d7541bc06d72019b6438c75913eb3ec90ea9bf040479a5d33ab2a3f"
+  },
+  "trials": [
+    {
+      "number": 0,
+      "status": "baseline",
+      "decision": "keep",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "frozen baseline",
+      "patches": [],
+      "metric": 0.5555555555555556,
+      "metric_samples": [
+        0.5555555555555556,
+        0.5555555555555556,
+        0.5555555555555556
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "rank_bm25.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 141
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests"
+          ],
+          "exit_code": 0,
+          "stdout": "..                                                                       [100%]\r\n2 passed in 0.77s\r\n",
+          "stderr": "",
+          "duration_ms": 1312
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"ordinary_ranking\", \"passed\": true}, {\"error\": \"\", \"name\": \"ordinary_batch_matches_scores\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_query_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"mixed_empty_documents_are_finite\", \"passed\": true}, {\"error\": \"ZeroDivisionError: division by zero\", \"name\": \"empty_corpus_is_supported\", \"passed\": false}, {\"error\": \"ZeroDivisionError: division by zero\", \"name\": \"all_empty_corpus_is_zero\", \"passed\": false}, {\"error\": \"\", \"name\": \"zero_top_n_is_empty\", \"passed\": true}, {\"error\": \"assertion failed\", \"name\": \"negative_top_n_is_empty\", \"passed\": false}, {\"error\": \"assertion failed\", \"name\": \"negative_batch_index_is_rejected\", \"passed\": false}], \"metrics\": {\"robustness_score\": 0.5555555555555556}, \"passed_cases\": 5, \"status\": \"ok\", \"total_cases\": 9}\r\n",
+          "stderr": "",
+          "duration_ms": 327
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "rank_bm25.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 139
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests"
+          ],
+          "exit_code": 0,
+          "stdout": "..                                                                       [100%]\r\n2 passed in 0.73s\r\n",
+          "stderr": "",
+          "duration_ms": 1282
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"ordinary_ranking\", \"passed\": true}, {\"error\": \"\", \"name\": \"ordinary_batch_matches_scores\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_query_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"mixed_empty_documents_are_finite\", \"passed\": true}, {\"error\": \"ZeroDivisionError: division by zero\", \"name\": \"empty_corpus_is_supported\", \"passed\": false}, {\"error\": \"ZeroDivisionError: division by zero\", \"name\": \"all_empty_corpus_is_zero\", \"passed\": false}, {\"error\": \"\", \"name\": \"zero_top_n_is_empty\", \"passed\": true}, {\"error\": \"assertion failed\", \"name\": \"negative_top_n_is_empty\", \"passed\": false}, {\"error\": \"assertion failed\", \"name\": \"negative_batch_index_is_rejected\", \"passed\": false}], \"metrics\": {\"robustness_score\": 0.5555555555555556}, \"passed_cases\": 5, \"status\": \"ok\", \"total_cases\": 9}\r\n",
+          "stderr": "",
+          "duration_ms": 312
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "rank_bm25.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 125
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests"
+          ],
+          "exit_code": 0,
+          "stdout": "..                                                                       [100%]\r\n2 passed in 0.73s\r\n",
+          "stderr": "",
+          "duration_ms": 1280
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"ordinary_ranking\", \"passed\": true}, {\"error\": \"\", \"name\": \"ordinary_batch_matches_scores\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_query_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"mixed_empty_documents_are_finite\", \"passed\": true}, {\"error\": \"ZeroDivisionError: division by zero\", \"name\": \"empty_corpus_is_supported\", \"passed\": false}, {\"error\": \"ZeroDivisionError: division by zero\", \"name\": \"all_empty_corpus_is_zero\", \"passed\": false}, {\"error\": \"\", \"name\": \"zero_top_n_is_empty\", \"passed\": true}, {\"error\": \"assertion failed\", \"name\": \"negative_top_n_is_empty\", \"passed\": false}, {\"error\": \"assertion failed\", \"name\": \"negative_batch_index_is_rejected\", \"passed\": false}], \"metrics\": {\"robustness_score\": 0.5555555555555556}, \"passed_cases\": 5, \"status\": \"ok\", \"total_cases\": 9}\r\n",
+          "stderr": "",
+          "duration_ms": 360
+        }
+      ],
+      "started_at": "2026-08-19T02:23:47.567176Z",
+      "finished_at": "2026-08-19T02:23:47.567176Z"
+    },
+    {
+      "number": 1,
+      "status": "kept",
+      "decision": "keep",
+      "diagnosis": "The BM25 implementations have several boundary condition issues: 1) Empty corpora cause division by zero in avgdl calculation, 2) All-empty documents cause corpus_size to be 0 leading to division by zero in idf calculations, 3) Non-positive top_n values in get_top_n method cause invalid array slicing, 4) Negative batch document indices in get_batch_scores bypass bounds checking.",
+      "hypothesis": "Adding proper boundary checks and handling for empty inputs will fix these issues while preserving normal behavior.",
+      "reason": "metrics.robustness_score improved from 0.55555556 to 0.88888889",
+      "patches": [
+        {
+          "path": "rank_bm25.py",
+          "before_sha256": "a593c6f67ba46e1812a6286b02cf692cc0119ce742cde0720e5ee666fd7ee5e6",
+          "after_sha256": "a842f9de0d7541bc06d72019b6438c75913eb3ec90ea9bf040479a5d33ab2a3f"
+        }
+      ],
+      "metric": 0.8888888888888888,
+      "metric_samples": [
+        0.8888888888888888,
+        0.8888888888888888,
+        0.8888888888888888
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "rank_bm25.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 140
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests"
+          ],
+          "exit_code": 0,
+          "stdout": "..                                                                       [100%]\r\n2 passed in 0.72s\r\n",
+          "stderr": "",
+          "duration_ms": 1297
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"ordinary_ranking\", \"passed\": true}, {\"error\": \"\", \"name\": \"ordinary_batch_matches_scores\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_query_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"mixed_empty_documents_are_finite\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_corpus_is_supported\", \"passed\": true}, {\"error\": \"assertion failed\", \"name\": \"all_empty_corpus_is_zero\", \"passed\": false}, {\"error\": \"\", \"name\": \"zero_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_batch_index_is_rejected\", \"passed\": true}], \"metrics\": {\"robustness_score\": 0.8888888888888888}, \"passed_cases\": 8, \"status\": \"ok\", \"total_cases\": 9}\r\n",
+          "stderr": "{workspace}\\rank_bm25.py:133: RuntimeWarning: invalid value encountered in divide\r\n  (q_freq + self.k1 * (1 - self.b + self.b * doc_len / self.avgdl)))\r\n",
+          "duration_ms": 342
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "rank_bm25.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 125
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests"
+          ],
+          "exit_code": 0,
+          "stdout": "..                                                                       [100%]\r\n2 passed in 0.79s\r\n",
+          "stderr": "",
+          "duration_ms": 1375
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"ordinary_ranking\", \"passed\": true}, {\"error\": \"\", \"name\": \"ordinary_batch_matches_scores\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_query_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"mixed_empty_documents_are_finite\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_corpus_is_supported\", \"passed\": true}, {\"error\": \"assertion failed\", \"name\": \"all_empty_corpus_is_zero\", \"passed\": false}, {\"error\": \"\", \"name\": \"zero_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_batch_index_is_rejected\", \"passed\": true}], \"metrics\": {\"robustness_score\": 0.8888888888888888}, \"passed_cases\": 8, \"status\": \"ok\", \"total_cases\": 9}\r\n",
+          "stderr": "{workspace}\\rank_bm25.py:133: RuntimeWarning: invalid value encountered in divide\r\n  (q_freq + self.k1 * (1 - self.b + self.b * doc_len / self.avgdl)))\r\n",
+          "duration_ms": 360
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "rank_bm25.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 139
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests"
+          ],
+          "exit_code": 0,
+          "stdout": "..                                                                       [100%]\r\n2 passed in 0.74s\r\n",
+          "stderr": "",
+          "duration_ms": 1282
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"ordinary_ranking\", \"passed\": true}, {\"error\": \"\", \"name\": \"ordinary_batch_matches_scores\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_query_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"mixed_empty_documents_are_finite\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_corpus_is_supported\", \"passed\": true}, {\"error\": \"assertion failed\", \"name\": \"all_empty_corpus_is_zero\", \"passed\": false}, {\"error\": \"\", \"name\": \"zero_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_batch_index_is_rejected\", \"passed\": true}], \"metrics\": {\"robustness_score\": 0.8888888888888888}, \"passed_cases\": 8, \"status\": \"ok\", \"total_cases\": 9}\r\n",
+          "stderr": "{workspace}\\rank_bm25.py:133: RuntimeWarning: invalid value encountered in divide\r\n  (q_freq + self.k1 * (1 - self.b + self.b * doc_len / self.avgdl)))\r\n",
+          "duration_ms": 342
+        }
+      ],
+      "started_at": "2026-08-19T02:23:49.356258Z",
+      "finished_at": "2026-08-19T02:24:31.708696Z"
+    },
+    {
+      "number": 2,
+      "status": "rejected",
+      "decision": "reject",
+      "diagnosis": "Current implementation has remaining boundary condition issues: 1) When all documents are empty strings, the corpus initialization still proceeds but creates inconsistent state, 2) The get_scores methods in all variants don't handle empty corpus cases properly and may still perform operations on zero-sized arrays, 3) The get_batch_scores methods need additional validation for empty doc_ids list.",
+      "hypothesis": "Adding comprehensive empty input validation and early returns for edge cases will improve robustness while maintaining performance on valid inputs.",
+      "reason": "metrics.robustness_score did not improve by required delta 0.01",
+      "patches": [
+        {
+          "path": "rank_bm25.py",
+          "before_sha256": "a842f9de0d7541bc06d72019b6438c75913eb3ec90ea9bf040479a5d33ab2a3f",
+          "after_sha256": "a3b6e2f639d94d44786bce58781213b8a12e950f72f3641842da834f199362ec"
+        }
+      ],
+      "metric": 0.8888888888888888,
+      "metric_samples": [
+        0.8888888888888888,
+        0.8888888888888888,
+        0.8888888888888888
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "rank_bm25.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 139
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests"
+          ],
+          "exit_code": 0,
+          "stdout": "..                                                                       [100%]\r\n2 passed in 0.73s\r\n",
+          "stderr": "",
+          "duration_ms": 1297
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"ordinary_ranking\", \"passed\": true}, {\"error\": \"\", \"name\": \"ordinary_batch_matches_scores\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_query_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"mixed_empty_documents_are_finite\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_corpus_is_supported\", \"passed\": true}, {\"error\": \"assertion failed\", \"name\": \"all_empty_corpus_is_zero\", \"passed\": false}, {\"error\": \"\", \"name\": \"zero_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_batch_index_is_rejected\", \"passed\": true}], \"metrics\": {\"robustness_score\": 0.8888888888888888}, \"passed_cases\": 8, \"status\": \"ok\", \"total_cases\": 9}\r\n",
+          "stderr": "{workspace}\\rank_bm25.py:141: RuntimeWarning: invalid value encountered in divide\r\n  (q_freq + self.k1 * (1 - self.b + self.b * doc_len / self.avgdl)))\r\n",
+          "duration_ms": 360
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "rank_bm25.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 156
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests"
+          ],
+          "exit_code": 0,
+          "stdout": "..                                                                       [100%]\r\n2 passed in 0.75s\r\n",
+          "stderr": "",
+          "duration_ms": 1311
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"ordinary_ranking\", \"passed\": true}, {\"error\": \"\", \"name\": \"ordinary_batch_matches_scores\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_query_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"mixed_empty_documents_are_finite\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_corpus_is_supported\", \"passed\": true}, {\"error\": \"assertion failed\", \"name\": \"all_empty_corpus_is_zero\", \"passed\": false}, {\"error\": \"\", \"name\": \"zero_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_batch_index_is_rejected\", \"passed\": true}], \"metrics\": {\"robustness_score\": 0.8888888888888888}, \"passed_cases\": 8, \"status\": \"ok\", \"total_cases\": 9}\r\n",
+          "stderr": "{workspace}\\rank_bm25.py:141: RuntimeWarning: invalid value encountered in divide\r\n  (q_freq + self.k1 * (1 - self.b + self.b * doc_len / self.avgdl)))\r\n",
+          "duration_ms": 344
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "rank_bm25.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 125
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests"
+          ],
+          "exit_code": 0,
+          "stdout": "..                                                                       [100%]\r\n2 passed in 0.72s\r\n",
+          "stderr": "",
+          "duration_ms": 1280
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"ordinary_ranking\", \"passed\": true}, {\"error\": \"\", \"name\": \"ordinary_batch_matches_scores\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_query_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"mixed_empty_documents_are_finite\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_corpus_is_supported\", \"passed\": true}, {\"error\": \"assertion failed\", \"name\": \"all_empty_corpus_is_zero\", \"passed\": false}, {\"error\": \"\", \"name\": \"zero_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_batch_index_is_rejected\", \"passed\": true}], \"metrics\": {\"robustness_score\": 0.8888888888888888}, \"passed_cases\": 8, \"status\": \"ok\", \"total_cases\": 9}\r\n",
+          "stderr": "{workspace}\\rank_bm25.py:141: RuntimeWarning: invalid value encountered in divide\r\n  (q_freq + self.k1 * (1 - self.b + self.b * doc_len / self.avgdl)))\r\n",
+          "duration_ms": 344
+        }
+      ],
+      "started_at": "2026-08-19T02:24:31.708696Z",
+      "finished_at": "2026-08-19T02:25:11.797939Z"
+    },
+    {
+      "number": 3,
+      "status": "rejected",
+      "decision": "reject",
+      "diagnosis": "Current implementation has remaining boundary condition issues: 1) When all documents are empty strings, the corpus initialization still proceeds but creates inconsistent state, 2) The get_scores methods in all variants don't handle empty corpus cases properly and may still perform operations on zero-sized arrays, 3) The get_batch_scores methods need additional validation for empty doc_ids list.",
+      "hypothesis": "Adding comprehensive empty input validation and early returns for edge cases will improve robustness while maintaining performance on valid inputs.",
+      "reason": "metrics.robustness_score did not improve by required delta 0.01",
+      "patches": [
+        {
+          "path": "rank_bm25.py",
+          "before_sha256": "a842f9de0d7541bc06d72019b6438c75913eb3ec90ea9bf040479a5d33ab2a3f",
+          "after_sha256": "f9138e9072a3a7d7238b56e01c5c159415ac81e1238aa4978417b1ae9b965f52"
+        }
+      ],
+      "metric": 0.8888888888888888,
+      "metric_samples": [
+        0.8888888888888888,
+        0.8888888888888888,
+        0.8888888888888888
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "rank_bm25.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 141
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests"
+          ],
+          "exit_code": 0,
+          "stdout": "..                                                                       [100%]\r\n2 passed in 0.74s\r\n",
+          "stderr": "",
+          "duration_ms": 1280
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"ordinary_ranking\", \"passed\": true}, {\"error\": \"\", \"name\": \"ordinary_batch_matches_scores\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_query_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"mixed_empty_documents_are_finite\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_corpus_is_supported\", \"passed\": true}, {\"error\": \"assertion failed\", \"name\": \"all_empty_corpus_is_zero\", \"passed\": false}, {\"error\": \"\", \"name\": \"zero_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_batch_index_is_rejected\", \"passed\": true}], \"metrics\": {\"robustness_score\": 0.8888888888888888}, \"passed_cases\": 8, \"status\": \"ok\", \"total_cases\": 9}\r\n",
+          "stderr": "{workspace}\\rank_bm25.py:141: RuntimeWarning: invalid value encountered in divide\r\n  (q_freq + self.k1 * (1 - self.b + self.b * doc_len / self.avgdl)))\r\n",
+          "duration_ms": 313
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "rank_bm25.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 139
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests"
+          ],
+          "exit_code": 0,
+          "stdout": "..                                                                       [100%]\r\n2 passed in 0.74s\r\n",
+          "stderr": "",
+          "duration_ms": 1296
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"ordinary_ranking\", \"passed\": true}, {\"error\": \"\", \"name\": \"ordinary_batch_matches_scores\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_query_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"mixed_empty_documents_are_finite\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_corpus_is_supported\", \"passed\": true}, {\"error\": \"assertion failed\", \"name\": \"all_empty_corpus_is_zero\", \"passed\": false}, {\"error\": \"\", \"name\": \"zero_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_batch_index_is_rejected\", \"passed\": true}], \"metrics\": {\"robustness_score\": 0.8888888888888888}, \"passed_cases\": 8, \"status\": \"ok\", \"total_cases\": 9}\r\n",
+          "stderr": "{workspace}\\rank_bm25.py:141: RuntimeWarning: invalid value encountered in divide\r\n  (q_freq + self.k1 * (1 - self.b + self.b * doc_len / self.avgdl)))\r\n",
+          "duration_ms": 344
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "rank_bm25.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 125
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests"
+          ],
+          "exit_code": 0,
+          "stdout": "..                                                                       [100%]\r\n2 passed in 0.71s\r\n",
+          "stderr": "",
+          "duration_ms": 1265
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"ordinary_ranking\", \"passed\": true}, {\"error\": \"\", \"name\": \"ordinary_batch_matches_scores\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_query_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"mixed_empty_documents_are_finite\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_corpus_is_supported\", \"passed\": true}, {\"error\": \"assertion failed\", \"name\": \"all_empty_corpus_is_zero\", \"passed\": false}, {\"error\": \"\", \"name\": \"zero_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_batch_index_is_rejected\", \"passed\": true}], \"metrics\": {\"robustness_score\": 0.8888888888888888}, \"passed_cases\": 8, \"status\": \"ok\", \"total_cases\": 9}\r\n",
+          "stderr": "{workspace}\\rank_bm25.py:141: RuntimeWarning: invalid value encountered in divide\r\n  (q_freq + self.k1 * (1 - self.b + self.b * doc_len / self.avgdl)))\r\n",
+          "duration_ms": 359
+        }
+      ],
+      "started_at": "2026-08-19T02:25:11.798938Z",
+      "finished_at": "2026-08-19T02:25:57.048709Z"
+    },
+    {
+      "number": 4,
+      "status": "stopped",
+      "decision": "reject",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "live request cap reached (3)",
+      "patches": [],
+      "metric": null,
+      "metric_samples": [],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "",
+      "command_results": [],
+      "started_at": "2026-08-19T02:25:57.048709Z",
+      "finished_at": "2026-08-19T02:25:57.061234Z"
+    }
+  ],
+  "command_runs": 39,
+  "command_duration_ms": 23078,
+  "model_usage": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "request_count": 3,
+    "reported_request_count": 3,
+    "prompt_tokens": 16168,
+    "completion_tokens": 10056,
+    "total_tokens": 26224
+  },
+  "started_at": "2026-08-19T02:23:42.257879Z",
+  "finished_at": "2026-08-19T02:25:57.096652Z"
+}

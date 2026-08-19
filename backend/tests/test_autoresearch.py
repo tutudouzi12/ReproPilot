@@ -179,7 +179,11 @@ async def test_run_keeps_improvement_rolls_back_regression_and_hides_holdout(tmp
     assert [trial.status for trial in ledger.trials] == ["baseline", "kept", "rejected", "stopped"]
     assert root.joinpath("candidate.py").read_text(encoding="utf-8") == "SCORE = 2\n"
     assert "holdout_command" not in contexts[0]["spec"]
-    assert "holdout.py" not in json.dumps(contexts[0], ensure_ascii=False)
+    assert all("holdout.py" not in json.dumps(context, ensure_ascii=False) for context in contexts)
+    assert contexts[0]["rejected_feedback"] == ""
+    assert '"score": 2.0' in contexts[1]["rejected_feedback"]
+    assert "trial budget allows further improvement" in contexts[1]["rejected_feedback"]
+    assert '"score": 0.0' in contexts[2]["rejected_feedback"]
 
     report = await validate_autoresearch(root, spec, ledger, evaluator_for(root))
     assert report.status == "passed"

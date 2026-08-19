@@ -1,0 +1,75 @@
+--- a/rank_bm25.py
++++ b/rank_bm25.py
+@@ -48,8 +48,12 @@
+                     nd[word] = 1
+ 
+             self.corpus_size += 1
+-
+-        self.avgdl = num_doc / self.corpus_size
++        
++        # Handle empty corpus case
++        if self.corpus_size > 0:
++            self.avgdl = num_doc / self.corpus_size
++        else:
++            self.avgdl = 0
+         return nd
+ 
+     def _tokenize_corpus(self, corpus):
+@@ -69,6 +73,10 @@
+     def get_top_n(self, query, documents, n=5):
+ 
+         assert self.corpus_size == len(documents), "The documents given don't match the index corpus!"
++        
++        # Handle non-positive n values
++        if n <= 0:
++            return []
+ 
+         scores = self.get_scores(query)
+         top_n = np.argsort(scores)[::-1][:n]
+@@ -98,7 +106,12 @@
+             idf_sum += idf
+             if idf < 0:
+                 negative_idfs.append(word)
+-        self.average_idf = idf_sum / len(self.idf)
++        
++        # Handle empty corpus case
++        if len(self.idf) > 0:
++            self.average_idf = idf_sum / len(self.idf)
++        else:
++            self.average_idf = 0
+ 
+         eps = self.epsilon * self.average_idf
+         for word in negative_idfs:
+@@ -124,7 +137,9 @@
+         """
+         Calculate bm25 scores between query and subset of all docs
+         """
+-        assert all(di < len(self.doc_freqs) for di in doc_ids)
++        # Check for negative indices and out-of-bounds indices
++        if any(di < 0 or di >= len(self.doc_freqs) for di in doc_ids):
++            raise IndexError("Document ID out of range")
+         score = np.zeros(len(doc_ids))
+         doc_len = np.array(self.doc_len)[doc_ids]
+         for q in query:
+@@ -161,7 +176,9 @@
+         """
+         Calculate bm25 scores between query and subset of all docs
+         """
+-        assert all(di < len(self.doc_freqs) for di in doc_ids)
++        # Check for negative indices and out-of-bounds indices
++        if any(di < 0 or di >= len(self.doc_freqs) for di in doc_ids):
++            raise IndexError("Document ID out of range")
+         score = np.zeros(len(doc_ids))
+         doc_len = np.array(self.doc_len)[doc_ids]
+         for q in query:
+@@ -198,7 +215,9 @@
+         """
+         Calculate bm25 scores between query and subset of all docs
+         """
+-        assert all(di < len(self.doc_freqs) for di in doc_ids)
++        # Check for negative indices and out-of-bounds indices
++        if any(di < 0 or di >= len(self.doc_freqs) for di in doc_ids):
++            raise IndexError("Document ID out of range")
+         score = np.zeros(len(doc_ids))
+         doc_len = np.array(self.doc_len)[doc_ids]
+         for q in query:

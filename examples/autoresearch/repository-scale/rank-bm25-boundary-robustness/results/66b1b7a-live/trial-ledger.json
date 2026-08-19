@@ -1,0 +1,290 @@
+{
+  "version": "autoresearch.ledger/v1",
+  "spec_sha256": "80961fea134cf1682514abfe9b67d36f1c1b40710f790e67e4a6e479dcef66ef",
+  "status": "completed",
+  "metric_key": "metrics.robustness_score",
+  "direction": "maximize",
+  "baseline_score": 0.5555555555555556,
+  "best_score": 1.0,
+  "holdout_baseline_score": 0.25,
+  "max_trials": 8,
+  "completed_trials": 1,
+  "accepted_trials": 1,
+  "stop_reason": "target_score_reached",
+  "best_candidate_files": {
+    "rank_bm25.py": "81a22ae2391a6ed949f9364ac4bb672d344491b80640324744b1250bd3c3fcea"
+  },
+  "trials": [
+    {
+      "number": 0,
+      "status": "baseline",
+      "decision": "keep",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "frozen baseline",
+      "patches": [],
+      "metric": 0.5555555555555556,
+      "metric_samples": [
+        0.5555555555555556,
+        0.5555555555555556,
+        0.5555555555555556
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "rank_bm25.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 141
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests"
+          ],
+          "exit_code": 0,
+          "stdout": "..                                                                       [100%]\r\n2 passed in 0.71s\r\n",
+          "stderr": "",
+          "duration_ms": 1264
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"ordinary_ranking\", \"passed\": true}, {\"error\": \"\", \"name\": \"ordinary_batch_matches_scores\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_query_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"mixed_empty_documents_are_finite\", \"passed\": true}, {\"error\": \"ZeroDivisionError: division by zero\", \"name\": \"empty_corpus_is_supported\", \"passed\": false}, {\"error\": \"ZeroDivisionError: division by zero\", \"name\": \"all_empty_corpus_is_zero\", \"passed\": false}, {\"error\": \"\", \"name\": \"zero_top_n_is_empty\", \"passed\": true}, {\"error\": \"assertion failed\", \"name\": \"negative_top_n_is_empty\", \"passed\": false}, {\"error\": \"assertion failed\", \"name\": \"negative_batch_index_is_rejected\", \"passed\": false}], \"metrics\": {\"robustness_score\": 0.5555555555555556}, \"passed_cases\": 5, \"status\": \"ok\", \"total_cases\": 9}\r\n",
+          "stderr": "",
+          "duration_ms": 312
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "rank_bm25.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 125
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests"
+          ],
+          "exit_code": 0,
+          "stdout": "..                                                                       [100%]\r\n2 passed in 0.67s\r\n",
+          "stderr": "",
+          "duration_ms": 1250
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"ordinary_ranking\", \"passed\": true}, {\"error\": \"\", \"name\": \"ordinary_batch_matches_scores\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_query_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"mixed_empty_documents_are_finite\", \"passed\": true}, {\"error\": \"ZeroDivisionError: division by zero\", \"name\": \"empty_corpus_is_supported\", \"passed\": false}, {\"error\": \"ZeroDivisionError: division by zero\", \"name\": \"all_empty_corpus_is_zero\", \"passed\": false}, {\"error\": \"\", \"name\": \"zero_top_n_is_empty\", \"passed\": true}, {\"error\": \"assertion failed\", \"name\": \"negative_top_n_is_empty\", \"passed\": false}, {\"error\": \"assertion failed\", \"name\": \"negative_batch_index_is_rejected\", \"passed\": false}], \"metrics\": {\"robustness_score\": 0.5555555555555556}, \"passed_cases\": 5, \"status\": \"ok\", \"total_cases\": 9}\r\n",
+          "stderr": "",
+          "duration_ms": 343
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "rank_bm25.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 139
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests"
+          ],
+          "exit_code": 0,
+          "stdout": "..                                                                       [100%]\r\n2 passed in 0.70s\r\n",
+          "stderr": "",
+          "duration_ms": 1219
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"ordinary_ranking\", \"passed\": true}, {\"error\": \"\", \"name\": \"ordinary_batch_matches_scores\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_query_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"mixed_empty_documents_are_finite\", \"passed\": true}, {\"error\": \"ZeroDivisionError: division by zero\", \"name\": \"empty_corpus_is_supported\", \"passed\": false}, {\"error\": \"ZeroDivisionError: division by zero\", \"name\": \"all_empty_corpus_is_zero\", \"passed\": false}, {\"error\": \"\", \"name\": \"zero_top_n_is_empty\", \"passed\": true}, {\"error\": \"assertion failed\", \"name\": \"negative_top_n_is_empty\", \"passed\": false}, {\"error\": \"assertion failed\", \"name\": \"negative_batch_index_is_rejected\", \"passed\": false}], \"metrics\": {\"robustness_score\": 0.5555555555555556}, \"passed_cases\": 5, \"status\": \"ok\", \"total_cases\": 9}\r\n",
+          "stderr": "",
+          "duration_ms": 327
+        }
+      ],
+      "started_at": "2026-08-19T02:36:12.757553Z",
+      "finished_at": "2026-08-19T02:36:12.757553Z"
+    },
+    {
+      "number": 1,
+      "status": "kept",
+      "decision": "keep",
+      "diagnosis": "The BM25 implementations have several boundary condition issues: 1) Empty corpora cause division by zero in avgdl calculation, 2) All-empty documents cause zero-length handling issues, 3) Non-positive top_n values cause array slicing problems, 4) Negative batch document indices cause out-of-bounds access.",
+      "hypothesis": "Adding proper boundary checks and handling for empty inputs will fix these issues while preserving existing functionality.",
+      "reason": "metrics.robustness_score improved from 0.55555556 to 1",
+      "patches": [
+        {
+          "path": "rank_bm25.py",
+          "before_sha256": "a593c6f67ba46e1812a6286b02cf692cc0119ce742cde0720e5ee666fd7ee5e6",
+          "after_sha256": "81a22ae2391a6ed949f9364ac4bb672d344491b80640324744b1250bd3c3fcea"
+        }
+      ],
+      "metric": 1.0,
+      "metric_samples": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "rank_bm25.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 139
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests"
+          ],
+          "exit_code": 0,
+          "stdout": "..                                                                       [100%]\r\n2 passed in 0.68s\r\n",
+          "stderr": "",
+          "duration_ms": 1202
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"ordinary_ranking\", \"passed\": true}, {\"error\": \"\", \"name\": \"ordinary_batch_matches_scores\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_query_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"mixed_empty_documents_are_finite\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_corpus_is_supported\", \"passed\": true}, {\"error\": \"\", \"name\": \"all_empty_corpus_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"zero_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_batch_index_is_rejected\", \"passed\": true}], \"metrics\": {\"robustness_score\": 1.0}, \"passed_cases\": 9, \"status\": \"ok\", \"total_cases\": 9}\r\n",
+          "stderr": "",
+          "duration_ms": 328
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "rank_bm25.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 125
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests"
+          ],
+          "exit_code": 0,
+          "stdout": "..                                                                       [100%]\r\n2 passed in 0.69s\r\n",
+          "stderr": "",
+          "duration_ms": 1250
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"ordinary_ranking\", \"passed\": true}, {\"error\": \"\", \"name\": \"ordinary_batch_matches_scores\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_query_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"mixed_empty_documents_are_finite\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_corpus_is_supported\", \"passed\": true}, {\"error\": \"\", \"name\": \"all_empty_corpus_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"zero_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_batch_index_is_rejected\", \"passed\": true}], \"metrics\": {\"robustness_score\": 1.0}, \"passed_cases\": 9, \"status\": \"ok\", \"total_cases\": 9}\r\n",
+          "stderr": "",
+          "duration_ms": 312
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "rank_bm25.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 141
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests"
+          ],
+          "exit_code": 0,
+          "stdout": "..                                                                       [100%]\r\n2 passed in 0.69s\r\n",
+          "stderr": "",
+          "duration_ms": 1217
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"ordinary_ranking\", \"passed\": true}, {\"error\": \"\", \"name\": \"ordinary_batch_matches_scores\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_query_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"mixed_empty_documents_are_finite\", \"passed\": true}, {\"error\": \"\", \"name\": \"empty_corpus_is_supported\", \"passed\": true}, {\"error\": \"\", \"name\": \"all_empty_corpus_is_zero\", \"passed\": true}, {\"error\": \"\", \"name\": \"zero_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_top_n_is_empty\", \"passed\": true}, {\"error\": \"\", \"name\": \"negative_batch_index_is_rejected\", \"passed\": true}], \"metrics\": {\"robustness_score\": 1.0}, \"passed_cases\": 9, \"status\": \"ok\", \"total_cases\": 9}\r\n",
+          "stderr": "",
+          "duration_ms": 328
+        }
+      ],
+      "started_at": "2026-08-19T02:36:14.515857Z",
+      "finished_at": "2026-08-19T02:36:59.417679Z"
+    }
+  ],
+  "command_runs": 21,
+  "command_duration_ms": 11910,
+  "model_usage": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "request_count": 1,
+    "reported_request_count": 1,
+    "prompt_tokens": 3593,
+    "completion_tokens": 3583,
+    "total_tokens": 7176
+  },
+  "started_at": "2026-08-19T02:36:07.615067Z",
+  "finished_at": "2026-08-19T02:36:59.446559Z"
+}

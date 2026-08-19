@@ -1,0 +1,53 @@
+{
+  "version": "autoresearch.validation/v1",
+  "spec_sha256": "80961fea134cf1682514abfe9b67d36f1c1b40710f790e67e4a6e479dcef66ef",
+  "status": "failed",
+  "validation_mode": "hidden_holdout",
+  "expected_score": 0.25,
+  "observed_scores": [
+    0.75,
+    0.75,
+    0.75
+  ],
+  "observed_score": 0.75,
+  "mean_score": 0.75,
+  "stddev": 0.0,
+  "passed_runs": 3,
+  "failed_runs": 0,
+  "score_matches": false,
+  "candidate_intact": true,
+  "protected_files_intact": true,
+  "command_results": [
+    {
+      "command": [
+        "python",
+        ".repropilot/uploads/03-holdout_evaluator.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"all_variants_accept_empty_corpus\", \"passed\": true}, {\"error\": \"assertion failed\", \"name\": \"all_variants_keep_all_empty_scores_finite\", \"passed\": false}, {\"error\": \"\", \"name\": \"all_variants_return_empty_for_negative_top_n\", \"passed\": true}, {\"error\": \"\", \"name\": \"all_variants_reject_negative_batch_indices\", \"passed\": true}], \"metrics\": {\"robustness_score\": 0.75}, \"passed_cases\": 3, \"status\": \"ok\", \"total_cases\": 4}\r\n",
+      "stderr": "{workspace}\\rank_bm25.py:133: RuntimeWarning: invalid value encountered in divide\r\n  (q_freq + self.k1 * (1 - self.b + self.b * doc_len / self.avgdl)))\r\n",
+      "duration_ms": 327
+    },
+    {
+      "command": [
+        "python",
+        ".repropilot/uploads/03-holdout_evaluator.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"all_variants_accept_empty_corpus\", \"passed\": true}, {\"error\": \"assertion failed\", \"name\": \"all_variants_keep_all_empty_scores_finite\", \"passed\": false}, {\"error\": \"\", \"name\": \"all_variants_return_empty_for_negative_top_n\", \"passed\": true}, {\"error\": \"\", \"name\": \"all_variants_reject_negative_batch_indices\", \"passed\": true}], \"metrics\": {\"robustness_score\": 0.75}, \"passed_cases\": 3, \"status\": \"ok\", \"total_cases\": 4}\r\n",
+      "stderr": "{workspace}\\rank_bm25.py:133: RuntimeWarning: invalid value encountered in divide\r\n  (q_freq + self.k1 * (1 - self.b + self.b * doc_len / self.avgdl)))\r\n",
+      "duration_ms": 328
+    },
+    {
+      "command": [
+        "python",
+        ".repropilot/uploads/03-holdout_evaluator.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"cases\": [{\"error\": \"\", \"name\": \"all_variants_accept_empty_corpus\", \"passed\": true}, {\"error\": \"assertion failed\", \"name\": \"all_variants_keep_all_empty_scores_finite\", \"passed\": false}, {\"error\": \"\", \"name\": \"all_variants_return_empty_for_negative_top_n\", \"passed\": true}, {\"error\": \"\", \"name\": \"all_variants_reject_negative_batch_indices\", \"passed\": true}], \"metrics\": {\"robustness_score\": 0.75}, \"passed_cases\": 3, \"status\": \"ok\", \"total_cases\": 4}\r\n",
+      "stderr": "{workspace}\\rank_bm25.py:133: RuntimeWarning: invalid value encountered in divide\r\n  (q_freq + self.k1 * (1 - self.b + self.b * doc_len / self.avgdl)))\r\n",
+      "duration_ms": 312
+    }
+  ],
+  "reason": "fresh validation score did not satisfy the frozen acceptance rule"
+}
