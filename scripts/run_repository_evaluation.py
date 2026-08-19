@@ -150,7 +150,7 @@ def validate_target(task_dir: Path, checkout: Path) -> tuple[dict[str, Any], dic
     return task, baseline
 
 
-def safe_evaluator_environment() -> dict[str, str]:
+def safe_evaluator_environment(workspace: Path | None = None) -> dict[str, str]:
     allowed = {
         "COMSPEC",
         "NUMBER_OF_PROCESSORS",
@@ -166,6 +166,8 @@ def safe_evaluator_environment() -> dict[str, str]:
     }
     environment = {key: value for key, value in os.environ.items() if key.upper() in allowed}
     environment.update({"PYTHONHASHSEED": "0", "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"})
+    if workspace is not None and (workspace / "src").is_dir():
+        environment["PYTHONPATH"] = str((workspace / "src").resolve())
     return environment
 
 
@@ -174,7 +176,7 @@ class LocalRepositoryEvaluator:
         self.workspace = workspace
         self.python = python
         self.timeout_seconds = timeout_seconds
-        self.environment = safe_evaluator_environment()
+        self.environment = safe_evaluator_environment(workspace)
 
     async def __call__(self, command: list[str]) -> CommandResult:
         executable = str(self.python) if Path(command[0]).name.lower() in {"python", "python3"} else command[0]

@@ -1,0 +1,63 @@
+{
+  "version": "repropilot.repository-benchmark/v1",
+  "id": "repository-scale-pilot-v1",
+  "title": "ReproPilot multi-repository pilot benchmark",
+  "protocol": {
+    "baseline_required": true,
+    "clean_checkout_required": true,
+    "git_blob_sha256_required": true,
+    "upstream_tests_required": true,
+    "public_evaluator_feedback": "deduplicated stdout and stderr may be provided to later candidate requests",
+    "hidden_evaluator_policy": "command and content are excluded from candidate proposer context",
+    "final_validation_runs": 3,
+    "manual_review_required_for_release_claim": true
+  },
+  "aggregate_metrics": [
+    "contract_pass_rate",
+    "pass_at_1",
+    "public_to_hidden_gap",
+    "upstream_regression_rate",
+    "mean_requests_per_pass",
+    "mean_tokens_per_pass",
+    "token_derived_cost_per_pass",
+    "failure_reason_distribution"
+  ],
+  "tasks": [
+    {
+      "id": "rank-bm25-boundary-robustness",
+      "path": "rank-bm25-boundary-robustness",
+      "repository_url": "https://github.com/dorianbrown/rank_bm25.git",
+      "revision": "47aa3ddf8dc1ebeb7ef4e65f2b4536af44594099",
+      "provenance_type": "repropilot_boundary_contract",
+      "difficulty": "single_module_boundary",
+      "contract_sha256": {
+        "task.json": "8e74cb6692a25f4f2c77c2086fc9ec559cfd7e1bd120aa00a56696fd791113af",
+        "autoresearch.json": "b2826e748ffdbb3233acccb8f4e99a9e2bafc5897261198cdbc5e1b477887625",
+        "evaluator.py": "7552c794d441119fd0ace194579fd81af7210ed7f0e22e537b38cc93be464e4d",
+        "holdout_evaluator.py": "361724332395281cec9f2b5b7a6079b3fc0c1e1a4403fe87bbba2fe52849e217",
+        "baseline.json": "c9470f914e7e3b67509962d64b8eed8dc7b25d7dd196e362bbc4453187195322"
+      }
+    },
+    {
+      "id": "humanize-naturalsize-rounding",
+      "path": "humanize-naturalsize-rounding",
+      "repository_url": "https://github.com/python-humanize/humanize.git",
+      "revision": "976484a655df046aa6849f440a4f0cd44fc4918c",
+      "provenance_type": "historical_merged_pull_request",
+      "difficulty": "single_module_historical_bug",
+      "contract_sha256": {
+        "task.json": "d3968c3c5255da0b2e4efb6121ac46c69cfcc23654395d42153da71252349cfe",
+        "autoresearch.json": "9cbd58460932ad4442e95245e9f9542dbe1a5e0eb54c56a46e4f939bf67b9d64",
+        "evaluator.py": "f857bea3a2dd141987d07f36b266498d1bdbde87949987dae9def213b1625b94",
+        "holdout_evaluator.py": "94ed1bd1db84fcae4db8cd5cd8afbe2d8ef184fb52637106e7691c1a8d1954ac",
+        "baseline.json": "12d7e57131e4ee468887d5580921b81364432f7c318a5e9cb61187a56a1a1984"
+      }
+    }
+  ],
+  "boundaries": [
+    "This pilot contains two repositories and is not a statistically representative software-engineering benchmark.",
+    "Historical bug provenance and ReproPilot-authored boundary contracts are labeled separately and must not be aggregated without retaining that distinction.",
+    "A contract pass does not establish equivalence with an upstream maintainer patch or production readiness.",
+    "Model cost is token-derived from caller-supplied public rates and is not a billing receipt."
+  ]
+}

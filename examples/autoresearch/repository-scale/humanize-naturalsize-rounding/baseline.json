@@ -1,0 +1,88 @@
+{
+  "version": "repropilot.repository-baseline/v1",
+  "recorded_at": "2026-08-19T08:52:13.975233Z",
+  "task_id": "humanize-naturalsize-rounding",
+  "repository": {
+    "url": "https://github.com/python-humanize/humanize.git",
+    "requested_revision": "976484a655df046aa6849f440a4f0cd44fc4918c",
+    "actual_revision": "976484a655df046aa6849f440a4f0cd44fc4918c",
+    "source_tree_dirty": false,
+    "git_blob_sha256": {
+      "src/humanize/filesize.py": "1895d6dad77e0e87089417d1a76a5d40abc0cb6bfc23be5d1ae46c865e50bd20",
+      "tests/test_filesize.py": "c321179cc329551367fb7979a1c1a064623262700150a6c8cd963fca61d3fbe5",
+      "pyproject.toml": "65e95e9627c0bff62e6469703fbe0d1041c3a788ffe911728e13a0b6a466a536",
+      "LICENCE": "8ba6c18112a431400ad3c743f70670079b302545d98884fc2f28a91c383a0380"
+    },
+    "working_tree_matches_git_blobs": true
+  },
+  "environment": {
+    "distributions": {
+      "freezegun": "1.5.5",
+      "humanize": "4.15.1.dev35",
+      "pytest": "9.1.1",
+      "pytest-benchmark": "5.2.3",
+      "pytest-codspeed": "5.0.3"
+    },
+    "implementation": "CPython",
+    "platform": "Windows-10-10.0.22631-SP0",
+    "version": "3.11.9"
+  },
+  "commands": {
+    "upstream_tests": {
+      "command": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "--benchmark-disable",
+        "--color=no"
+      ],
+      "working_directory": "{target_checkout}",
+      "exit_code": 0,
+      "stdout": "........................................................................ [  9%]\n.............sssssssssssssssssssssssssssssssssssssssssssssssssssssssssss [ 18%]\nsssssssss......s........................................................ [ 28%]\n........................................................................ [ 37%]\n........................................................................ [ 46%]\n........................................................................ [ 56%]\n........................................................................ [ 65%]\n........................................................................ [ 74%]\n........................................................................ [ 84%]\n........................................................................ [ 93%]\n..................................................                       [100%]\n701 passed, 69 skipped in 2.98s\n",
+      "stderr": "",
+      "duration_ms": 4505
+    },
+    "public_evaluator": {
+      "command": [
+        "{python}",
+        "{task_dir}/evaluator.py"
+      ],
+      "working_directory": "{target_checkout}",
+      "exit_code": 0,
+      "stdout": "{\"metrics\": {\"rounding_score\": 0.6666666666666666}, \"passed\": 4, \"total\": 6, \"cases\": [{\"value\": 999999, \"kwargs\": {}, \"expected\": \"1.0 MB\", \"observed\": \"1000.0 kB\", \"passed\": false}, {\"value\": -999999, \"kwargs\": {}, \"expected\": \"-1.0 MB\", \"observed\": \"-1000.0 kB\", \"passed\": false}, {\"value\": 1000, \"kwargs\": {}, \"expected\": \"1.0 kB\", \"observed\": \"1.0 kB\", \"passed\": true}, {\"value\": 1024, \"kwargs\": {\"binary\": true}, \"expected\": \"1.0 KiB\", \"observed\": \"1.0 KiB\", \"passed\": true}, {\"value\": 0, \"kwargs\": {}, \"expected\": \"0 Bytes\", \"observed\": \"0 Bytes\", \"passed\": true}, {\"value\": 30000000000000000000000000000000000, \"kwargs\": {}, \"expected\": \"30000.0 QB\", \"observed\": \"30000.0 QB\", \"passed\": true}]}\n",
+      "stderr": "",
+      "duration_ms": 152
+    },
+    "hidden_evaluator": {
+      "command": [
+        "{python}",
+        "{task_dir}/holdout_evaluator.py"
+      ],
+      "working_directory": "{target_checkout}",
+      "exit_code": 0,
+      "stdout": "{\"metrics\": {\"rounding_score\": 0.16666666666666666}, \"passed\": 1, \"total\": 6, \"cases\": [{\"value\": 999999999, \"kwargs\": {}, \"expected\": \"1.0 GB\", \"observed\": \"1000.0 MB\", \"passed\": false}, {\"value\": 999999999999, \"kwargs\": {}, \"expected\": \"1.0 TB\", \"observed\": \"1000.0 GB\", \"passed\": false}, {\"value\": 1048575, \"kwargs\": {\"binary\": true}, \"expected\": \"1.0 MiB\", \"observed\": \"1024.0 KiB\", \"passed\": false}, {\"value\": 1073741823, \"kwargs\": {\"binary\": true}, \"expected\": \"1.0 GiB\", \"observed\": \"1024.0 MiB\", \"passed\": false}, {\"value\": 1048575, \"kwargs\": {\"gnu\": true}, \"expected\": \"1.0M\", \"observed\": \"1024.0K\", \"passed\": false}, {\"value\": 1048576, \"kwargs\": {\"binary\": true}, \"expected\": \"1.0 MiB\", \"observed\": \"1.0 MiB\", \"passed\": true}]}\n",
+      "stderr": "",
+      "duration_ms": 173
+    }
+  },
+  "baseline": {
+    "upstream_tests_passed": true,
+    "public_score": 0.6666666666666666,
+    "hidden_score": 0.16666666666666666,
+    "metric_key": "metrics.rounding_score"
+  },
+  "task_artifact_sha256": {
+    "autoresearch.json": "9cbd58460932ad4442e95245e9f9542dbe1a5e0eb54c56a46e4f939bf67b9d64",
+    "evaluator.py": "f857bea3a2dd141987d07f36b266498d1bdbde87949987dae9def213b1625b94",
+    "holdout_evaluator.py": "94ed1bd1db84fcae4db8cd5cd8afbe2d8ef184fb52637106e7691c1a8d1954ac",
+    "README.md": "e07248d8bcbc6f30d108007932d685884943f0aef4d2ec155a6401c1a00bb63b",
+    "task.json": "d3968c3c5255da0b2e4efb6121ac46c69cfcc23654395d42153da71252349cfe"
+  },
+  "boundaries": [
+    "The task replays one historical Humanize pull request against its pre-fix base commit; it is not an official project benchmark.",
+    "The public and hidden cases are a ReproPilot split of upstream regression examples plus explicit non-regression cases.",
+    "The historical fix commit is retained as provenance for human review and is not included in candidate proposer context.",
+    "A contract pass proves the frozen cases and upstream suite passed; it does not prove semantic equivalence with the maintainer patch."
+  ]
+}
