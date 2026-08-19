@@ -1,0 +1,29 @@
+--- a/more_itertools/more.py
++++ b/more_itertools/more.py
+@@ -3722,6 +3722,26 @@
+         remaining -= i + 1
+         return element
+ 
++    if strict:
++        # Calculate total population size from counts
++        total_population = 0
++        counts_list = []
++        counts_iter = iter(counts)
++        
++        try:
++            while True:
++                count_val = next(counts_iter)
++                counts_list.append(count_val)
++                total_population += count_val
++        except StopIteration:
++            pass
++        
++        # Create a new iterator for counts from the stored list
++        counts = iter(counts_list)
++        
++        if k > total_population:
++            raise ValueError('Sample larger than population')
++    
+     with suppress(StopIteration):
+         reservoir = []
+         for _ in range(k):

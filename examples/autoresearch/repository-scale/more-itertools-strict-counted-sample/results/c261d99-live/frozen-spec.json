@@ -1,0 +1,53 @@
+{
+  "version": "autoresearch.spec/v1",
+  "name": "more-itertools-strict-counted-sample",
+  "objective": "Fix counted sample() so strict=True raises ValueError whenever the requested sample is larger than the population represented by counts, including exhausted or zero-count iterators, without regressing exact-size, non-strict, weighted, or argument-validation behavior.",
+  "repository_revision": "18225d856665bfc3bfdfcdbfa585290f92645daf",
+  "editable_files": [
+    "more_itertools/more.py"
+  ],
+  "protected_files": [
+    ".repropilot/uploads/02-evaluator.py",
+    ".repropilot/uploads/03-holdout_evaluator.py"
+  ],
+  "eval_command": [
+    "python",
+    ".repropilot/uploads/02-evaluator.py"
+  ],
+  "holdout_command": [
+    "python",
+    ".repropilot/uploads/03-holdout_evaluator.py"
+  ],
+  "guard_commands": [
+    [
+      "python",
+      "-m",
+      "py_compile",
+      "more_itertools/more.py"
+    ],
+    [
+      "python",
+      "-m",
+      "unittest",
+      "-q"
+    ]
+  ],
+  "metric_key": "metrics.strict_counted_score",
+  "direction": "maximize",
+  "min_delta": 0.1,
+  "holdout_min_delta": 0.8,
+  "target_score": 1.0,
+  "max_trials": 8,
+  "max_wall_seconds": 600,
+  "search_runs": 3,
+  "search_aggregation": "worst",
+  "validation_runs": 3,
+  "dependencies": [],
+  "frozen_files": {
+    ".repropilot/uploads/02-evaluator.py": "1721e9293d98898cd0a1998f67ba0e9814891d0220eac8fd9dd111143eca4868",
+    ".repropilot/uploads/03-holdout_evaluator.py": "c24e0134c3bf355e35f5b11290848ccc68ad4c722c9c31d0125552638b90455d"
+  },
+  "frozen_workspace_sha256": "293f74fae73e4c5c3dfb2131b738cbc6953f1e5bcc06ed35ed75dacebc11872d",
+  "source_path": ".repropilot/uploads/01-autoresearch.json",
+  "spec_sha256": "0ec84154b0389141aaaa0f99a10f119dfc30c29ad6218c1938a094f6e738d99b"
+}

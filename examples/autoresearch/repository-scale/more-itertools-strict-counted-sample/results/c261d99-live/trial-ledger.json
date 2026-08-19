@@ -1,0 +1,286 @@
+{
+  "version": "autoresearch.ledger/v1",
+  "spec_sha256": "0ec84154b0389141aaaa0f99a10f119dfc30c29ad6218c1938a094f6e738d99b",
+  "status": "completed",
+  "metric_key": "metrics.strict_counted_score",
+  "direction": "maximize",
+  "baseline_score": 0.6666666666666666,
+  "best_score": 1.0,
+  "holdout_baseline_score": 0.16666666666666666,
+  "max_trials": 8,
+  "completed_trials": 1,
+  "accepted_trials": 1,
+  "stop_reason": "target_score_reached",
+  "best_candidate_files": {
+    "more_itertools/more.py": "1775358d0eb9d5b8e94b5060a2c24761d44c98bfca369c4cda7a8dd41af13530"
+  },
+  "trials": [
+    {
+      "number": 0,
+      "status": "baseline",
+      "decision": "keep",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "frozen baseline",
+      "patches": [],
+      "metric": 0.6666666666666666,
+      "metric_samples": [
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "more_itertools/more.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 203
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "unittest",
+            "-q"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "{workspace}\\more_itertools\\more.py:1742: DeprecationWarning: zip_equal will be removed in a future version of more-itertools. Use the builtin zip function with strict=True instead.\r\n  warnings.warn(\r\n{workspace}\\more_itertools\\more.py:1742: DeprecationWarning: zip_equal will be removed in a future version of more-itertools. Use the builtin zip function with strict=True instead.\r\n  warnings.warn(\r\n----------------------------------------------------------------------\r\nRan 825 tests in 46.990s\r\n\r\nOK (skipped=1)\r\n",
+          "duration_ms": 47688
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"strict_counted_score\": 0.6666666666666666}, \"passed\": 4, \"total\": 6, \"cases\": [{\"name\": \"strict_unit_counts\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_aggregated_counts\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_exact_total\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"non_strict_undersized\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"weighted_strict_undersized\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"negative_k\", \"expected\": true, \"observed\": true, \"passed\": true}]}\r\n",
+          "stderr": "",
+          "duration_ms": 235
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "more_itertools/more.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 217
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "unittest",
+            "-q"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "{workspace}\\more_itertools\\more.py:1742: DeprecationWarning: zip_equal will be removed in a future version of more-itertools. Use the builtin zip function with strict=True instead.\r\n  warnings.warn(\r\n{workspace}\\more_itertools\\more.py:1742: DeprecationWarning: zip_equal will be removed in a future version of more-itertools. Use the builtin zip function with strict=True instead.\r\n  warnings.warn(\r\n----------------------------------------------------------------------\r\nRan 825 tests in 46.797s\r\n\r\nOK (skipped=1)\r\n",
+          "duration_ms": 47359
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"strict_counted_score\": 0.6666666666666666}, \"passed\": 4, \"total\": 6, \"cases\": [{\"name\": \"strict_unit_counts\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_aggregated_counts\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_exact_total\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"non_strict_undersized\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"weighted_strict_undersized\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"negative_k\", \"expected\": true, \"observed\": true, \"passed\": true}]}\r\n",
+          "stderr": "",
+          "duration_ms": 186
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "more_itertools/more.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 203
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "unittest",
+            "-q"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "{workspace}\\more_itertools\\more.py:1742: DeprecationWarning: zip_equal will be removed in a future version of more-itertools. Use the builtin zip function with strict=True instead.\r\n  warnings.warn(\r\n{workspace}\\more_itertools\\more.py:1742: DeprecationWarning: zip_equal will be removed in a future version of more-itertools. Use the builtin zip function with strict=True instead.\r\n  warnings.warn(\r\n----------------------------------------------------------------------\r\nRan 825 tests in 44.717s\r\n\r\nOK (skipped=1)\r\n",
+          "duration_ms": 45234
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"strict_counted_score\": 0.6666666666666666}, \"passed\": 4, \"total\": 6, \"cases\": [{\"name\": \"strict_unit_counts\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_aggregated_counts\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_exact_total\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"non_strict_undersized\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"weighted_strict_undersized\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"negative_k\", \"expected\": true, \"observed\": true, \"passed\": true}]}\r\n",
+          "stderr": "",
+          "duration_ms": 172
+        }
+      ],
+      "started_at": "2026-08-19T15:25:53.928473Z",
+      "finished_at": "2026-08-19T15:25:53.928473Z"
+    },
+    {
+      "number": 1,
+      "status": "kept",
+      "decision": "keep",
+      "diagnosis": "The issue is in the `_sample_counted` function where it doesn't properly validate that the requested sample size k is not larger than the total population size when strict=True. The function currently only checks if it could collect k elements in the initial loop, but doesn't verify against the total population size represented by counts.",
+      "hypothesis": "Add validation in `_sample_counted` to calculate the total population size from counts and raise ValueError when k is larger than the total population size and strict=True.",
+      "reason": "metrics.strict_counted_score improved from 0.66666667 to 1",
+      "patches": [
+        {
+          "path": "more_itertools/more.py",
+          "operation": "replace_text",
+          "before_sha256": "60d499ab79dbc22aad9ed734523020e0bbc40ffed318b5205053390f8b155f94",
+          "search_sha256": "87641923677491602f3f48e2fee60d972025dee757261c784f90e00c163adb87",
+          "after_sha256": "1775358d0eb9d5b8e94b5060a2c24761d44c98bfca369c4cda7a8dd41af13530"
+        }
+      ],
+      "metric": 1.0,
+      "metric_samples": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "more_itertools/more.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 203
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "unittest",
+            "-q"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "{workspace}\\more_itertools\\more.py:1742: DeprecationWarning: zip_equal will be removed in a future version of more-itertools. Use the builtin zip function with strict=True instead.\r\n  warnings.warn(\r\n{workspace}\\more_itertools\\more.py:1742: DeprecationWarning: zip_equal will be removed in a future version of more-itertools. Use the builtin zip function with strict=True instead.\r\n  warnings.warn(\r\n----------------------------------------------------------------------\r\nRan 825 tests in 34.757s\r\n\r\nOK (skipped=1)\r\n",
+          "duration_ms": 35186
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"strict_counted_score\": 1.0}, \"passed\": 6, \"total\": 6, \"cases\": [{\"name\": \"strict_unit_counts\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"strict_aggregated_counts\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"strict_exact_total\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"non_strict_undersized\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"weighted_strict_undersized\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"negative_k\", \"expected\": true, \"observed\": true, \"passed\": true}]}\r\n",
+          "stderr": "",
+          "duration_ms": 155
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "more_itertools/more.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 171
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "unittest",
+            "-q"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "{workspace}\\more_itertools\\more.py:1742: DeprecationWarning: zip_equal will be removed in a future version of more-itertools. Use the builtin zip function with strict=True instead.\r\n  warnings.warn(\r\n{workspace}\\more_itertools\\more.py:1742: DeprecationWarning: zip_equal will be removed in a future version of more-itertools. Use the builtin zip function with strict=True instead.\r\n  warnings.warn(\r\n----------------------------------------------------------------------\r\nRan 825 tests in 46.980s\r\n\r\nOK (skipped=1)\r\n",
+          "duration_ms": 47500
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"strict_counted_score\": 1.0}, \"passed\": 6, \"total\": 6, \"cases\": [{\"name\": \"strict_unit_counts\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"strict_aggregated_counts\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"strict_exact_total\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"non_strict_undersized\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"weighted_strict_undersized\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"negative_k\", \"expected\": true, \"observed\": true, \"passed\": true}]}\r\n",
+          "stderr": "",
+          "duration_ms": 157
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "py_compile",
+            "more_itertools/more.py"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "duration_ms": 203
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "unittest",
+            "-q"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "{workspace}\\more_itertools\\more.py:1742: DeprecationWarning: zip_equal will be removed in a future version of more-itertools. Use the builtin zip function with strict=True instead.\r\n  warnings.warn(\r\n{workspace}\\more_itertools\\more.py:1742: DeprecationWarning: zip_equal will be removed in a future version of more-itertools. Use the builtin zip function with strict=True instead.\r\n  warnings.warn(\r\n----------------------------------------------------------------------\r\nRan 825 tests in 48.171s\r\n\r\nOK (skipped=1)\r\n",
+          "duration_ms": 48639
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"metrics\": {\"strict_counted_score\": 1.0}, \"passed\": 6, \"total\": 6, \"cases\": [{\"name\": \"strict_unit_counts\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"strict_aggregated_counts\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"strict_exact_total\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"non_strict_undersized\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"weighted_strict_undersized\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"negative_k\", \"expected\": true, \"observed\": true, \"passed\": true}]}\r\n",
+          "stderr": "",
+          "duration_ms": 157
+        }
+      ],
+      "started_at": "2026-08-19T15:26:42.220273Z",
+      "finished_at": "2026-08-19T15:29:11.825980Z"
+    }
+  ],
+  "command_runs": 21,
+  "command_duration_ms": 322023,
+  "model_usage": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "request_count": 1,
+    "reported_request_count": 1,
+    "prompt_tokens": 9585,
+    "completion_tokens": 774,
+    "total_tokens": 10359
+  },
+  "started_at": "2026-08-19T15:23:32.243663Z",
+  "finished_at": "2026-08-19T15:29:12.067758Z"
+}
