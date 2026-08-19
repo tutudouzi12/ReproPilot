@@ -289,7 +289,7 @@ def live_proposer(
         responses.append(record)
         try:
             completion = await client.complete_with_usage(
-                "You are a bounded AutoResearch candidate proposer. Return strict JSON only with status, diagnosis, hypothesis, reason and patches. The status value MUST be exactly 'candidate' when proposing patches or 'stop' when no safe patch should be attempted. Each patch must contain path and complete replacement content. Patch only listed editable files. Never modify evaluators, tests, metrics, commands, dependencies or budgets; never add network access, subprocesses, fake metrics or fake predictions. Preserve ordinary upstream behavior while fixing the stated task.",
+                "You are a bounded AutoResearch candidate proposer. Return strict JSON only with status, diagnosis, hypothesis, reason and patches. The status value MUST be exactly 'candidate' when proposing patches or 'stop' when no safe patch should be attempted. Each patch must contain path and either complete replacement content or an exact search and replace pair. When editable file context mode is excerpts, you MUST use search/replace so unseen source is preserved; search must match exactly once. Patch only listed editable files. Never modify evaluators, tests, metrics, commands, dependencies or budgets; never add network access, subprocesses, fake metrics or fake predictions. Preserve ordinary upstream behavior while fixing the stated task.",
                 sent_context,
             )
         except Exception as exc:

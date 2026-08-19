@@ -11,7 +11,9 @@ from app.autoresearch import (
     CandidateProposal,
     CommandResult,
     TrialLedger,
+    _apply_candidate,
     aggregate_scores,
+    editable_file_context,
     freeze_research_spec,
     parse_metric,
     proposal_context,
@@ -87,6 +89,83 @@ def test_freeze_rejects_revision_drift_and_evaluator_overlap(tmp_path):
         freeze(root, editable_files=["candidate.py", "evaluator.py"])
     with pytest.raises(ValueError, match="package specifier"):
         freeze(root, dependencies=["safe-package", "--index-url=https://evil.invalid"])
+
+
+def test_candidate_patch_requires_exactly_one_edit_mode() -> None:
+    CandidatePatch(path="candidate.py", content="SCORE = 2\n")
+    CandidatePatch(path="candidate.py", search="SCORE = 1", replace="SCORE = 2")
+
+    with pytest.raises(ValueError, match="exactly one"):
+        CandidatePatch(path="candidate.py")
+    with pytest.raises(ValueError, match="exactly one"):
+        CandidatePatch(path="candidate.py", content="SCORE = 2\n", search="1", replace="2")
+    with pytest.raises(ValueError, match="must change"):
+        CandidatePatch(path="candidate.py", search="same", replace="same")
+
+
+def test_apply_candidate_supports_unique_localized_edit(tmp_path: Path) -> None:
+    root = workspace(tmp_path)
+    spec = freeze(root)
+
+    records = _apply_candidate(
+        root,
+        spec,
+        CandidateProposal(
+            patches=[CandidatePatch(path="candidate.py", search="SCORE = 1", replace="SCORE = 2")]
+        ),
+    )
+
+    assert root.joinpath("candidate.py").read_text(encoding="utf-8") == "SCORE = 2\n"
+    assert records[0]["operation"] == "replace_text"
+    assert "search_sha256" in records[0]
+
+    root.joinpath("candidate.py").write_text("SCORE = 1\nSCORE = 1\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="matched 2 times"):
+        _apply_candidate(
+            root,
+            spec,
+            CandidateProposal(
+                patches=[CandidatePatch(path="candidate.py", search="SCORE = 1", replace="SCORE = 2")]
+            ),
+        )
+
+
+def test_apply_candidate_rejects_complete_replacement_for_excerpted_file(tmp_path: Path) -> None:
+    root = workspace(tmp_path)
+    root.joinpath("candidate.py").write_text("SCORE = 1\n" * 4000, encoding="utf-8")
+    spec = freeze(root)
+
+    with pytest.raises(ValueError, match="complete replacement is not allowed for excerpted file"):
+        _apply_candidate(
+            root,
+            spec,
+            CandidateProposal(
+                patches=[CandidatePatch(path="candidate.py", content="SCORE = 2\n")]
+            ),
+        )
+
+    assert root.joinpath("candidate.py").read_text(encoding="utf-8") == "SCORE = 1\n" * 4000
+
+
+def test_editable_file_context_selects_target_beyond_prefix(tmp_path: Path) -> None:
+    source = tmp_path / "large.py"
+    source.write_text(
+        ("unrelated_value = 1\n" * 2500)
+        + "\ndef _sample_counted(population, counts, strict):\n"
+        + "    return population, counts, strict\n",
+        encoding="utf-8",
+    )
+
+    context = editable_file_context(
+        source,
+        "Fix counted sample strict counts exhaustion behavior",
+    )
+
+    assert context["mode"] == "excerpts"
+    assert context["patch_mode"] == "replace_text_required"
+    assert context["total_characters"] > 32_000
+    retained = "".join(excerpt["content"] for excerpt in context["excerpts"])
+    assert "def _sample_counted" in retained
 
 
 def test_metric_parser_uses_last_nested_json_and_robust_aggregation():
