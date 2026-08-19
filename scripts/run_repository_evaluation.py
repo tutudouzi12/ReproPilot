@@ -60,6 +60,18 @@ def write_json(path: Path, value: Any) -> None:
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
 
 
+def sanitize_workspace_paths(value: Any, workspace: Path) -> Any:
+    if isinstance(value, dict):
+        return {key: sanitize_workspace_paths(item, workspace) for key, item in value.items()}
+    if isinstance(value, list):
+        return [sanitize_workspace_paths(item, workspace) for item in value]
+    if isinstance(value, str):
+        windows_path = str(workspace)
+        portable_path = workspace.as_posix()
+        return value.replace(windows_path, "{workspace}").replace(portable_path, "{workspace}")
+    return value
+
+
 def load_env_file(path: Path | None) -> None:
     if path is None:
         return
@@ -411,8 +423,10 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
     initial_source = ""
     final_source = ""
     frozen_spec: Any = None
+    workspace_path: Path | None = None
     with tempfile.TemporaryDirectory(prefix=f"repropilot-{task['id']}-") as temporary:
         workspace = Path(temporary)
+        workspace_path = workspace
         _, frozen_spec = materialize_workspace(checkout, task_dir, workspace)
         initial_source = (workspace / "rank_bm25.py").read_text(encoding="utf-8")
         evaluator = LocalRepositoryEvaluator(workspace, python, float(task.get("command_timeout_seconds", 60)))
@@ -434,6 +448,7 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
         "task_id": task["id"],
         "outcome": outcome,
         "harness": {"revision": harness_revision, "source_tree_dirty": harness_dirty},
+        "sanitization": {"workspace_paths_replaced_with": "{workspace}"},
         "repository": {
             "url": task["repository"]["url"],
             "revision": task["repository"]["revision"],
@@ -472,6 +487,13 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
             "Any monetary amount is token-derived from the cited public rate and is not a billing-console receipt.",
         ],
     }
+    if workspace_path is None:
+        raise RuntimeError("repository workspace was not materialized")
+    result = sanitize_workspace_paths(result, workspace_path)
+    frozen_spec_payload = sanitize_workspace_paths(frozen_spec.model_dump(mode="json"), workspace_path)
+    response_payload = sanitize_workspace_paths(responses, workspace_path)
+    ledger_payload = sanitize_workspace_paths(ledger.model_dump(mode="json"), workspace_path) if ledger is not None else None
+    report_payload = sanitize_workspace_paths(report.model_dump(mode="json"), workspace_path) if report is not None else None
 
     output.mkdir(parents=True, exist_ok=False)
     (output / "initial-rank_bm25.py").write_text(initial_source, encoding="utf-8", newline="\n")
@@ -486,12 +508,12 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
     )
     (output / "candidate.patch").write_text(diff, encoding="utf-8", newline="\n")
     write_json(output / "task-input.json", task)
-    write_json(output / "frozen-spec.json", frozen_spec.model_dump(mode="json"))
-    write_json(output / "model-responses.json", responses)
-    if ledger is not None:
-        write_json(output / "trial-ledger.json", ledger.model_dump(mode="json"))
-    if report is not None:
-        write_json(output / "validation-report.json", report.model_dump(mode="json"))
+    write_json(output / "frozen-spec.json", frozen_spec_payload)
+    write_json(output / "model-responses.json", response_payload)
+    if ledger_payload is not None:
+        write_json(output / "trial-ledger.json", ledger_payload)
+    if report_payload is not None:
+        write_json(output / "validation-report.json", report_payload)
     (output / "README.md").write_text(render_report(result, ledger), encoding="utf-8", newline="\n")
     result["artifact_sha256"] = {
         path.name: sha256_file(path) for path in sorted(output.iterdir()) if path.is_file()

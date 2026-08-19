@@ -510,6 +510,22 @@ def _apply_candidate(root: Path, spec: ResearchSpec, proposal: CandidateProposal
     return records
 
 
+def evaluator_feedback(results: list[CommandResult], limit: int = 12_000) -> str:
+    chunks: list[str] = []
+    seen: set[str] = set()
+    for result in results:
+        for stream, value in (("stdout", result.stdout), ("stderr", result.stderr)):
+            content = value.strip()
+            if not content or content in seen:
+                continue
+            seen.add(content)
+            chunks.append(
+                f"command={json.dumps(result.command, ensure_ascii=False)} "
+                f"exit_code={result.exit_code} {stream}:\n{content}"
+            )
+    return "\n\n".join(chunks)[:limit]
+
+
 def proposal_context(root: Path, spec: ResearchSpec, ledger: TrialLedger, rejected_feedback: str = "") -> dict[str, Any]:
     files = {relative: _safe_existing_file(root, relative).read_text(encoding="utf-8", errors="replace")[:32_000] for relative in spec.editable_files}
     public_spec = spec.model_dump(mode="json", exclude={"holdout_command", "holdout_min_delta", "protected_files", "frozen_files"})
@@ -556,14 +572,14 @@ async def run_autoresearch(workspace: str | Path, spec: ResearchSpec, evaluator:
         ledger.finished_at = utc_now()
         raise
 
-    rejected_feedback = ""
+    evaluation_feedback = ""
     for number in range(1, spec.max_trials + 1):
         if time.monotonic() - started >= spec.max_wall_seconds:
             ledger.stop_reason = "wall_time_budget_exhausted"
             break
         trial = ResearchTrial(number=number, status="running", decision="reject")
         try:
-            proposal = await proposer(proposal_context(root, spec, ledger, rejected_feedback))
+            proposal = await proposer(proposal_context(root, spec, ledger, rejected_feedback=evaluation_feedback))
             trial.diagnosis = proposal.diagnosis
             trial.hypothesis = proposal.hypothesis
             if proposal.status == "stop":
@@ -591,15 +607,27 @@ async def run_autoresearch(workspace: str | Path, spec: ResearchSpec, evaluator:
                 ledger.best_score = score
                 ledger.accepted_trials += 1
                 best = snapshot_files(root, spec.editable_files)
+                continuation = (
+                    f"target {spec.target_score!r} was not reached"
+                    if spec.target_score is not None
+                    else "the trial budget allows further improvement"
+                )
+                evaluation_feedback = (
+                    f"Candidate improved to {score:.8g}, but {continuation}. "
+                    f"Remaining public evaluator output:\n{evaluator_feedback(commands)}"
+                )[:12_000]
             else:
                 trial.status = "rejected"
                 trial.reason = f"{spec.metric_key} did not improve by required delta {spec.min_delta:.8g}"
-                rejected_feedback = f"{trial.reason}; samples={samples}; candidate={proposal.model_dump_json()}"
+                evaluation_feedback = (
+                    f"{trial.reason}; samples={samples}; public evaluator output:\n{evaluator_feedback(commands)}\n"
+                    f"Rejected candidate: {proposal.model_dump_json()}"
+                )[:12_000]
                 restore_files(root, best)
         except Exception as exc:
             trial.status = "rejected"
             trial.reason = f"{type(exc).__name__}: {exc}".rstrip(": ")[:4000]
-            rejected_feedback = trial.reason
+            evaluation_feedback = trial.reason
             restore_files(root, best)
             try:
                 _assert_integrity(root, spec)
