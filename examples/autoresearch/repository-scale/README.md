@@ -15,3 +15,9 @@ These tasks exercise repository acquisition and real project code. They remain m
 `scripts/run_repository_baseline.py` refuses to score a checkout when its GitHub origin, HEAD commit, cleanliness, or selected source hashes differ from `task.json`. It runs the upstream tests before the project-defined public and hidden evaluators and retains portable command forms, working-directory roles, stdout, stderr, duration, Python environment, dependency versions, scores, and evidence boundaries.
 
 The baseline runner does not call an LLM and does not claim that a repair has been produced. Candidate search and retained Keep/Reject evidence belong in a later commit after this frozen starting point is reviewable.
+
+## Bounded live search
+
+After the baseline task is committed, `scripts/run_repository_evaluation.py` materializes the pinned checkout in a temporary workspace, freezes the AutoResearch contract, caps provider requests, and retains the exact model responses, candidate patch, Keep/Reject ledger, hidden validation, provider token usage, and cost basis. Release evidence requires a clean harness checkout and never overwrites an existing result directory.
+
+Use `--preflight-only` first to validate the frozen checkout and evaluator without making a provider request. Live evaluator subprocesses receive a stripped environment; they are local processes rather than a network-isolated sandbox, and the result states that boundary explicitly.
