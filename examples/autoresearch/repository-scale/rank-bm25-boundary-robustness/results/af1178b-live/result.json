@@ -1,0 +1,90 @@
+{
+  "version": "repropilot.repository-evaluation-result/v1",
+  "recorded_at": "2026-08-19T02:25:58.128243Z",
+  "task_id": "rank-bm25-boundary-robustness",
+  "outcome": "hidden_validation_failed",
+  "harness": {
+    "revision": "af1178b6af72408d470fae714abf45c9a04513a8",
+    "source_tree_dirty": false
+  },
+  "sanitization": {
+    "workspace_paths_replaced_with": "{workspace}"
+  },
+  "repository": {
+    "url": "https://github.com/dorianbrown/rank_bm25.git",
+    "revision": "47aa3ddf8dc1ebeb7ef4e65f2b4536af44594099",
+    "source_sha256": {
+      "rank_bm25.py": "a593c6f67ba46e1812a6286b02cf692cc0119ce742cde0720e5ee666fd7ee5e6",
+      "requirements.txt": "457e45615e94382f80e281e64bb96095df4a11779dfa61cf6071c6d5d8ab89b2",
+      "tests/test_loading.py": "f2613dba52aaf1bb96a04fec91dd10a86c75af7074fb65f769e1ab8fd35f5531"
+    }
+  },
+  "baseline_artifact_sha256": "84fdcf2a535e418faa6c60bd3d362f7502b558ae53c591bd9e13410a95b914a6",
+  "search": {
+    "baseline_score": 0.5555555555555556,
+    "best_score": 0.8888888888888888,
+    "completed_trials": 3,
+    "accepted_trials": 1,
+    "stop_reason": "candidate_stopped",
+    "request_cap": 3
+  },
+  "model": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "request_count": 3,
+    "reported_request_count": 3,
+    "prompt_tokens": 16168,
+    "completion_tokens": 10056,
+    "total_tokens": 26224,
+    "attempted_request_count": 3,
+    "mode": "live_model"
+  },
+  "cost": {
+    "status": "calculated_from_supplied_rates",
+    "currency": "CNY",
+    "amount": 0.225568,
+    "input_cost_per_million": 4.0,
+    "output_cost_per_million": 16.0,
+    "basis": "provider-reported tokens multiplied by caller-supplied public list rates; not a billing receipt",
+    "pricing_source": "https://help.aliyun.com/zh/model-studio/model-pricing",
+    "pricing_tier": "Mainland China, 0<Token<=32K",
+    "pricing_verified_at": "2026-08-19"
+  },
+  "validation": {
+    "status": "failed",
+    "mode": "hidden_holdout",
+    "baseline_score": 0.25,
+    "observed_scores": [
+      0.75,
+      0.75,
+      0.75
+    ],
+    "observed_score": 0.75,
+    "candidate_intact": true,
+    "protected_files_intact": true,
+    "reason": "fresh validation score did not satisfy the frozen acceptance rule"
+  },
+  "failure": {
+    "error": ""
+  },
+  "boundaries": [
+    "The task evaluates boundary behavior in rank_bm25.py, not the full quality of the rank-bm25 project.",
+    "The public and hidden cases are ReproPilot contracts, not upstream-maintainer tests or an official benchmark.",
+    "A passing original test suite establishes compatibility with two upstream loading tests only.",
+    "This baseline contains no model request, candidate patch, Keep decision, or hidden-validation pass claim.",
+    "The candidate was executed by local subprocess with a stripped environment, not a network-isolated container.",
+    "The hidden evaluator content was excluded from proposer context but remains inspectable in this public evidence package.",
+    "Any monetary amount is token-derived from the cited public rate and is not a billing-console receipt."
+  ],
+  "artifact_sha256": {
+    "candidate.patch": "74e57ad8786c464c04c18eed0bd75c4aeb1573998b5e69715ffaa246b398fd59",
+    "final-rank_bm25.py": "a842f9de0d7541bc06d72019b6438c75913eb3ec90ea9bf040479a5d33ab2a3f",
+    "frozen-spec.json": "792bebdb73eda52324dbc19395c96d8b57ebe56536896aca27fa1cdb7c8b9f98",
+    "initial-rank_bm25.py": "0de6c46a8d5a9ad63ff7034012cda1b296a12b7000fdee4479101375fdf62968",
+    "model-responses.json": "fbcc36f787164eb57bd6ed652d94d1f2ad811472f4ffdb9d9345a08efdcfb7f6",
+    "README.md": "2923ea37023bd2fd35f08505765b840f621f6022515139ad2e6349ed6338f402",
+    "task-input.json": "47a8749a793d81135080d99bd2ffb24b6388b1f589eeaa2cc8567fb1a733efd8",
+    "trial-ledger.json": "0f854b7f8afa174747c075a645f9afc9646fe4fdf762616dcba5348745496752",
+    "validation-report.json": "f78db0670b316b45d30d94ee6e47560aae5b13fe6bd2711358653e3c7492e38d"
+  }
+}
