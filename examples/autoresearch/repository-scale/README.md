@@ -2,6 +2,8 @@
 
 This directory contains bounded tasks against real, independently versioned GitHub repositories. A task is release evidence only when the repository URL, full commit SHA, selected Git-blob hashes, dependency versions, original test command, public evaluator, hidden evaluator, and observed baseline are all retained.
 
+The local `.gitattributes` disables checkout line-ending rewriting for frozen inputs and retained artifacts so their recorded SHA256 values remain stable across Git configurations.
+
 These tasks exercise repository acquisition and real project code. They remain module-level repair experiments rather than claims about the full upstream product or a general software-engineering benchmark.
 
 ## First task

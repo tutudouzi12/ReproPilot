@@ -1,0 +1,57 @@
+{
+  "version": "autoresearch.spec/v1",
+  "name": "rank-bm25-boundary-robustness",
+  "objective": "Make all three BM25 variants handle empty corpora, all-empty documents, non-positive top_n values, and negative batch document indices without regressing ordinary ranking behavior.",
+  "repository_revision": "47aa3ddf8dc1ebeb7ef4e65f2b4536af44594099",
+  "editable_files": [
+    "rank_bm25.py"
+  ],
+  "protected_files": [
+    ".repropilot/uploads/02-evaluator.py",
+    ".repropilot/uploads/03-holdout_evaluator.py"
+  ],
+  "eval_command": [
+    "python",
+    ".repropilot/uploads/02-evaluator.py"
+  ],
+  "holdout_command": [
+    "python",
+    ".repropilot/uploads/03-holdout_evaluator.py"
+  ],
+  "guard_commands": [
+    [
+      "python",
+      "-m",
+      "py_compile",
+      "rank_bm25.py"
+    ],
+    [
+      "python",
+      "-m",
+      "pytest",
+      "-q",
+      "tests"
+    ]
+  ],
+  "metric_key": "metrics.robustness_score",
+  "direction": "maximize",
+  "min_delta": 0.01,
+  "holdout_min_delta": 0.75,
+  "target_score": 1.0,
+  "max_trials": 8,
+  "max_wall_seconds": 300,
+  "search_runs": 3,
+  "search_aggregation": "worst",
+  "validation_runs": 3,
+  "dependencies": [
+    "numpy==2.1.3",
+    "pytest==8.3.5"
+  ],
+  "frozen_files": {
+    ".repropilot/uploads/02-evaluator.py": "7552c794d441119fd0ace194579fd81af7210ed7f0e22e537b38cc93be464e4d",
+    ".repropilot/uploads/03-holdout_evaluator.py": "361724332395281cec9f2b5b7a6079b3fc0c1e1a4403fe87bbba2fe52849e217"
+  },
+  "frozen_workspace_sha256": "8d132483362844c314d418651a448628fb6f51427add92a31836498ce0339c78",
+  "source_path": ".repropilot/uploads/01-autoresearch.json",
+  "spec_sha256": "80961fea134cf1682514abfe9b67d36f1c1b40710f790e67e4a6e479dcef66ef"
+}

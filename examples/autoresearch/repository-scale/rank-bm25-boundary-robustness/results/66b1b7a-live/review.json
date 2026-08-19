@@ -1,0 +1,25 @@
+{
+  "version": "repropilot.repository-evaluation-review/v1",
+  "status": "contract_pass_with_review_boundary",
+  "automated_evidence": {
+    "public_search_runs": [1.0, 1.0, 1.0],
+    "hidden_validation_runs": [1.0, 1.0, 1.0],
+    "upstream_tests_passed_during_search": true,
+    "candidate_intact": true,
+    "protected_files_intact": true
+  },
+  "manual_observations": [
+    {
+      "severity": "boundary",
+      "finding": "The candidate checks n <= 0 before asserting that the documents list matches the indexed corpus size.",
+      "impact": "A mismatched documents list with non-positive n returns an empty list instead of preserving the original assertion. The frozen public and hidden contracts do not cover this combined input.",
+      "disposition": "Retain the automated contract pass, but do not treat this candidate as upstream-ready without moving the n check after the corpus-size assertion and rerunning an expanded contract."
+    },
+    {
+      "severity": "provenance",
+      "finding": "This run used the pre-portability task contract whose source hashes reflected the Windows checkout bytes.",
+      "impact": "The target URL and full commit remain exact, but that preflight hash representation was not portable across line-ending policies.",
+      "disposition": "The run remains reproducible from its recorded harness revision. The active task contract now freezes Git-blob SHA256 values and separately checks filtered working-tree content."
+    }
+  ]
+}

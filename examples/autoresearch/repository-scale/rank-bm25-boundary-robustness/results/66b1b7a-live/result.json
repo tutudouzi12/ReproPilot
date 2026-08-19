@@ -1,0 +1,95 @@
+{
+  "version": "repropilot.repository-evaluation-result/v1",
+  "recorded_at": "2026-08-19T02:37:00.464053Z",
+  "task_id": "rank-bm25-boundary-robustness",
+  "outcome": "validation_passed",
+  "harness": {
+    "revision": "66b1b7ae6b2e2599092632cdc90af0b47ab9063e",
+    "source_tree_dirty": false
+  },
+  "sanitization": {
+    "workspace_paths_replaced_with": "{workspace}"
+  },
+  "repository": {
+    "url": "https://github.com/dorianbrown/rank_bm25.git",
+    "revision": "47aa3ddf8dc1ebeb7ef4e65f2b4536af44594099",
+    "source_sha256": {
+      "rank_bm25.py": "a593c6f67ba46e1812a6286b02cf692cc0119ce742cde0720e5ee666fd7ee5e6",
+      "requirements.txt": "457e45615e94382f80e281e64bb96095df4a11779dfa61cf6071c6d5d8ab89b2",
+      "tests/test_loading.py": "f2613dba52aaf1bb96a04fec91dd10a86c75af7074fb65f769e1ab8fd35f5531"
+    }
+  },
+  "baseline_artifact_sha256": "84fdcf2a535e418faa6c60bd3d362f7502b558ae53c591bd9e13410a95b914a6",
+  "search": {
+    "baseline_score": 0.5555555555555556,
+    "best_score": 1.0,
+    "completed_trials": 1,
+    "accepted_trials": 1,
+    "stop_reason": "target_score_reached",
+    "request_cap": 3
+  },
+  "model": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "request_count": 1,
+    "reported_request_count": 1,
+    "prompt_tokens": 3593,
+    "completion_tokens": 3583,
+    "total_tokens": 7176,
+    "attempted_request_count": 1,
+    "mode": "live_model"
+  },
+  "cost": {
+    "status": "calculated_from_supplied_rates",
+    "currency": "CNY",
+    "amount": 0.0717,
+    "input_cost_per_million": 4.0,
+    "output_cost_per_million": 16.0,
+    "basis": "provider-reported tokens multiplied by caller-supplied public list rates; not a billing receipt",
+    "pricing_source": "https://help.aliyun.com/zh/model-studio/model-pricing",
+    "pricing_tier": "Mainland China, 0<Token<=32K",
+    "pricing_verified_at": "2026-08-19"
+  },
+  "validation": {
+    "status": "passed",
+    "mode": "hidden_holdout",
+    "baseline_score": 0.25,
+    "observed_scores": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "observed_score": 1.0,
+    "candidate_intact": true,
+    "protected_files_intact": true,
+    "reason": ""
+  },
+  "post_run_review": {
+    "status": "contract_pass_with_review_boundary",
+    "artifact": "review.json"
+  },
+  "failure": {
+    "error": ""
+  },
+  "boundaries": [
+    "The task evaluates boundary behavior in rank_bm25.py, not the full quality of the rank-bm25 project.",
+    "The public and hidden cases are ReproPilot contracts, not upstream-maintainer tests or an official benchmark.",
+    "A passing original test suite establishes compatibility with two upstream loading tests only.",
+    "This baseline contains no model request, candidate patch, Keep decision, or hidden-validation pass claim.",
+    "The candidate was executed by local subprocess with a stripped environment, not a network-isolated container.",
+    "The hidden evaluator content was excluded from proposer context but remains inspectable in this public evidence package.",
+    "Any monetary amount is token-derived from the cited public rate and is not a billing-console receipt."
+  ],
+  "artifact_sha256": {
+    "candidate.patch": "2594aed916cc50309435bc796cfbcd14e705de29a7187d4f3f78c868b765c860",
+    "final-rank_bm25.py": "81a22ae2391a6ed949f9364ac4bb672d344491b80640324744b1250bd3c3fcea",
+    "frozen-spec.json": "792bebdb73eda52324dbc19395c96d8b57ebe56536896aca27fa1cdb7c8b9f98",
+    "initial-rank_bm25.py": "0de6c46a8d5a9ad63ff7034012cda1b296a12b7000fdee4479101375fdf62968",
+    "model-responses.json": "8b316b3ccc160b91ab318f060db7bc531dbc217653c830aad632d46e1fff374b",
+    "README.md": "778457214e286f15bc52ee3ca78e5276f5d599106fbf71ac9e919b2ec4392bbd",
+    "review.json": "adeebc496eac6074750045824c759f6ca24bfa8927ef37ce909cadf2ccbbfbb9",
+    "task-input.json": "47a8749a793d81135080d99bd2ffb24b6388b1f589eeaa2cc8567fb1a733efd8",
+    "trial-ledger.json": "74a4908ecee16876b3bae55fc3fe7c9c86ed63fda3cf3c4b2e3026714e385dfa",
+    "validation-report.json": "d96e1cc863cbf86f4dd8850734e1fee65ca82ce301ed30346e772ee4e7a6f578"
+  }
+}
