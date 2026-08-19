@@ -79,6 +79,20 @@ def portable_command(command: list[str], python: Path, task_dir: Path) -> list[s
     return portable
 
 
+def sanitize_paths(value: str, replacements: list[tuple[Path, str]]) -> str:
+    sanitized = value
+    for path, placeholder in replacements:
+        sanitized = sanitized.replace(str(path), placeholder).replace(path.as_posix(), placeholder)
+    return sanitized
+
+
+def sanitize_command_result(result: dict[str, Any], replacements: list[tuple[Path, str]]) -> None:
+    for field in ("stdout", "stderr", "error"):
+        value = result.get(field)
+        if isinstance(value, str):
+            result[field] = sanitize_paths(value, replacements)
+
+
 def run_command(command: list[str], checkout: Path, timeout_seconds: float) -> dict[str, Any]:
     started = time.perf_counter()
     environment = os.environ.copy()
@@ -210,8 +224,14 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         checkout,
         timeout_seconds,
     )
+    replacements = [
+        (checkout, "{target_checkout}"),
+        (python, "{python}"),
+        (task_dir, "{task_dir}"),
+    ]
     for result in (upstream, public, hidden):
         result["command"] = portable_command(result["command"], python, task_dir)
+        sanitize_command_result(result, replacements)
     for label, result in (("upstream tests", upstream), ("public evaluator", public), ("hidden evaluator", hidden)):
         if result["exit_code"] != 0:
             raise RuntimeError(f"{label} failed: {result.get('error') or result['stderr']}")

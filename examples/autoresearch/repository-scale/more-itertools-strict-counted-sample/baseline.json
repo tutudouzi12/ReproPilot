@@ -1,0 +1,80 @@
+{
+  "version": "repropilot.repository-baseline/v1",
+  "recorded_at": "2026-08-19T14:17:36.570186Z",
+  "task_id": "more-itertools-strict-counted-sample",
+  "repository": {
+    "url": "https://github.com/more-itertools/more-itertools.git",
+    "requested_revision": "18225d856665bfc3bfdfcdbfa585290f92645daf",
+    "actual_revision": "18225d856665bfc3bfdfcdbfa585290f92645daf",
+    "source_tree_dirty": false,
+    "git_blob_sha256": {
+      "more_itertools/more.py": "daf4ffc89d1ebafdb47a1ed1376ce017c281547130f456e6821a5e74eabad1df",
+      "tests/test_more.py": "a7bbbc3be1dd77ce4974d49b29dd6576463c986aae83ebbf4a2e655e6e790a1c",
+      "pyproject.toml": "74197e577189b7d63307a7a4fc7f71d67f3a0ef85c410561539a2d01e911baea",
+      "LICENSE": "09f1c8c9e941af3e584d59641ea9b87d83c0cb0fd007eb5ef391a7e2643c1a46"
+    },
+    "working_tree_matches_git_blobs": true
+  },
+  "environment": {
+    "distributions": {},
+    "implementation": "CPython",
+    "platform": "Windows-10-10.0.22631-SP0",
+    "version": "3.11.9"
+  },
+  "commands": {
+    "upstream_tests": {
+      "command": [
+        "{python}",
+        "-m",
+        "unittest",
+        "-q"
+      ],
+      "working_directory": "{target_checkout}",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "{target_checkout}\\more_itertools\\more.py:1742: DeprecationWarning: zip_equal will be removed in a future version of more-itertools. Use the builtin zip function with strict=True instead.\n  warnings.warn(\n{target_checkout}\\more_itertools\\more.py:1742: DeprecationWarning: zip_equal will be removed in a future version of more-itertools. Use the builtin zip function with strict=True instead.\n  warnings.warn(\n----------------------------------------------------------------------\nRan 825 tests in 34.431s\n\nOK (skipped=1)\n",
+      "duration_ms": 35246
+    },
+    "public_evaluator": {
+      "command": [
+        "{python}",
+        "{task_dir}/evaluator.py"
+      ],
+      "working_directory": "{target_checkout}",
+      "exit_code": 0,
+      "stdout": "{\"metrics\": {\"strict_counted_score\": 0.6666666666666666}, \"passed\": 4, \"total\": 6, \"cases\": [{\"name\": \"strict_unit_counts\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_aggregated_counts\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_exact_total\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"non_strict_undersized\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"weighted_strict_undersized\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"negative_k\", \"expected\": true, \"observed\": true, \"passed\": true}]}\n",
+      "stderr": "",
+      "duration_ms": 236
+    },
+    "hidden_evaluator": {
+      "command": [
+        "{python}",
+        "{task_dir}/holdout_evaluator.py"
+      ],
+      "working_directory": "{target_checkout}",
+      "exit_code": 0,
+      "stdout": "{\"metrics\": {\"strict_counted_score\": 0.16666666666666666}, \"passed\": 1, \"total\": 6, \"cases\": [{\"name\": \"strict_empty\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_zero_leading\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_short_counts_iterator\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_generator_inputs\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_mixed_counts\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"non_strict_generator_inputs\", \"expected\": true, \"observed\": true, \"passed\": true}]}\n",
+      "stderr": "",
+      "duration_ms": 202
+    }
+  },
+  "baseline": {
+    "upstream_tests_passed": true,
+    "public_score": 0.6666666666666666,
+    "hidden_score": 0.16666666666666666,
+    "metric_key": "metrics.strict_counted_score"
+  },
+  "task_artifact_sha256": {
+    "autoresearch.json": "28e04e8a8dc4aad86769faab888791722147ace6478acb91385e424a71bfffc8",
+    "evaluator.py": "1721e9293d98898cd0a1998f67ba0e9814891d0220eac8fd9dd111143eca4868",
+    "holdout_evaluator.py": "c24e0134c3bf355e35f5b11290848ccc68ad4c722c9c31d0125552638b90455d",
+    "README.md": "c3ce07e4b51d86b6ca69cd8f98d65e950233809e08a9b80a6c8bed91b35754ec",
+    "task.json": "838aae7f0fd80bb1fbc8630b2c2f4034af7b2b6f84ea543270a886ed3ea7030e"
+  },
+  "boundaries": [
+    "The task replays the effective change from more-itertools pull request #944 against the merge commit's first parent; it is not an official project benchmark.",
+    "The public and hidden cases are a ReproPilot split of the upstream strict-counts regression plus explicit iterator and non-regression cases.",
+    "The pull request head and merge commit are retained as provenance for human review and are not included in candidate proposer context.",
+    "A contract pass proves the frozen cases and upstream suite passed; it does not prove semantic equivalence with the maintainer patch."
+  ]
+}

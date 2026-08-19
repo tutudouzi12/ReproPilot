@@ -12,6 +12,7 @@ These tasks exercise repository acquisition and real project code. They remain m
 | --- | --- | --- | ---: | --- |
 | [`rank-bm25-boundary-robustness`](rank-bm25-boundary-robustness/) | ReproPilot boundary contract | `dorianbrown/rank_bm25@47aa3ddf8dc1ebeb7ef4e65f2b4536af44594099` | public `5/9`, hidden `1/4` | One real module plus the upstream test suite |
 | [`humanize-naturalsize-rounding`](humanize-naturalsize-rounding/) | Historical merged PR [#329](https://github.com/python-humanize/humanize/pull/329) | `python-humanize/humanize@976484a655df046aa6849f440a4f0cd44fc4918c` | public `4/6`, hidden `1/6` | One historical defect plus 701 upstream tests |
+| [`more-itertools-strict-counted-sample`](more-itertools-strict-counted-sample/) | Historical merged PR [#944](https://github.com/more-itertools/more-itertools/pull/944) | `more-itertools/more-itertools@18225d856665bfc3bfdfcdbfa585290f92645daf` | public `4/6`, hidden `1/6` | Counted-sampling exception flow plus 825 upstream tests |
 
 ## Baseline contract
 
@@ -38,6 +39,8 @@ py -3.11 scripts\run_repository_benchmark_preflight.py `
   --python rank-bm25-boundary-robustness=<rank-python> `
   --checkout humanize-naturalsize-rounding=<humanize-checkout> `
   --python humanize-naturalsize-rounding=<humanize-python> `
+  --checkout more-itertools-strict-counted-sample=<more-itertools-checkout> `
+  --python more-itertools-strict-counted-sample=<more-itertools-python> `
   --output <preflight-report.json>
 ```
 

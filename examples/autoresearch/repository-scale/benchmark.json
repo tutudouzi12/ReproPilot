@@ -52,10 +52,25 @@
         "holdout_evaluator.py": "94ed1bd1db84fcae4db8cd5cd8afbe2d8ef184fb52637106e7691c1a8d1954ac",
         "baseline.json": "12d7e57131e4ee468887d5580921b81364432f7c318a5e9cb61187a56a1a1984"
       }
+    },
+    {
+      "id": "more-itertools-strict-counted-sample",
+      "path": "more-itertools-strict-counted-sample",
+      "repository_url": "https://github.com/more-itertools/more-itertools.git",
+      "revision": "18225d856665bfc3bfdfcdbfa585290f92645daf",
+      "provenance_type": "historical_merged_pull_request",
+      "difficulty": "single_module_exception_flow",
+      "contract_sha256": {
+        "task.json": "838aae7f0fd80bb1fbc8630b2c2f4034af7b2b6f84ea543270a886ed3ea7030e",
+        "autoresearch.json": "28e04e8a8dc4aad86769faab888791722147ace6478acb91385e424a71bfffc8",
+        "evaluator.py": "1721e9293d98898cd0a1998f67ba0e9814891d0220eac8fd9dd111143eca4868",
+        "holdout_evaluator.py": "c24e0134c3bf355e35f5b11290848ccc68ad4c722c9c31d0125552638b90455d",
+        "baseline.json": "b8e5790eb9c144d08637441b233f677fa32aedd4b036b4c7c10b98e2d13213ef"
+      }
     }
   ],
   "boundaries": [
-    "This pilot contains two repositories and is not a statistically representative software-engineering benchmark.",
+    "This pilot contains three repositories and is not a statistically representative software-engineering benchmark.",
     "Historical bug provenance and ReproPilot-authored boundary contracts are labeled separately and must not be aggregated without retaining that distinction.",
     "A contract pass does not establish equivalence with an upstream maintainer patch or production readiness.",
     "Model cost is token-derived from caller-supplied public rates and is not a billing receipt."
