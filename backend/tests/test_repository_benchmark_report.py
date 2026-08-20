@@ -211,3 +211,78 @@ def test_strict_mode_rejects_tampered_evidence(tmp_path: Path) -> None:
     candidate.write_text("tampered\n", encoding="utf-8")
     with pytest.raises(ValueError, match="result artifact candidate.patch"):
         load_fixture(benchmark_path, selection_path)
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("repository_url", "https://github.com/example/other.git", "repository URL mismatch"),
+        ("revision", "c" * 40, "repository revision mismatch"),
+    ],
+)
+def test_rejects_benchmark_task_repository_mismatch(
+    tmp_path: Path,
+    field: str,
+    value: str,
+    message: str,
+) -> None:
+    benchmark_path, selection_path, _, _ = build_fixture(tmp_path)
+    benchmark = json.loads(benchmark_path.read_text(encoding="utf-8"))
+    benchmark["tasks"][0][field] = value
+    write_json(benchmark_path, benchmark)
+
+    with pytest.raises(ValueError, match=message):
+        load_fixture(benchmark_path, selection_path)
+
+
+def test_followup_task_inventory_counts_unique_tasks(tmp_path: Path) -> None:
+    benchmark_path = tmp_path / "benchmark.json"
+    selection_path = tmp_path / "run-selection.json"
+    write_json(benchmark_path, {"id": "sample", "title": "Sample", "boundaries": []})
+    write_json(selection_path, {"recorded_at": "2026-01-01T00:00:00Z", "boundaries": []})
+    primary = {
+        "task_id": "sample-task",
+        "role": "primary",
+        "run_id": "primary-run",
+        "result": "sample-task/results/primary-run/result.json",
+        "recorded_at": "2026-01-01T00:00:00Z",
+        "automated_contract_passed": True,
+        "manual_accepted": True,
+        "attempted_requests": 1,
+        "completed_responses": 1,
+        "usage_reports": 1,
+        "reported_tokens": 10,
+        "cost_amount": 0.01,
+        "cost_currency": "CNY",
+        "public_to_hidden_gap": 0.0,
+        "classification": "accepted",
+        "outcome": "validation_passed",
+    }
+    followup = {
+        **primary,
+        "task_id": "followup-task",
+        "role": "adversarial_followup",
+        "manual_accepted": False,
+        "classification": "hidden_validation_failed",
+        "outcome": "hidden_validation_failed",
+    }
+    tasks = {
+        "sample-task": {"repository_url": "https://github.com/example/project.git"},
+        "followup-task": {
+            "repository_url": "https://github.com/example/project.git",
+            "aggregate_eligibility": repository_benchmark_report.FOLLOWUP_ELIGIBILITY,
+        },
+    }
+
+    report = repository_benchmark_report.aggregate_report(
+        {"id": "sample", "title": "Sample", "boundaries": []},
+        benchmark_path,
+        {"recorded_at": "2026-01-01T00:00:00Z", "boundaries": []},
+        selection_path,
+        tasks,
+        [primary, {**followup, "run_id": "followup-1"}, {**followup, "run_id": "followup-2"}],
+        [],
+    )
+
+    assert report["inventory"]["adversarial_followup_task_count"] == 1
+    assert report["inventory"]["retained_run_count"] == 3

@@ -112,6 +112,19 @@ def validate_benchmark(path: Path) -> tuple[dict[str, Any], Path, dict[str, dict
         task = read_object(task_dir / "task.json")
         if task.get("version") != TASK_VERSION or task.get("id") != task_id:
             raise ValueError(f"task identity mismatch for {task_id}")
+        task_repository = task.get("repository")
+        if not isinstance(task_repository, dict):
+            raise ValueError(f"task repository metadata is missing for {task_id}")
+        benchmark_repository_url = str(entry.get("repository_url", "")).strip()
+        task_repository_url = str(task_repository.get("url", "")).strip()
+        if not benchmark_repository_url or normalize_repository_url(task_repository_url) != normalize_repository_url(
+            benchmark_repository_url
+        ):
+            raise ValueError(f"repository URL mismatch for {task_id}")
+        benchmark_revision = str(entry.get("revision", "")).strip().lower()
+        task_revision = str(task_repository.get("revision", "")).strip().lower()
+        if not benchmark_revision or task_revision != benchmark_revision:
+            raise ValueError(f"repository revision mismatch for {task_id}")
         contract_hashes = entry.get("contract_sha256")
         if not isinstance(contract_hashes, dict) or not contract_hashes:
             raise ValueError(f"contract hashes are missing for {task_id}")
@@ -320,6 +333,7 @@ def aggregate_report(
     primary = [run for run in runs if run["role"] == "primary"]
     accepted = [run for run in primary if run["manual_accepted"]]
     followups = [run for run in runs if run["role"] == "adversarial_followup"]
+    followup_task_ids = {run["task_id"] for run in followups}
     repository_urls = {
         normalize_repository_url(str(entry.get("repository_url", "")))
         for entry in tasks.values()
@@ -356,7 +370,7 @@ def aggregate_report(
             "task_count": len(tasks),
             "independent_task_count": len(primary),
             "unique_repository_count": len(repository_urls),
-            "adversarial_followup_task_count": len(followups),
+            "adversarial_followup_task_count": len(followup_task_ids),
             "retained_run_count": len(runs),
             "selected_primary_run_count": len(primary),
         },
