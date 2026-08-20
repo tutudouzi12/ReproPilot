@@ -23,6 +23,7 @@ METRIC_KEY_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_.-]{0,127}$")
 COMMAND_ALLOWLIST = {"python", "python3", "pytest"}
 IGNORED_PARTS = {".git", ".repropilot", ".venv", ".pytest_cache", "node_modules", "__pycache__"}
 DEPENDENCY_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*(?:\[[A-Za-z0-9_,.-]+\])?(?:(?:===|==|~=|!=|<=|>=|<|>)[A-Za-z0-9*+!_.-]+)?$")
+EDITABLE_CONTEXT_LIMIT = 32_000
 
 
 def utc_now() -> datetime:
@@ -113,7 +114,25 @@ class CommandResult(BaseModel):
 
 class CandidatePatch(BaseModel):
     path: str
-    content: str = Field(max_length=256_000)
+    content: str | None = Field(default=None, max_length=256_000)
+    search: str | None = Field(default=None, max_length=64_000)
+    replace: str | None = Field(default=None, max_length=64_000)
+
+    @model_validator(mode="after")
+    def validate_operation(self) -> "CandidatePatch":
+        uses_content = self.content is not None
+        uses_text_edit = self.search is not None or self.replace is not None
+        if uses_content == uses_text_edit:
+            raise ValueError("patch must use exactly one of content or search/replace")
+        if uses_content:
+            if not self.content:
+                raise ValueError("replacement content must not be empty")
+            return self
+        if not self.search or self.replace is None:
+            raise ValueError("localized patch requires non-empty search and a replace value")
+        if self.search == self.replace:
+            raise ValueError("localized patch must change the matched text")
+        return self
 
 
 class CandidateProposal(BaseModel):
@@ -190,6 +209,12 @@ class ValidationReport(BaseModel):
     status: Literal["passed", "failed"]
     validation_mode: Literal["hidden_holdout", "public_replay"]
     expected_score: float
+    baseline_score: float | None = None
+    acceptance_rule: Literal["minimum_improvement", "public_replay_tolerance"] = (
+        "public_replay_tolerance"
+    )
+    acceptance_delta: float = 0.0
+    acceptance_target_score: float | None = None
     observed_scores: list[float]
     observed_score: float | None
     mean_score: float | None
@@ -500,13 +525,34 @@ def _apply_candidate(root: Path, spec: ResearchSpec, proposal: CandidateProposal
             raise ValueError(f"candidate patch is not authorized: {patch.path}")
         seen.add(relative)
         before = sha256_file(path)
-        content = patch.content.encode()
+        if patch.content is not None:
+            if path.stat().st_size > EDITABLE_CONTEXT_LIMIT:
+                raise ValueError(f"complete replacement is not allowed for excerpted file: {relative}")
+            operation = "replace_file"
+            content = patch.content.encode()
+            record = {"path": relative, "operation": operation, "before_sha256": before}
+        else:
+            operation = "replace_text"
+            original = path.read_text(encoding="utf-8")
+            assert patch.search is not None and patch.replace is not None
+            occurrences = original.count(patch.search)
+            if occurrences != 1:
+                raise ValueError(
+                    f"localized patch search must match exactly once in {relative}; matched {occurrences} times"
+                )
+            content = original.replace(patch.search, patch.replace, 1).encode()
+            record = {
+                "path": relative,
+                "operation": operation,
+                "before_sha256": before,
+                "search_sha256": hashlib.sha256(patch.search.encode()).hexdigest(),
+            }
         if not content or len(content) > 256_000:
             raise ValueError(f"candidate content is empty or too large: {relative}")
         temporary = path.parent / f".{path.name}.candidate-{os.getpid()}.tmp"
         temporary.write_bytes(content)
         os.replace(temporary, path)
-        records.append({"path": relative, "before_sha256": before, "after_sha256": sha256_file(path)})
+        records.append({**record, "after_sha256": sha256_file(path)})
     return records
 
 
@@ -526,8 +572,91 @@ def evaluator_feedback(results: list[CommandResult], limit: int = 12_000) -> str
     return "\n\n".join(chunks)[:limit]
 
 
+def objective_terms(objective: str) -> set[str]:
+    ignored = {
+        "behavior",
+        "including",
+        "regressing",
+        "requested",
+        "whenever",
+        "without",
+        "should",
+        "function",
+        "values",
+        "value",
+        "files",
+        "true",
+        "false",
+    }
+    return {
+        token.lower()
+        for token in re.findall(r"[A-Za-z_][A-Za-z0-9_]{3,}", objective)
+        if token.lower() not in ignored
+    }
+
+
+def editable_file_context(path: Path, objective: str, limit: int = EDITABLE_CONTEXT_LIMIT) -> dict[str, Any]:
+    text = path.read_text(encoding="utf-8", errors="replace")
+    lines = text.splitlines(keepends=True)
+    if len(text) <= limit:
+        return {
+            "mode": "full",
+            "patch_mode": "replace_text_or_file",
+            "total_characters": len(text),
+            "total_lines": len(lines),
+            "content": text,
+        }
+
+    terms = objective_terms(objective)
+    scored: list[tuple[int, int]] = []
+    for index, line in enumerate(lines):
+        lowered = line.lower()
+        matches = sum(term in lowered for term in terms)
+        if matches:
+            definition_bonus = 20 if line.lstrip().startswith(("def ", "class ")) else 0
+            scored.append((definition_bonus + matches, index))
+    centers = [index for _, index in sorted(scored, key=lambda item: (-item[0], item[1]))]
+    selected: set[int] = set()
+    selected_characters = 0
+    for center in centers:
+        start = max(0, center - 50)
+        end = min(len(lines), center + 51)
+        new_indexes = [index for index in range(start, end) if index not in selected]
+        added = sum(len(lines[index]) for index in new_indexes)
+        if selected and selected_characters + added > limit:
+            continue
+        selected.update(new_indexes)
+        selected_characters += added
+        if selected_characters >= limit * 0.8:
+            break
+    if not selected:
+        selected.update(range(min(len(lines), 200)))
+
+    ranges: list[tuple[int, int]] = []
+    for index in sorted(selected):
+        if not ranges or index > ranges[-1][1]:
+            ranges.append((index, index + 1))
+        else:
+            ranges[-1] = (ranges[-1][0], index + 1)
+    excerpts = [
+        {"start_line": start + 1, "end_line": end, "content": "".join(lines[start:end])}
+        for start, end in ranges
+    ]
+    return {
+        "mode": "excerpts",
+        "patch_mode": "replace_text_required",
+        "total_characters": len(text),
+        "total_lines": len(lines),
+        "objective_terms": sorted(terms),
+        "excerpts": excerpts,
+    }
+
+
 def proposal_context(root: Path, spec: ResearchSpec, ledger: TrialLedger, rejected_feedback: str = "") -> dict[str, Any]:
-    files = {relative: _safe_existing_file(root, relative).read_text(encoding="utf-8", errors="replace")[:32_000] for relative in spec.editable_files}
+    files = {
+        relative: editable_file_context(_safe_existing_file(root, relative), spec.objective)
+        for relative in spec.editable_files
+    }
     public_spec = spec.model_dump(mode="json", exclude={"holdout_command", "holdout_min_delta", "protected_files", "frozen_files"})
     return {
         "spec": public_spec,
@@ -689,9 +818,15 @@ async def validate_autoresearch(workspace: str | Path, spec: ResearchSpec, ledge
     observed = aggregate_scores(scores, spec.search_aggregation, spec.direction) if scores else None
     if mode == "hidden_holdout":
         threshold = spec.holdout_min_delta if spec.holdout_min_delta is not None else spec.min_delta
+        acceptance_rule: Literal["minimum_improvement", "public_replay_tolerance"] = "minimum_improvement"
+        acceptance_delta = threshold
+        acceptance_target = expected + threshold if spec.direction == "maximize" else expected - threshold
         score_matches = observed is not None and len(scores) == spec.validation_runs and improved(observed, expected, spec.direction, threshold)
     else:
         tolerance = max(1e-9, spec.min_delta)
+        acceptance_rule = "public_replay_tolerance"
+        acceptance_delta = tolerance
+        acceptance_target = expected
         score_matches = observed is not None and len(scores) == spec.validation_runs and abs(observed - expected) <= tolerance
     passed = candidate_intact and protected_intact and score_matches
     if not candidate_intact:
@@ -705,6 +840,10 @@ async def validate_autoresearch(workspace: str | Path, spec: ResearchSpec, ledge
         status="passed" if passed else "failed",
         validation_mode=mode,
         expected_score=expected,
+        baseline_score=expected,
+        acceptance_rule=acceptance_rule,
+        acceptance_delta=acceptance_delta,
+        acceptance_target_score=acceptance_target,
         observed_scores=scores,
         observed_score=observed,
         mean_score=statistics.fmean(scores) if scores else None,

@@ -115,4 +115,7 @@ def test_checked_in_repository_benchmark_contracts_are_frozen() -> None:
     assert [task["id"] for task in tasks] == [
         "rank-bm25-boundary-robustness",
         "humanize-naturalsize-rounding",
+        "more-itertools-strict-counted-sample",
+        "more-itertools-strict-counted-sample-adversarial",
     ]
+    assert tasks[-1]["aggregate_eligibility"] == "followup_only_not_independent_repository_sample"

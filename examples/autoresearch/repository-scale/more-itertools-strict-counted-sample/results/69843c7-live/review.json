@@ -1,0 +1,73 @@
+{
+  "version": "repropilot.repository-evaluation-review/v1",
+  "status": "truncated_context_candidate_rejected_then_provider_failures",
+  "automated_evidence": {
+    "public_baseline": 0.6666666666666666,
+    "public_best": 0.6666666666666666,
+    "hidden_baseline": 0.16666666666666666,
+    "hidden_validation_runs": [
+      0.16666666666666666,
+      0.16666666666666666,
+      0.16666666666666666
+    ],
+    "provider_attempts": 3,
+    "provider_usage_reports": 1,
+    "reported_prompt_tokens": 10530,
+    "reported_completion_tokens": 10574,
+    "reported_total_tokens": 21104,
+    "accepted_trials": 0,
+    "candidate_intact": true,
+    "protected_files_intact": true
+  },
+  "candidate_rejection": {
+    "trial": 1,
+    "guard": "python -m py_compile more_itertools/more.py",
+    "error_type": "SyntaxError",
+    "error_summary": "unterminated triple-quoted string literal detected at candidate line 1173",
+    "rollback_preserved_best_candidate": true
+  },
+  "context_boundary": {
+    "source_file": "more_itertools/more.py",
+    "source_characters": 158840,
+    "source_lines": 5002,
+    "editable_prefix_characters": 32000,
+    "target_function": "sample",
+    "target_character_offset": 120143,
+    "target_line": 3743,
+    "target_visible_in_prefix": false,
+    "returned_replacement_characters": 34715,
+    "returned_replacement_lines": 1173,
+    "returned_replacement_ended_with_newline": false
+  },
+  "subsequent_request_failures": [
+    {
+      "request_number": 2,
+      "error_type": "ReadTimeout"
+    },
+    {
+      "request_number": 3,
+      "error_type": "RemoteProtocolError",
+      "summary": "Server disconnected without sending a response."
+    }
+  ],
+  "manual_observations": [
+    {
+      "severity": "harness_boundary",
+      "finding": "The proposer received only the first 32,000 characters of the editable module while the target function begins at character 120,143, and the patch contract required replacement content for the whole file.",
+      "impact": "The candidate could not preserve the unseen remainder of the 5,002-line module and failed syntax validation before public scoring.",
+      "disposition": "Retain the guard rejection. Before rerunning this task, replace prefix-only full-file proposals with a bounded localized edit protocol or target-relevant context selection."
+    },
+    {
+      "severity": "failure_classification",
+      "finding": "The first provider response produced an invalid candidate; the remaining two attempts failed before returning candidate content.",
+      "impact": "The run contains one real candidate rejection and two external-provider failures, not three equivalent model repair failures.",
+      "disposition": "Report the failure types separately and do not infer semantic repair capability from the syntax rejection alone."
+    },
+    {
+      "severity": "cost_boundary",
+      "finding": "Only one of three provider attempts returned token usage.",
+      "impact": "The retained 21,104 reported tokens are partial usage, so a complete token-derived run cost cannot be calculated.",
+      "disposition": "Report the observed tokens and keep total cost as not calculated."
+    }
+  ]
+}

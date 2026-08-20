@@ -1,0 +1,63 @@
+{
+  "version": "repropilot.repository-evaluation-review/v1",
+  "status": "automated_contract_passed_manual_review_rejected",
+  "automated_evidence": {
+    "outcome": "validation_passed",
+    "public_baseline": 0.6666666666666666,
+    "public_best": 1.0,
+    "hidden_baseline": 0.16666666666666666,
+    "hidden_validation_runs": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "provider_attempts": 1,
+    "provider_usage_reports": 1,
+    "reported_prompt_tokens": 9585,
+    "reported_completion_tokens": 774,
+    "reported_total_tokens": 10359,
+    "token_derived_cost_cny": 0.050724,
+    "accepted_trials": 1,
+    "candidate_intact": true,
+    "protected_files_intact": true
+  },
+  "candidate_review": {
+    "decision": "reject",
+    "finding": "The candidate eagerly materializes the complete counts iterator whenever strict=True before running the existing counted reservoir algorithm.",
+    "impact": "This changes the lazy iterator contract: a large counts iterable requires additional memory, and an unbounded counts iterable may never reach sampling even when the requested sample can be completed from the first population item.",
+    "upstream_difference": "The merged upstream repair only moves the strict reservoir-length check outside suppress(StopIteration); it does not pre-consume counts."
+  },
+  "manual_reproduction": {
+    "case": "population=iter('a'), k=1, strict=True, counts yields 1 then raises AssertionError if consumed again",
+    "candidate_observation": {
+      "result": "AssertionError: counts iterator was consumed past the matched population",
+      "counts_next_calls": 2
+    },
+    "upstream_merge_observation": {
+      "result": [
+        "a"
+      ],
+      "counts_next_calls": 1
+    }
+  },
+  "manual_observations": [
+    {
+      "severity": "candidate_regression",
+      "finding": "The fixed public and hidden cases cover finite counts iterables but do not detect eager over-consumption.",
+      "impact": "The automated validation pass is real for the frozen contract but is insufficient for accepting the candidate as an upstream-equivalent repair.",
+      "disposition": "Retain the automated pass and exact model evidence, but exclude this candidate from manually reviewed repair-success claims."
+    },
+    {
+      "severity": "benchmark_gap",
+      "finding": "The current holdout lacks a bounded sentinel case for counts iterator consumption.",
+      "impact": "A semantically broader implementation can pass while regressing laziness outside the frozen cases.",
+      "disposition": "Version and strengthen the task contract before the next model evaluation; do not rewrite this completed run retroactively."
+    },
+    {
+      "severity": "cost_boundary",
+      "finding": "All attempted requests returned provider token usage in this run.",
+      "impact": "The recorded 0.050724 CNY is reproducible from the caller-supplied public rates and reported tokens, but is not a billing receipt.",
+      "disposition": "Report the amount only as token-derived cost."
+    }
+  ]
+}

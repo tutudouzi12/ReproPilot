@@ -1,0 +1,90 @@
+{
+  "version": "repropilot.repository-evaluation-result/v1",
+  "recorded_at": "2026-08-19T14:33:06.581852Z",
+  "task_id": "more-itertools-strict-counted-sample",
+  "outcome": "candidate_stopped",
+  "harness": {
+    "revision": "da3cfdd2fba0d1f652383b1df7df33c4f456be94",
+    "source_tree_dirty": false
+  },
+  "sanitization": {
+    "workspace_paths_replaced_with": "{workspace}"
+  },
+  "repository": {
+    "url": "https://github.com/more-itertools/more-itertools.git",
+    "revision": "18225d856665bfc3bfdfcdbfa585290f92645daf",
+    "git_blob_sha256": {
+      "more_itertools/more.py": "daf4ffc89d1ebafdb47a1ed1376ce017c281547130f456e6821a5e74eabad1df",
+      "tests/test_more.py": "a7bbbc3be1dd77ce4974d49b29dd6576463c986aae83ebbf4a2e655e6e790a1c",
+      "pyproject.toml": "74197e577189b7d63307a7a4fc7f71d67f3a0ef85c410561539a2d01e911baea",
+      "LICENSE": "09f1c8c9e941af3e584d59641ea9b87d83c0cb0fd007eb5ef391a7e2643c1a46"
+    },
+    "editable_files": [
+      "more_itertools/more.py"
+    ],
+    "working_tree_matches_git_blobs": true
+  },
+  "baseline_artifact_sha256": "b8e5790eb9c144d08637441b233f677fa32aedd4b036b4c7c10b98e2d13213ef",
+  "search": {
+    "baseline_score": 0.6666666666666666,
+    "best_score": 0.6666666666666666,
+    "completed_trials": 3,
+    "accepted_trials": 0,
+    "stop_reason": "candidate_stopped",
+    "request_cap": 3
+  },
+  "model": {
+    "provider": "",
+    "model": "",
+    "request_count": 0,
+    "reported_request_count": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0,
+    "attempted_request_count": 3,
+    "mode": "live_model"
+  },
+  "cost": {
+    "status": "not_calculated",
+    "currency": "CNY",
+    "amount": null,
+    "basis": "one or more provider request attempts failed before token usage was returned"
+  },
+  "validation": {
+    "status": "failed",
+    "mode": "hidden_holdout",
+    "baseline_score": 0.16666666666666666,
+    "observed_scores": [
+      0.16666666666666666,
+      0.16666666666666666,
+      0.16666666666666666
+    ],
+    "observed_score": 0.16666666666666666,
+    "candidate_intact": true,
+    "protected_files_intact": true,
+    "reason": "fresh validation score did not satisfy the frozen acceptance rule"
+  },
+  "failure": {
+    "error": ""
+  },
+  "boundaries": [
+    "The task replays the effective change from more-itertools pull request #944 against the merge commit's first parent; it is not an official project benchmark.",
+    "The public and hidden cases are a ReproPilot split of the upstream strict-counts regression plus explicit iterator and non-regression cases.",
+    "The pull request head and merge commit are retained as provenance for human review and are not included in candidate proposer context.",
+    "A contract pass proves the frozen cases and upstream suite passed; it does not prove semantic equivalence with the maintainer patch.",
+    "The candidate was executed by local subprocess with a stripped environment, not a network-isolated container.",
+    "The hidden evaluator content was excluded from proposer context but remains inspectable in this public evidence package.",
+    "Any monetary amount is token-derived from the cited public rate and is not a billing-console receipt."
+  ],
+  "artifact_sha256": {
+    "candidate.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "final-files/more_itertools/more.py": "daf4ffc89d1ebafdb47a1ed1376ce017c281547130f456e6821a5e74eabad1df",
+    "frozen-spec.json": "f04517bcf9f5db0dc3530c09b3b80cd1612703c31a421e77b9e14e623533fb48",
+    "initial-files/more_itertools/more.py": "daf4ffc89d1ebafdb47a1ed1376ce017c281547130f456e6821a5e74eabad1df",
+    "model-responses.json": "0f88887978870753c87c62ded17fc3a9768704a471e5870dd8d2657b36a3eb67",
+    "README.md": "03a69ac7431ce99290785fcb4fcbfbcc5d17009d9165aab444aff5c649bf3a76",
+    "task-input.json": "c439c91f9958347d7d08d25795e355e033e87e59cf400e970ad4927af464a5a8",
+    "trial-ledger.json": "bb470a0e4131528a50c3af0ab2220846ba4250a3ff9e0e22ffa407b516f357ee",
+    "validation-report.json": "013069072b96deb00eab8e1899c870083aa51b689960235c0968fdc438fe7ed6"
+  }
+}

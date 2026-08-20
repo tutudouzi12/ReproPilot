@@ -1,0 +1,80 @@
+{
+  "version": "repropilot.repository-baseline/v1",
+  "recorded_at": "2026-08-19T16:05:18.426147Z",
+  "task_id": "more-itertools-strict-counted-sample-adversarial",
+  "repository": {
+    "url": "https://github.com/more-itertools/more-itertools.git",
+    "requested_revision": "18225d856665bfc3bfdfcdbfa585290f92645daf",
+    "actual_revision": "18225d856665bfc3bfdfcdbfa585290f92645daf",
+    "source_tree_dirty": false,
+    "git_blob_sha256": {
+      "more_itertools/more.py": "daf4ffc89d1ebafdb47a1ed1376ce017c281547130f456e6821a5e74eabad1df",
+      "tests/test_more.py": "a7bbbc3be1dd77ce4974d49b29dd6576463c986aae83ebbf4a2e655e6e790a1c",
+      "pyproject.toml": "74197e577189b7d63307a7a4fc7f71d67f3a0ef85c410561539a2d01e911baea",
+      "LICENSE": "09f1c8c9e941af3e584d59641ea9b87d83c0cb0fd007eb5ef391a7e2643c1a46"
+    },
+    "working_tree_matches_git_blobs": true
+  },
+  "environment": {
+    "distributions": {},
+    "implementation": "CPython",
+    "platform": "Windows-10-10.0.22631-SP0",
+    "version": "3.11.9"
+  },
+  "commands": {
+    "upstream_tests": {
+      "command": [
+        "{python}",
+        "-m",
+        "unittest",
+        "-q"
+      ],
+      "working_directory": "{target_checkout}",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "{target_checkout}\\more_itertools\\more.py:1742: DeprecationWarning: zip_equal will be removed in a future version of more-itertools. Use the builtin zip function with strict=True instead.\n  warnings.warn(\n{target_checkout}\\more_itertools\\more.py:1742: DeprecationWarning: zip_equal will be removed in a future version of more-itertools. Use the builtin zip function with strict=True instead.\n  warnings.warn(\n----------------------------------------------------------------------\nRan 825 tests in 24.141s\n\nOK (skipped=1)\n",
+      "duration_ms": 24520
+    },
+    "public_evaluator": {
+      "command": [
+        "{python}",
+        "{task_dir}/evaluator.py"
+      ],
+      "working_directory": "{target_checkout}",
+      "exit_code": 0,
+      "stdout": "{\"metrics\": {\"strict_counted_score\": 0.6666666666666666}, \"passed\": 4, \"total\": 6, \"cases\": [{\"name\": \"strict_unit_counts\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_aggregated_counts\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_exact_total\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"non_strict_undersized\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"weighted_strict_undersized\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"negative_k\", \"expected\": true, \"observed\": true, \"passed\": true}]}\n",
+      "stderr": "",
+      "duration_ms": 137
+    },
+    "hidden_evaluator": {
+      "command": [
+        "{python}",
+        "{task_dir}/holdout_evaluator.py"
+      ],
+      "working_directory": "{target_checkout}",
+      "exit_code": 0,
+      "stdout": "{\"metrics\": {\"strict_counted_score\": 0.2}, \"passed\": 2, \"total\": 10, \"cases\": [{\"name\": \"strict_empty\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_zero_leading\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_short_counts_iterator\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_generator_inputs\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_mixed_counts\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"non_strict_generator_inputs\", \"expected\": true, \"observed\": true, \"passed\": true}, {\"name\": \"strict_single_zero\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_trailing_zero\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_sparse_generator\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_counts_remain_lazy\", \"expected\": true, \"observed\": true, \"passed\": true}]}\n",
+      "stderr": "",
+      "duration_ms": 136
+    }
+  },
+  "baseline": {
+    "upstream_tests_passed": true,
+    "public_score": 0.6666666666666666,
+    "hidden_score": 0.2,
+    "metric_key": "metrics.strict_counted_score"
+  },
+  "task_artifact_sha256": {
+    "autoresearch.json": "796eee254062174ca78f9d251097a86a57dd5f68e765170b94ea04664c1c4de7",
+    "evaluator.py": "1721e9293d98898cd0a1998f67ba0e9814891d0220eac8fd9dd111143eca4868",
+    "holdout_evaluator.py": "c1327c26ad82653b526a4f7e978db782dc548d44dfc7324bc36792efdac3ee90",
+    "README.md": "573ccd7221d61c8634a6e0084a168618bc2a03ce4f0ebd6ca1f34b5f7b084073",
+    "task.json": "5dd5467da6ac22600efc3cc826365ede86bfb95e18c649546a500626c7db1aa3"
+  },
+  "boundaries": [
+    "This is a candidate-informed adversarial follow-up to the retained c261d99-live run, not an independent fourth repository.",
+    "The task reuses the pinned more-itertools base and public evaluator while adding hidden non-regression cases; it must remain distinct in aggregate reporting.",
+    "The source candidate and merged upstream patch are retained for human review only and are excluded from candidate proposer context.",
+    "A contract pass proves only the frozen cases and upstream suite, not production readiness or semantic equivalence with the maintainer patch."
+  ]
+}

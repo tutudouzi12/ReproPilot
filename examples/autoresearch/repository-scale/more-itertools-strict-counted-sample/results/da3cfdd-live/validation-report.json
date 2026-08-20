@@ -1,0 +1,53 @@
+{
+  "version": "autoresearch.validation/v1",
+  "spec_sha256": "0ec84154b0389141aaaa0f99a10f119dfc30c29ad6218c1938a094f6e738d99b",
+  "status": "failed",
+  "validation_mode": "hidden_holdout",
+  "expected_score": 0.16666666666666666,
+  "observed_scores": [
+    0.16666666666666666,
+    0.16666666666666666,
+    0.16666666666666666
+  ],
+  "observed_score": 0.16666666666666666,
+  "mean_score": 0.16666666666666666,
+  "stddev": 0.0,
+  "passed_runs": 3,
+  "failed_runs": 0,
+  "score_matches": false,
+  "candidate_intact": true,
+  "protected_files_intact": true,
+  "command_results": [
+    {
+      "command": [
+        "python",
+        ".repropilot/uploads/03-holdout_evaluator.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"metrics\": {\"strict_counted_score\": 0.16666666666666666}, \"passed\": 1, \"total\": 6, \"cases\": [{\"name\": \"strict_empty\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_zero_leading\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_short_counts_iterator\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_generator_inputs\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_mixed_counts\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"non_strict_generator_inputs\", \"expected\": true, \"observed\": true, \"passed\": true}]}\r\n",
+      "stderr": "",
+      "duration_ms": 250
+    },
+    {
+      "command": [
+        "python",
+        ".repropilot/uploads/03-holdout_evaluator.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"metrics\": {\"strict_counted_score\": 0.16666666666666666}, \"passed\": 1, \"total\": 6, \"cases\": [{\"name\": \"strict_empty\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_zero_leading\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_short_counts_iterator\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_generator_inputs\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_mixed_counts\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"non_strict_generator_inputs\", \"expected\": true, \"observed\": true, \"passed\": true}]}\r\n",
+      "stderr": "",
+      "duration_ms": 172
+    },
+    {
+      "command": [
+        "python",
+        ".repropilot/uploads/03-holdout_evaluator.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"metrics\": {\"strict_counted_score\": 0.16666666666666666}, \"passed\": 1, \"total\": 6, \"cases\": [{\"name\": \"strict_empty\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_zero_leading\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_short_counts_iterator\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_generator_inputs\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"strict_mixed_counts\", \"expected\": true, \"observed\": false, \"passed\": false}, {\"name\": \"non_strict_generator_inputs\", \"expected\": true, \"observed\": true, \"passed\": true}]}\r\n",
+      "stderr": "",
+      "duration_ms": 170
+    }
+  ],
+  "reason": "fresh validation score did not satisfy the frozen acceptance rule"
+}

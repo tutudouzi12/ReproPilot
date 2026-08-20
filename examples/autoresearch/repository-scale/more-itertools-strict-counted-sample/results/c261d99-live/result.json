@@ -1,0 +1,95 @@
+{
+  "version": "repropilot.repository-evaluation-result/v1",
+  "recorded_at": "2026-08-19T15:29:13.145050Z",
+  "task_id": "more-itertools-strict-counted-sample",
+  "outcome": "validation_passed",
+  "harness": {
+    "revision": "c261d99fa1bf1d598f973309dc76872896baa86c",
+    "source_tree_dirty": false
+  },
+  "sanitization": {
+    "workspace_paths_replaced_with": "{workspace}"
+  },
+  "repository": {
+    "url": "https://github.com/more-itertools/more-itertools.git",
+    "revision": "18225d856665bfc3bfdfcdbfa585290f92645daf",
+    "git_blob_sha256": {
+      "more_itertools/more.py": "daf4ffc89d1ebafdb47a1ed1376ce017c281547130f456e6821a5e74eabad1df",
+      "tests/test_more.py": "a7bbbc3be1dd77ce4974d49b29dd6576463c986aae83ebbf4a2e655e6e790a1c",
+      "pyproject.toml": "74197e577189b7d63307a7a4fc7f71d67f3a0ef85c410561539a2d01e911baea",
+      "LICENSE": "09f1c8c9e941af3e584d59641ea9b87d83c0cb0fd007eb5ef391a7e2643c1a46"
+    },
+    "editable_files": [
+      "more_itertools/more.py"
+    ],
+    "working_tree_matches_git_blobs": true
+  },
+  "baseline_artifact_sha256": "b8e5790eb9c144d08637441b233f677fa32aedd4b036b4c7c10b98e2d13213ef",
+  "search": {
+    "baseline_score": 0.6666666666666666,
+    "best_score": 1.0,
+    "completed_trials": 1,
+    "accepted_trials": 1,
+    "stop_reason": "target_score_reached",
+    "request_cap": 3
+  },
+  "model": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "request_count": 1,
+    "reported_request_count": 1,
+    "prompt_tokens": 9585,
+    "completion_tokens": 774,
+    "total_tokens": 10359,
+    "attempted_request_count": 1,
+    "mode": "live_model"
+  },
+  "cost": {
+    "status": "calculated_from_supplied_rates",
+    "currency": "CNY",
+    "amount": 0.050724,
+    "input_cost_per_million": 4.0,
+    "output_cost_per_million": 16.0,
+    "basis": "provider-reported tokens multiplied by caller-supplied public list rates; not a billing receipt",
+    "pricing_source": "https://help.aliyun.com/zh/model-studio/model-pricing",
+    "pricing_tier": "Mainland China, 0<Token<=32K",
+    "pricing_verified_at": "2026-08-19"
+  },
+  "validation": {
+    "status": "passed",
+    "mode": "hidden_holdout",
+    "baseline_score": 0.16666666666666666,
+    "observed_scores": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "observed_score": 1.0,
+    "candidate_intact": true,
+    "protected_files_intact": true,
+    "reason": ""
+  },
+  "failure": {
+    "error": ""
+  },
+  "boundaries": [
+    "The task replays the effective change from more-itertools pull request #944 against the merge commit's first parent; it is not an official project benchmark.",
+    "The public and hidden cases are a ReproPilot split of the upstream strict-counts regression plus explicit iterator and non-regression cases.",
+    "The pull request head and merge commit are retained as provenance for human review and are not included in candidate proposer context.",
+    "A contract pass proves the frozen cases and upstream suite passed; it does not prove semantic equivalence with the maintainer patch.",
+    "The candidate was executed by local subprocess with a stripped environment, not a network-isolated container.",
+    "The hidden evaluator content was excluded from proposer context but remains inspectable in this public evidence package.",
+    "Any monetary amount is token-derived from the cited public rate and is not a billing-console receipt."
+  ],
+  "artifact_sha256": {
+    "candidate.patch": "7c63be821115ffc8bc0a6cc328520d6e3c11ee85667e304ffa2e46742775400a",
+    "final-files/more_itertools/more.py": "1775358d0eb9d5b8e94b5060a2c24761d44c98bfca369c4cda7a8dd41af13530",
+    "frozen-spec.json": "f04517bcf9f5db0dc3530c09b3b80cd1612703c31a421e77b9e14e623533fb48",
+    "initial-files/more_itertools/more.py": "daf4ffc89d1ebafdb47a1ed1376ce017c281547130f456e6821a5e74eabad1df",
+    "model-responses.json": "478112fad4a28609d65694c8a6ccf0d851ffefb667a160bc9de17cf4691d91ab",
+    "README.md": "044565afa2e5eacc594498e547cfe1829046fba3d7084008b59b8cc55f5a9863",
+    "task-input.json": "c439c91f9958347d7d08d25795e355e033e87e59cf400e970ad4927af464a5a8",
+    "trial-ledger.json": "902632c28d77247339c8119d0f21872d4a381bf4f7c54370a7f9f3ec78fd3498",
+    "validation-report.json": "f6d69b0fda3e1fe7bc9a4097677f5b9c1e1eafc896c11c2cf9192591a0c52736"
+  }
+}

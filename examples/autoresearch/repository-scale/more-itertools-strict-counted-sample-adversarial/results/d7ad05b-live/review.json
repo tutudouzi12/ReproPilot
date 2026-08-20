@@ -1,0 +1,58 @@
+{
+  "version": "repropilot.repository-evaluation-review/v1",
+  "status": "hidden_holdout_rejected_eager_iterable_materialization",
+  "automated_evidence": {
+    "outcome": "hidden_validation_failed",
+    "public_baseline": 0.6666666666666666,
+    "public_best": 1.0,
+    "hidden_baseline": 0.2,
+    "hidden_validation_runs": [
+      0.9,
+      0.9,
+      0.9
+    ],
+    "failed_hidden_case": "strict_counts_remain_lazy",
+    "provider_attempts": 1,
+    "provider_usage_reports": 1,
+    "reported_prompt_tokens": 9585,
+    "reported_completion_tokens": 1261,
+    "reported_total_tokens": 10846,
+    "token_derived_cost_cny": 0.058516,
+    "publicly_accepted_trials": 1,
+    "candidate_intact": true,
+    "protected_files_intact": true
+  },
+  "candidate_review": {
+    "decision": "reject",
+    "finding": "The candidate converts both population and counts to complete lists before sampling.",
+    "impact": "The implementation is no longer streaming for unknown-length iterables, adds input-sized memory use, and may not terminate for unbounded inputs.",
+    "hidden_observation": "strict_counts_remain_lazy raised AssertionError because counts was consumed past the population item in all three fresh validation runs.",
+    "upstream_difference": "The merged upstream repair moves the strict reservoir-length check outside suppress(StopIteration) without materializing either iterable."
+  },
+  "manual_observations": [
+    {
+      "severity": "hidden_acceptance_failure",
+      "finding": "The candidate reached the public target and passed the upstream suite, but improved hidden score from 0.2 to only 0.9.",
+      "impact": "The frozen hidden minimum delta is 0.8, requiring a score of 1.0 from this baseline; the candidate therefore fails final acceptance.",
+      "disposition": "Retain the public Keep decision and final hidden Reject as separate stages of the same run."
+    },
+    {
+      "severity": "candidate_regression",
+      "finding": "Eager list conversion is broader than the requested exception-flow repair.",
+      "impact": "Passing finite test inputs does not preserve lazy iterator semantics.",
+      "disposition": "Do not count this candidate as a successful repository repair."
+    },
+    {
+      "severity": "benchmark_provenance",
+      "finding": "This holdout was created after manual review of c261d99-live and reuses the same repository revision.",
+      "impact": "It is useful adversarial evidence but is neither an independent task discovery nor a fourth unique repository.",
+      "disposition": "Report it separately from unique-repository aggregates."
+    },
+    {
+      "severity": "cost_boundary",
+      "finding": "The only provider attempt returned complete token usage.",
+      "impact": "The recorded 0.058516 CNY is reproducible from caller-supplied public rates, but is not a billing receipt.",
+      "disposition": "Label the amount as token-derived cost."
+    }
+  ]
+}

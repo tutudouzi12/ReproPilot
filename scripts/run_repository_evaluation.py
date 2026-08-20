@@ -289,7 +289,7 @@ def live_proposer(
         responses.append(record)
         try:
             completion = await client.complete_with_usage(
-                "You are a bounded AutoResearch candidate proposer. Return strict JSON only with status, diagnosis, hypothesis, reason and patches. The status value MUST be exactly 'candidate' when proposing patches or 'stop' when no safe patch should be attempted. Each patch must contain path and complete replacement content. Patch only listed editable files. Never modify evaluators, tests, metrics, commands, dependencies or budgets; never add network access, subprocesses, fake metrics or fake predictions. Preserve ordinary upstream behavior while fixing the stated task.",
+                "You are a bounded AutoResearch candidate proposer. Return strict JSON only with status, diagnosis, hypothesis, reason and patches. The status value MUST be exactly 'candidate' when proposing patches or 'stop' when no safe patch should be attempted. Each patch must contain path and either complete replacement content or an exact search and replace pair. When editable file context mode is excerpts, you MUST use search/replace so unseen source is preserved; search must match exactly once. Patch only listed editable files. Never modify evaluators, tests, metrics, commands, dependencies or budgets; never add network access, subprocesses, fake metrics or fake predictions. Preserve ordinary upstream behavior while fixing the stated task.",
                 sent_context,
             )
         except Exception as exc:
@@ -397,6 +397,9 @@ def render_report(result: dict[str, Any], ledger: TrialLedger | None, task: dict
         f"- Outcome: `{result['outcome']}`",
         f"- Public baseline -> best: `{result['search']['baseline_score']}` -> `{result['search']['best_score']}`",
         f"- Hidden baseline -> observed: `{result['validation']['baseline_score']}` -> `{result['validation']['observed_score']}`",
+        f"- Validation acceptance: `{result['validation']['acceptance_rule']}`, "
+        f"target `{result['validation']['acceptance_target_score']}`, "
+        f"delta `{result['validation']['acceptance_delta']}`",
         f"- Model: `{result['model']['provider']}/{result['model']['model']}`",
         f"- Requests/tokens: `{result['model']['request_count']}` / `{result['model']['total_tokens']}`",
         f"- Token-derived cost: `{amount}`",
@@ -536,6 +539,9 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
             "status": report.status if report is not None else "not_run",
             "mode": report.validation_mode if report is not None else "hidden_holdout",
             "baseline_score": ledger.holdout_baseline_score if ledger is not None else baseline["baseline"]["hidden_score"],
+            "acceptance_rule": report.acceptance_rule if report is not None else "not_run",
+            "acceptance_delta": report.acceptance_delta if report is not None else None,
+            "acceptance_target_score": report.acceptance_target_score if report is not None else None,
             "observed_scores": report.observed_scores if report is not None else [],
             "observed_score": validation_observed,
             "candidate_intact": report.candidate_intact if report is not None else False,

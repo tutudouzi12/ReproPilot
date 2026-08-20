@@ -1,0 +1,32 @@
+[
+  {
+    "request_number": 1,
+    "context_sha256": "3f75d1710d251b9cdbc79b7399ae4e5e569bf3d30a3ff58bcdfdeebeb4bea749",
+    "context_characters": 34945,
+    "usage": null,
+    "raw_content": "",
+    "parsed_proposal": null,
+    "parse_error": "",
+    "request_error": "RemoteProtocolError: Server disconnected without sending a response."
+  },
+  {
+    "request_number": 2,
+    "context_sha256": "5fc7222a15434d810486dbcb8bdff74d77cac617e832889fc609700f6b7a1ac3",
+    "context_characters": 35381,
+    "usage": null,
+    "raw_content": "",
+    "parsed_proposal": null,
+    "parse_error": "",
+    "request_error": "ReadTimeout: "
+  },
+  {
+    "request_number": 3,
+    "context_sha256": "b2cf72dcb751bda8589248b7ec89d6f44793e600d410313a97f5a848c7a9cc25",
+    "context_characters": 35635,
+    "usage": null,
+    "raw_content": "",
+    "parsed_proposal": null,
+    "parse_error": "",
+    "request_error": "ReadTimeout: "
+  }
+]

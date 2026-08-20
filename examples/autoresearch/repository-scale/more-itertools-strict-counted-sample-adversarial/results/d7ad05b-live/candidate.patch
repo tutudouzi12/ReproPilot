@@ -1,0 +1,129 @@
+--- a/more_itertools/more.py
++++ b/more_itertools/more.py
+@@ -3708,33 +3708,116 @@
+ 
+ 
+ def _sample_counted(population, k, counts, strict):
++    # Convert to lists to allow multiple iterations and length checking
++    population = list(population)
++    counts = list(counts)
++    
++    # Calculate total population size
++    total_population = sum(counts)
++    
++    # If strict and requested sample is larger than population, raise error
++    if strict and k > total_population:
++        raise ValueError('Sample larger than population')
++    
++    # If k is 0, return empty list
++    if k == 0:
++        return []
++    
++    # If k is greater than or equal to total population and not strict, return full population
++    if not strict and k >= total_population:
++        result = []
++        for element, count in zip(population, counts):
++            result.extend([element] * count)
++        shuffle(result)
++        return result
++    
++    # Perform the actual sampling
+     element = None
+     remaining = 0
+-
++    
++    # Create iterators again for the sampling process
++    pop_iter = iter(population)
++    count_iter = iter(counts)
++    
+     def feed(i):
+         # Advance *i* steps ahead and consume an element
+         nonlocal element, remaining
+-
++        
+         while i + 1 > remaining:
+             i = i - remaining
+-            element = next(population)
+-            remaining = next(counts)
++            try:
++                element = next(pop_iter)
++            except StopIteration:
++                # If we run out of elements, we've exhausted the population
++                raise StopIteration
++            remaining = next(count_iter)
+         remaining -= i + 1
+         return element
+-
++    
++    # Reset iterators for actual sampling
++    pop_iter = iter(population)
++    count_iter = iter(counts)
++    
++    element = None
++    remaining = 0
++    
++    def feed_reset(i):
++        # Advance *i* steps ahead and consume an element
++        nonlocal element, remaining
++        
++        while i + 1 > remaining:
++            i = i - remaining
++            try:
++                element = next(pop_iter)
++            except StopIteration:
++                # If we run out of elements, we've exhausted the population
++                raise StopIteration
++            remaining = next(count_iter)
++        remaining -= i + 1
++        return element
++    
++    # We need to recreate the original logic with fresh iterators
++    # Create new iterators for this specific sampling attempt
++    pop_iter_local = iter(population)
++    count_iter_local = iter(counts)
++    
++    element_local = None
++    remaining_local = 0
++    
++    def feed_local(i):
++        # Advance *i* steps ahead and consume an element
++        nonlocal element_local, remaining_local
++        
++        while i + 1 > remaining_local:
++            i = i - remaining_local
++            try:
++                element_local = next(pop_iter_local)
++            except StopIteration:
++                # If we run out of elements, we've exhausted the population
++                raise StopIteration
++            remaining_local = next(count_iter_local)
++        remaining_local -= i + 1
++        return element_local
++    
+     with suppress(StopIteration):
+         reservoir = []
+         for _ in range(k):
+-            reservoir.append(feed(0))
++            try:
++                reservoir.append(feed_local(0))
++            except StopIteration:
++                break
+         if strict and len(reservoir) < k:
+             raise ValueError('Sample larger than population')
+ 
+         W = 1.0
+         while True:
+-            W *= exp(log(random()) / k)
+-            skip = floor(log(random()) / log1p(-W))
+-            element = feed(skip)
+-            reservoir[randrange(k)] = element
++            try:
++                W *= exp(log(random()) / k)
++                skip = floor(log(random()) / log1p(-W))
++                element_local = feed_local(skip)
++                reservoir[randrange(k)] = element_local
++            except StopIteration:
++                break
+ 
+     shuffle(reservoir)
+     return reservoir
