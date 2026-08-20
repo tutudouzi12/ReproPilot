@@ -1,0 +1,78 @@
+{
+  "version": "repropilot.repository-benchmark-run-selection/v1",
+  "benchmark_id": "repository-scale-pilot-v1",
+  "recorded_at": "2026-08-20T02:20:58Z",
+  "selection_policy": {
+    "primary_run": "one manually reviewed release-evidence run per independent task",
+    "development_history": "retained earlier runs contribute failure evidence but not selected contract-pass metrics",
+    "adversarial_followup": "candidate-informed tasks remain separate from independent repository aggregates",
+    "pass_at_1": "selected primary run is manually accepted and used exactly one provider attempt",
+    "chronological_first_run": "earliest retained run per independent task; reported separately to expose development-history selection bias"
+  },
+  "runs": [
+    {
+      "task_id": "rank-bm25-boundary-robustness",
+      "role": "development_history",
+      "contract_alignment": "historical_pre_portability_contract",
+      "result": "rank-bm25-boundary-robustness/results/af1178b-live/result.json",
+      "result_sha256": "e935b152ec49c59f809b17109da6dfbaaa19df44c9d9151a46272b5afc6c6f33",
+      "review": "rank-bm25-boundary-robustness/results/af1178b-live/review.json",
+      "review_sha256": "0aa2539dac8ede3b716d6a52e733814e93e52e1e9f86d98f9888cc1256c5f9b6"
+    },
+    {
+      "task_id": "rank-bm25-boundary-robustness",
+      "role": "primary",
+      "contract_alignment": "historical_pre_portability_contract",
+      "result": "rank-bm25-boundary-robustness/results/66b1b7a-live/result.json",
+      "result_sha256": "f204e03f128ccc5a3785ef797b78dd7341f73e35ad28ee31575845d9898e481d",
+      "review": "rank-bm25-boundary-robustness/results/66b1b7a-live/review.json",
+      "review_sha256": "055027b831e48e27c4cf11b1786e8894d493282ad9c78b11cba78a835cefe595"
+    },
+    {
+      "task_id": "humanize-naturalsize-rounding",
+      "role": "primary",
+      "result": "humanize-naturalsize-rounding/results/6511078-live/result.json",
+      "result_sha256": "0d67a1ba8574d4fbb69530312e2ecb86936f0889e29284f59c2b76e7271173d0",
+      "review": "humanize-naturalsize-rounding/results/6511078-live/review.json",
+      "review_sha256": "04ef3a48e2bf39a63e0470febd644842d8661b49357f2ce1bc44b17e323f0187"
+    },
+    {
+      "task_id": "more-itertools-strict-counted-sample",
+      "role": "development_history",
+      "result": "more-itertools-strict-counted-sample/results/da3cfdd-live/result.json",
+      "result_sha256": "89c6e4b2f813677c7c54f82b424dc4beb12b463fdde32906c006bcaf7a9aca90",
+      "review": "more-itertools-strict-counted-sample/results/da3cfdd-live/review.json",
+      "review_sha256": "25083380b6fb86d40f8d435802e7f41fa86835d9e65a9ee030ae4190ee3b71a6"
+    },
+    {
+      "task_id": "more-itertools-strict-counted-sample",
+      "role": "development_history",
+      "result": "more-itertools-strict-counted-sample/results/69843c7-live/result.json",
+      "result_sha256": "750dc91ec094370f9061eb9a286e69d5e801aebea3c135da74bef4d16e38114b",
+      "review": "more-itertools-strict-counted-sample/results/69843c7-live/review.json",
+      "review_sha256": "8d474e3b844b220ddd26e6f7ef9dbe33c1698547f0e133b175ea8a71ead5f5cd"
+    },
+    {
+      "task_id": "more-itertools-strict-counted-sample",
+      "role": "primary",
+      "result": "more-itertools-strict-counted-sample/results/c261d99-live/result.json",
+      "result_sha256": "b334d770d51ac5db162a0f1359ed70d6d14881f49292b0b8efb681ad4f314680",
+      "review": "more-itertools-strict-counted-sample/results/c261d99-live/review.json",
+      "review_sha256": "328c1220acf08fac9d7225a2c6f035c2282bd3ff24f7ca241d1ac4e6ba36aaf1"
+    },
+    {
+      "task_id": "more-itertools-strict-counted-sample-adversarial",
+      "role": "adversarial_followup",
+      "result": "more-itertools-strict-counted-sample-adversarial/results/d7ad05b-live/result.json",
+      "result_sha256": "189ad23ec1c399e5b9bd346ea63e1ba276989c2d3241f5309836701467b6f9a4",
+      "review": "more-itertools-strict-counted-sample-adversarial/results/d7ad05b-live/review.json",
+      "review_sha256": "3f57df69cdeba8ba962c6fc7c8e6d7772e53bc07f8063752c7c87b3cec4df035"
+    }
+  ],
+  "boundaries": [
+    "Selected primary metrics are based on post-development run selection and are not an unbiased estimate of general software-engineering performance.",
+    "Chronological first-run metrics are reported separately so earlier failures remain visible.",
+    "The adversarial follow-up reuses more-itertools and is excluded from independent task and unique-repository counts.",
+    "Manual acceptance means the retained review accepts the run as bounded benchmark evidence; it does not claim upstream readiness or production equivalence."
+  ]
+}

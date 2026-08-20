@@ -1,6 +1,8 @@
 {
   "version": "repropilot.repository-evaluation-review/v1",
   "status": "provider_requests_failed_no_candidate",
+  "decision": "reject",
+  "classification": "provider_requests_failed_no_candidate",
   "automated_evidence": {
     "public_baseline": 0.6666666666666666,
     "public_best": 0.6666666666666666,

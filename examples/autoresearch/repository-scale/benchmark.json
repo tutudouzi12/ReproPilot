@@ -2,6 +2,7 @@
   "version": "repropilot.repository-benchmark/v1",
   "id": "repository-scale-pilot-v1",
   "title": "ReproPilot multi-repository pilot benchmark",
+  "run_selection": "run-selection.json",
   "protocol": {
     "baseline_required": true,
     "clean_checkout_required": true,

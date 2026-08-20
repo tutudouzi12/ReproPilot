@@ -50,3 +50,22 @@ py -3.11 scripts\run_repository_benchmark_preflight.py `
 ```
 
 The runner checks benchmark-to-task identity and contract hashes before delegating to the repository preflight. It continues across task failures, emits one aggregate result, and exits non-zero if any selected task fails. Retained output replaces local checkout and interpreter paths with task-scoped placeholders.
+
+## Audited aggregate report
+
+[`run-selection.json`](run-selection.json) freezes the role and SHA-256 of every retained `result.json` and `review.json`. Exactly one manually reviewed run is selected as release evidence for each independent task; earlier development runs and the candidate-informed adversarial follow-up remain visible but are not silently mixed into the same denominator.
+
+Regenerate [`benchmark-results.json`](benchmark-results.json) and the readable [`BENCHMARK_REPORT.md`](BENCHMARK_REPORT.md) in strict mode:
+
+```powershell
+py -3.11 scripts\build_repository_benchmark_report.py `
+  --benchmark examples\autoresearch\repository-scale\benchmark.json `
+  --selection examples\autoresearch\repository-scale\run-selection.json `
+  --json-output examples\autoresearch\repository-scale\benchmark-results.json `
+  --markdown-output examples\autoresearch\repository-scale\BENCHMARK_REPORT.md `
+  --strict
+```
+
+Strict mode verifies the benchmark contract hashes, selected result and review hashes, result artifact hashes, repository identity, clean harness state, normalized review decision, one-primary-run-per-independent-task rule, and complete selection of every retained result. Missing reviews, tampered artifacts, or unselected runs fail report generation.
+
+The report separates post-development selected-run metrics from chronological first-run metrics. This exposes selection bias instead of presenting the selected `pass@1` value as a general model capability estimate.

@@ -1,6 +1,8 @@
 {
   "version": "repropilot.repository-evaluation-review/v1",
   "status": "hidden_holdout_rejected_eager_iterable_materialization",
+  "decision": "reject",
+  "classification": "hidden_validation_failed",
   "automated_evidence": {
     "outcome": "hidden_validation_failed",
     "public_baseline": 0.6666666666666666,

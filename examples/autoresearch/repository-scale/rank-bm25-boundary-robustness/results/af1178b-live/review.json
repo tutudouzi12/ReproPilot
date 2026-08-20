@@ -1,0 +1,45 @@
+{
+  "version": "repropilot.repository-evaluation-review/v1",
+  "status": "hidden_validation_failed_all_empty_scores_nonfinite",
+  "decision": "reject",
+  "classification": "hidden_validation_failed",
+  "automated_evidence": {
+    "outcome": "hidden_validation_failed",
+    "public_baseline": 0.5555555555555556,
+    "public_best": 0.8888888888888888,
+    "hidden_baseline": 0.25,
+    "hidden_validation_runs": [
+      0.75,
+      0.75,
+      0.75
+    ],
+    "failed_hidden_case": "all_variants_keep_all_empty_scores_finite",
+    "provider_attempts": 3,
+    "provider_usage_reports": 3,
+    "reported_total_tokens": 26224,
+    "token_derived_cost_cny": 0.225568,
+    "publicly_accepted_trials": 1,
+    "candidate_intact": true,
+    "protected_files_intact": true
+  },
+  "candidate_review": {
+    "decision": "reject",
+    "finding": "The candidate handles a truly empty corpus but still produces non-finite scores when the corpus contains only empty documents.",
+    "impact": "All three BM25 variants emit a runtime warning and fail the frozen finite-score hidden case.",
+    "hidden_observation": "The fresh hidden score remained 0.75 in all three validation repetitions, below the frozen acceptance rule."
+  },
+  "manual_observations": [
+    {
+      "severity": "hidden_acceptance_failure",
+      "finding": "One public candidate was kept at 8/9, but the all-empty-document hidden case remained unresolved after the three-request cap.",
+      "impact": "The run is a real partial repair followed by hidden rejection, not a provider failure or complete contract pass.",
+      "disposition": "Retain the partial improvement and final hidden rejection as separate stages of the run."
+    },
+    {
+      "severity": "cost_boundary",
+      "finding": "All three provider attempts returned token usage.",
+      "impact": "The recorded 0.225568 CNY is reproducible from caller-supplied public rates, but is not a billing receipt.",
+      "disposition": "Label the amount as token-derived cost."
+    }
+  ]
+}

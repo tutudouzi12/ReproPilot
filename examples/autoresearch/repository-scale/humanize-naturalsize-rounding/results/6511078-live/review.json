@@ -1,6 +1,8 @@
 {
   "version": "repropilot.repository-evaluation-review/v1",
   "status": "contract_pass_with_review_boundary",
+  "decision": "accept_with_boundary",
+  "classification": "contract_pass_review_accepted",
   "automated_evidence": {
     "public_search_runs": [1.0, 1.0, 1.0],
     "hidden_validation_runs": [1.0, 1.0, 1.0],
