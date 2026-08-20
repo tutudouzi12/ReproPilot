@@ -1,0 +1,47 @@
+{
+  "version": "autoresearch.spec/v1",
+  "name": "flask-ipv6-host-parsing",
+  "repository_revision": "514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b",
+  "objective": "Fix Flask's bracketed IPv6 host parsing so session transactions retain cookies and app.run() resolves SERVER_NAME host and port correctly, without regressing hostname, IPv4, default-port, or explicit port-zero behavior.",
+  "editable_files": [
+    "src/flask/app.py",
+    "src/flask/testing.py"
+  ],
+  "protected_files": [
+    ".repropilot/uploads/02-evaluator.py",
+    ".repropilot/uploads/03-holdout_evaluator.py"
+  ],
+  "eval_command": [
+    "python",
+    ".repropilot/uploads/02-evaluator.py"
+  ],
+  "holdout_command": [
+    "python",
+    ".repropilot/uploads/03-holdout_evaluator.py"
+  ],
+  "guard_commands": [
+    ["python", "-m", "py_compile", "src/flask/app.py", "src/flask/testing.py"],
+    ["python", "-m", "pytest", "-q", "--color=no"]
+  ],
+  "metric_key": "metrics.ipv6_host_score",
+  "direction": "maximize",
+  "min_delta": 0.1,
+  "holdout_min_delta": 0.5,
+  "target_score": 1.0,
+  "max_trials": 8,
+  "max_wall_seconds": 600,
+  "search_runs": 3,
+  "search_aggregation": "worst",
+  "validation_runs": 3,
+  "dependencies": [
+    "pytest==9.1.1",
+    "asgiref==3.12.1",
+    "python-dotenv==1.2.3",
+    "Werkzeug==3.1.8",
+    "blinker==1.9.0",
+    "click==8.4.2",
+    "itsdangerous==2.2.0",
+    "Jinja2==3.1.6",
+    "MarkupSafe==3.0.3"
+  ]
+}

@@ -4,7 +4,7 @@ This directory contains bounded tasks against real, independently versioned GitH
 
 The local `.gitattributes` disables checkout line-ending rewriting for frozen inputs and retained artifacts so their recorded SHA256 values remain stable across Git configurations.
 
-These tasks exercise repository acquisition and real project code. They remain module-level repair experiments rather than claims about the full upstream product or a general software-engineering benchmark.
+These tasks exercise repository acquisition and real project code. They remain bounded repair experiments rather than claims about the full upstream product or a general software-engineering benchmark.
 
 ## Pilot tasks
 
@@ -13,9 +13,10 @@ These tasks exercise repository acquisition and real project code. They remain m
 | [`rank-bm25-boundary-robustness`](rank-bm25-boundary-robustness/) | ReproPilot boundary contract | `dorianbrown/rank_bm25@47aa3ddf8dc1ebeb7ef4e65f2b4536af44594099` | public `5/9`, hidden `1/4` | One real module plus the upstream test suite |
 | [`humanize-naturalsize-rounding`](humanize-naturalsize-rounding/) | Historical merged PR [#329](https://github.com/python-humanize/humanize/pull/329) | `python-humanize/humanize@976484a655df046aa6849f440a4f0cd44fc4918c` | public `4/6`, hidden `1/6` | One historical defect plus 701 upstream tests |
 | [`more-itertools-strict-counted-sample`](more-itertools-strict-counted-sample/) | Historical merged PR [#944](https://github.com/more-itertools/more-itertools/pull/944) | `more-itertools/more-itertools@18225d856665bfc3bfdfcdbfa585290f92645daf` | public `4/6`, hidden `1/6` | Counted-sampling exception flow plus 825 upstream tests |
+| [`flask-ipv6-host-parsing`](flask-ipv6-host-parsing/) | Historical merged PR [#6096](https://github.com/pallets/flask/pull/6096) | `pallets/flask@514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b` | public `2/4`, hidden `2/5` | Two production modules plus 491 upstream tests |
 | [`more-itertools-strict-counted-sample-adversarial`](more-itertools-strict-counted-sample-adversarial/) | Candidate-informed follow-up | Same pinned `more-itertools` base | public `4/6`, hidden `2/10` | Lazy-iterator non-regression; excluded from independent repository counts |
 
-The pilot therefore contains four tasks across three unique repositories. The adversarial follow-up is retained to show how manual review hardened a missed boundary; it is not an independent repository sample and must remain separately labeled in aggregates.
+The pilot therefore contains five tasks across four unique repositories. The adversarial follow-up is retained to show how manual review hardened a missed boundary; it is not an independent repository sample and must remain separately labeled in aggregates.
 
 ## Baseline contract
 
@@ -44,6 +45,8 @@ py -3.11 scripts\run_repository_benchmark_preflight.py `
   --python humanize-naturalsize-rounding=<humanize-python> `
   --checkout more-itertools-strict-counted-sample=<more-itertools-checkout> `
   --python more-itertools-strict-counted-sample=<more-itertools-python> `
+  --checkout flask-ipv6-host-parsing=<flask-checkout> `
+  --python flask-ipv6-host-parsing=<flask-python> `
   --checkout more-itertools-strict-counted-sample-adversarial=<more-itertools-checkout> `
   --python more-itertools-strict-counted-sample-adversarial=<more-itertools-python> `
   --output <preflight-report.json>

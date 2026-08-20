@@ -1,0 +1,94 @@
+{
+  "version": "repropilot.repository-baseline/v1",
+  "recorded_at": "2026-08-20T05:30:57.669168Z",
+  "task_id": "flask-ipv6-host-parsing",
+  "repository": {
+    "url": "https://github.com/pallets/flask.git",
+    "requested_revision": "514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b",
+    "actual_revision": "514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b",
+    "source_tree_dirty": false,
+    "git_blob_sha256": {
+      "src/flask/app.py": "ed0ad667fc7ac326a7bdc317532d943af1dc3d8a9ad9f80a0a51f7fd9e8d3ca7",
+      "src/flask/testing.py": "60c60294d716a6102e9993ad8f14930ad421fde322d8d3b54c7be642acbad560",
+      "tests/test_basic.py": "02f801a3648fa63d8117111b1d8e3219aa946062f584fd9b252de5db6ac8ec17",
+      "tests/test_testing.py": "6d3a048b696cb704b29dc09c712d0ac6e52cfe28d5068a324c1b0b54dcd6fdab",
+      "pyproject.toml": "d4b8029dc2ce71866e45fee381bdfb91e0cfc35a67715c5e591bdde80cfc25f8",
+      "LICENSE.txt": "489a8e1108509ed98a37bb983e11e0f7e1d31f0bd8f99a79c8448e7ff37d07ea"
+    },
+    "working_tree_matches_git_blobs": true
+  },
+  "environment": {
+    "distributions": {
+      "Flask": "3.2.0.dev0",
+      "Jinja2": "3.1.6",
+      "MarkupSafe": "3.0.3",
+      "Werkzeug": "3.1.8",
+      "asgiref": "3.12.1",
+      "blinker": "1.9.0",
+      "click": "8.4.2",
+      "itsdangerous": "2.2.0",
+      "pytest": "9.1.1",
+      "python-dotenv": "1.2.3"
+    },
+    "implementation": "CPython",
+    "platform": "Windows-10-10.0.22631-SP0",
+    "version": "3.11.9"
+  },
+  "commands": {
+    "upstream_tests": {
+      "command": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "--color=no"
+      ],
+      "working_directory": "{target_checkout}",
+      "exit_code": 0,
+      "stdout": "........................................................................ [ 14%]\n........................................................................ [ 29%]\n........................................................................ [ 43%]\n........................................................................ [ 58%]\n........................................................................ [ 73%]\n........................................................................ [ 87%]\n...........................................................              [100%]\n491 passed in 5.19s\n",
+      "stderr": "",
+      "duration_ms": 6314
+    },
+    "public_evaluator": {
+      "command": [
+        "{python}",
+        "{task_dir}/evaluator.py"
+      ],
+      "working_directory": "{target_checkout}",
+      "exit_code": 0,
+      "stdout": "{\"metrics\": {\"ipv6_host_score\": 0.5}, \"passed\": 2, \"total\": 4, \"cases\": [{\"name\": \"session_hostname\", \"base_url\": \"http://localhost:8000/\", \"expected\": \"42\", \"observed\": \"42\", \"passed\": true}, {\"name\": \"session_ipv6_loopback\", \"base_url\": \"http://[::1]:8000/\", \"expected\": \"42\", \"observed\": \"None\", \"passed\": false}, {\"name\": \"run_hostname\", \"server_name\": \"localhost:8080\", \"expected\": [\"localhost\", 8080], \"observed\": [\"localhost\", 8080], \"passed\": true}, {\"name\": \"run_ipv6_loopback\", \"server_name\": \"[::1]:8080\", \"expected\": [\"::1\", 8080], \"observed\": null, \"error\": \"ValueError: invalid literal for int() with base 10: ':1]:8080'\", \"passed\": false}]}\n",
+      "stderr": "",
+      "duration_ms": 637
+    },
+    "hidden_evaluator": {
+      "command": [
+        "{python}",
+        "{task_dir}/holdout_evaluator.py"
+      ],
+      "working_directory": "{target_checkout}",
+      "exit_code": 0,
+      "stdout": "{\"metrics\": {\"ipv6_host_score\": 0.4}, \"passed\": 2, \"total\": 5, \"cases\": [{\"name\": \"session_ipv4\", \"base_url\": \"http://127.0.0.1:8000/\", \"expected\": \"42\", \"observed\": \"42\", \"passed\": true}, {\"name\": \"session_ipv6_full\", \"base_url\": \"http://[2001:db8::1]:8443/\", \"expected\": \"42\", \"observed\": \"None\", \"passed\": false}, {\"name\": \"run_ipv4_port_zero\", \"server_name\": \"127.0.0.1:0\", \"expected\": [\"127.0.0.1\", 0], \"observed\": [\"127.0.0.1\", 0], \"passed\": true}, {\"name\": \"run_ipv6_full\", \"server_name\": \"[2001:db8::1]:8443\", \"expected\": [\"2001:db8::1\", 8443], \"observed\": null, \"error\": \"ValueError: invalid literal for int() with base 10: 'db8::1]:8443'\", \"passed\": false}, {\"name\": \"run_ipv6_default_port\", \"server_name\": \"[::1]\", \"expected\": [\"::1\", 5000], \"observed\": null, \"error\": \"ValueError: invalid literal for int() with base 10: ':1]'\", \"passed\": false}]}\n",
+      "stderr": "",
+      "duration_ms": 621
+    }
+  },
+  "baseline": {
+    "upstream_tests_passed": true,
+    "public_score": 0.5,
+    "hidden_score": 0.4,
+    "metric_key": "metrics.ipv6_host_score"
+  },
+  "task_artifact_sha256": {
+    "autoresearch.json": "977a3f3058ac8047d2f972078f8616040126c8bfe3eaa16eaaa42b4d59eaafd5",
+    "evaluator.py": "9f8ecca2d727f09dfdb3477b2ffdd25ce30a1e62edce3616e8850f3672b06598",
+    "holdout_evaluator.py": "66a9af07294a4b582953ec62cb24fed970253fd4972d61dc8838f27fb4a98af4",
+    "README.md": "5487056f98fee0d59017a5713512315862f557b6ce44ba3aa62f2fc7b0382c38",
+    "task.json": "745d7d72b369457d81008f229dd542a5a1f3ddd2e6f0570f1d023e1d56638301"
+  },
+  "boundaries": [
+    "The task replays Flask issue #6093 and pull request #6096 against the merge commit's first parent; it is not an official Flask benchmark.",
+    "The public evaluator covers loopback IPv6 and ordinary-host controls; the hidden evaluator uses a full IPv6 address, an omitted port, IPv4, and explicit port zero.",
+    "The pull request head and merge commit are retained as provenance for human review and are not included in candidate proposer context.",
+    "A contract pass proves the frozen cases and pinned upstream suite passed; it does not prove semantic equivalence with the maintainer patch or complete IPv6 correctness."
+  ]
+}

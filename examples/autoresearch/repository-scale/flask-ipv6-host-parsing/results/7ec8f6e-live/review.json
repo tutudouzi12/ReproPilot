@@ -1,0 +1,113 @@
+{
+  "version": "repropilot.repository-evaluation-review/v1",
+  "status": "automated_contract_passed_manual_review_rejected",
+  "decision": "reject",
+  "classification": "manual_review_rejected_after_contract_pass",
+  "automated_evidence": {
+    "outcome": "validation_passed",
+    "public_baseline": 0.5,
+    "public_best": 1.0,
+    "hidden_baseline": 0.4,
+    "hidden_validation_runs": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "provider_attempts": 3,
+    "provider_usage_reports": 3,
+    "reported_prompt_tokens": 33044,
+    "reported_completion_tokens": 2348,
+    "reported_total_tokens": 35392,
+    "token_derived_cost_cny": 0.169744,
+    "completed_trials": 3,
+    "accepted_trials": 1,
+    "candidate_intact": true,
+    "protected_files_intact": true,
+    "upstream_tests_per_evaluated_sample": "491 passed"
+  },
+  "search_history": [
+    {
+      "trial": 1,
+      "decision": "reject",
+      "finding": "The first patch preserved the brackets in app.run() and did not repair the session cookie path; the public score remained 0.5."
+    },
+    {
+      "trial": 2,
+      "decision": "reject",
+      "finding": "The second proposal could not be applied because its localized search matched zero locations."
+    },
+    {
+      "trial": 3,
+      "decision": "keep",
+      "finding": "The third patch reached public 1.0 and the frozen hidden holdout returned 1.0 in all three validation runs."
+    }
+  ],
+  "candidate_review": {
+    "decision": "reject",
+    "finding": "The candidate manually slices bracketed hosts and passes every frozen valid-host case, but it sends malformed or out-of-range values to run_simple() instead of rejecting them.",
+    "impact": "SERVER_NAME='[::1' reaches run_simple('[::1', 5000), and SERVER_NAME='[::1]:65536' reaches run_simple('::1', 65536). The pinned base and merged upstream repair both raise before the server call for these bracketed inputs; localhost:65536 additionally demonstrates non-equivalence with the upstream port-range validation while preserving pinned-base behavior.",
+    "upstream_difference": "The merged repair delegates parsing to urllib.parse.urlsplit and reads its validated hostname and port properties rather than duplicating partial bracket parsing."
+  },
+  "manual_reproduction": {
+    "method": "Materialize the retained candidate files over the pinned base in a temporary directory, stub werkzeug.serving.run_simple, and execute the same Flask.run() matrix against the upstream merge checkout.",
+    "cases": [
+      {
+        "server_name": "[::1]:8080",
+        "candidate": "run_simple('::1', 8080)",
+        "upstream_merge": "run_simple('::1', 8080)"
+      },
+      {
+        "server_name": "[::1",
+        "candidate": "run_simple('[::1', 5000)",
+        "upstream_merge": "ValueError: Invalid IPv6 URL"
+      },
+      {
+        "server_name": "[::1]:65536",
+        "candidate": "run_simple('::1', 65536)",
+        "upstream_merge": "ValueError: Port out of range 0-65535"
+      },
+      {
+        "server_name": "localhost:65536",
+        "candidate": "run_simple('localhost', 65536)",
+        "upstream_merge": "ValueError: Port out of range 0-65535"
+      }
+    ]
+  },
+  "style_review": {
+    "tool": "ruff==0.16.0",
+    "configuration": "pinned Flask pyproject.toml",
+    "command_mode": "check --no-fix",
+    "exit_code": 1,
+    "violations": {
+      "E501_line_too_long": 4,
+      "W293_blank_line_contains_whitespace": 1
+    },
+    "artifact_restored_and_hash_verified": true
+  },
+  "manual_observations": [
+    {
+      "severity": "candidate_regression",
+      "finding": "The frozen evaluators cover valid bracketed IPv6 hosts but not malformed brackets or out-of-range ports.",
+      "impact": "A partial manual parser can pass the contract while weakening rejection behavior outside the frozen cases.",
+      "disposition": "Retain the automated pass and exact trajectory, but exclude this candidate from manually accepted repair-success claims."
+    },
+    {
+      "severity": "maintainability",
+      "finding": "The candidate duplicates host parsing across two files and fails the pinned Flask Ruff configuration with five violations.",
+      "impact": "The patch is not upstream-ready even though the existing test suite and frozen evaluators pass.",
+      "disposition": "Do not normalize or reformat the retained candidate artifact; preserve the original model output and record the lint failure separately."
+    },
+    {
+      "severity": "benchmark_gap",
+      "finding": "The current hidden holdout lacks malformed-bracket and port-range cases.",
+      "impact": "The automated contract establishes the stated valid-host behavior but is insufficient for accepting the broader parsing implementation.",
+      "disposition": "Strengthen a later version or adversarial follow-up without rewriting this completed run retroactively."
+    },
+    {
+      "severity": "cost_boundary",
+      "finding": "All three provider attempts returned token usage.",
+      "impact": "The recorded 0.169744 CNY is reproducible from caller-supplied public rates and reported tokens, but is not a billing receipt.",
+      "disposition": "Report the amount only as token-derived cost."
+    }
+  ]
+}

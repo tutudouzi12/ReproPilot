@@ -1,33 +1,33 @@
 {
   "version": "repropilot.repository-benchmark-report/v1",
-  "recorded_at": "2026-08-20T02:20:58Z",
+  "recorded_at": "2026-08-20T05:47:10Z",
   "benchmark_id": "repository-scale-pilot-v1",
   "benchmark_title": "ReproPilot multi-repository pilot benchmark",
-  "benchmark_sha256": "696b26958c88362e94d813977b5760ec69b666658e6c956c215eccb5a0fe2363",
-  "run_selection_sha256": "71c4adab646efafee3b275ea54129d38ba7a9583bcac06b74c6fc4250b3da9be",
+  "benchmark_sha256": "fe65bff51cf98a2c94bc4d0d13e5ef7853464512436786d99d675adb3ebde5fe",
+  "run_selection_sha256": "143805af654c9a0e6da6e4253adec57bfcbd06f9ac179d4dbfaeabe3286822d2",
   "inventory": {
-    "task_count": 4,
-    "independent_task_count": 3,
-    "unique_repository_count": 3,
+    "task_count": 5,
+    "independent_task_count": 4,
+    "unique_repository_count": 4,
     "adversarial_followup_task_count": 1,
-    "retained_run_count": 7,
-    "selected_primary_run_count": 3
+    "retained_run_count": 8,
+    "selected_primary_run_count": 4
   },
   "selected_primary_metrics": {
     "automated_contract_pass_rate": {
-      "numerator": 3,
-      "denominator": 3,
+      "numerator": 4,
+      "denominator": 4,
       "rate": 1.0
     },
     "manual_acceptance_rate": {
       "numerator": 2,
-      "denominator": 3,
-      "rate": 0.6666666666666666
+      "denominator": 4,
+      "rate": 0.5
     },
     "pass_at_1": {
       "numerator": 2,
-      "denominator": 3,
-      "rate": 0.6666666666666666
+      "denominator": 4,
+      "rate": 0.5
     },
     "mean_public_to_hidden_gap": 0.0,
     "upstream_regression_rate": {
@@ -38,15 +38,16 @@
   "chronological_first_run_metrics": {
     "automated_pass_at_1": {
       "numerator": 1,
-      "denominator": 3,
-      "rate": 0.3333333333333333
+      "denominator": 4,
+      "rate": 0.25
     },
     "manual_pass_at_1": {
       "numerator": 1,
-      "denominator": 3,
-      "rate": 0.3333333333333333
+      "denominator": 4,
+      "rate": 0.25
     },
     "runs": [
+      "flask-ipv6-host-parsing/results/7ec8f6e-live/result.json",
       "humanize-naturalsize-rounding/results/6511078-live/result.json",
       "more-itertools-strict-counted-sample/results/da3cfdd-live/result.json",
       "rank-bm25-boundary-robustness/results/af1178b-live/result.json"
@@ -64,33 +65,33 @@
     }
   },
   "retained_evidence_totals": {
-    "attempted_requests": 13,
-    "completed_responses": 8,
-    "usage_reports": 8,
-    "reported_tokens": 79096,
+    "attempted_requests": 16,
+    "completed_responses": 11,
+    "usage_reports": 11,
+    "reported_tokens": 114488,
     "known_token_derived_cost": {
       "currency": "CNY",
-      "amount": 0.43964,
-      "runs_with_calculated_cost": 5,
+      "amount": 0.609384,
+      "runs_with_calculated_cost": 6,
       "runs_without_complete_cost": 2
     }
   },
   "automated_outcome_distribution": {
     "candidate_stopped": 2,
     "hidden_validation_failed": 2,
-    "validation_passed": 3
+    "validation_passed": 4
   },
   "review_classification_distribution": {
     "contract_pass_review_accepted": 2,
     "guard_rejection_then_provider_failures": 1,
     "hidden_validation_failed": 2,
-    "manual_review_rejected_after_contract_pass": 1,
+    "manual_review_rejected_after_contract_pass": 2,
     "provider_requests_failed_no_candidate": 1
   },
   "failure_reason_distribution": {
     "guard_rejection_then_provider_failures": 1,
     "hidden_validation_failed": 2,
-    "manual_review_rejected_after_contract_pass": 1,
+    "manual_review_rejected_after_contract_pass": 2,
     "provider_requests_failed_no_candidate": 1
   },
   "selected_primary_runs": [
@@ -175,6 +176,34 @@
       "public_baseline": 0.6666666666666666,
       "public_best": 1.0,
       "hidden_baseline": 0.16666666666666666,
+      "hidden_observed": 1.0,
+      "public_to_hidden_gap": 0.0
+    },
+    {
+      "task_id": "flask-ipv6-host-parsing",
+      "role": "primary",
+      "run_id": "7ec8f6e-live",
+      "result": "flask-ipv6-host-parsing/results/7ec8f6e-live/result.json",
+      "review": "flask-ipv6-host-parsing/results/7ec8f6e-live/review.json",
+      "recorded_at": "2026-08-20T05:40:06.686323Z",
+      "harness_revision": "7ec8f6ebd47cdea471ec0a0c267b379cb4bca5b2",
+      "repository_url": "https://github.com/pallets/flask.git",
+      "contract_alignment": "current_contract",
+      "outcome": "validation_passed",
+      "automated_contract_passed": true,
+      "manual_decision": "reject",
+      "manual_accepted": false,
+      "classification": "manual_review_rejected_after_contract_pass",
+      "attempted_requests": 3,
+      "completed_responses": 3,
+      "usage_reports": 3,
+      "reported_tokens": 35392,
+      "cost_status": "calculated_from_supplied_rates",
+      "cost_amount": 0.169744,
+      "cost_currency": "CNY",
+      "public_baseline": 0.5,
+      "public_best": 1.0,
+      "hidden_baseline": 0.4,
       "hidden_observed": 1.0,
       "public_to_hidden_gap": 0.0
     }
@@ -379,6 +408,34 @@
       "public_to_hidden_gap": 0.0
     },
     {
+      "task_id": "flask-ipv6-host-parsing",
+      "role": "primary",
+      "run_id": "7ec8f6e-live",
+      "result": "flask-ipv6-host-parsing/results/7ec8f6e-live/result.json",
+      "review": "flask-ipv6-host-parsing/results/7ec8f6e-live/review.json",
+      "recorded_at": "2026-08-20T05:40:06.686323Z",
+      "harness_revision": "7ec8f6ebd47cdea471ec0a0c267b379cb4bca5b2",
+      "repository_url": "https://github.com/pallets/flask.git",
+      "contract_alignment": "current_contract",
+      "outcome": "validation_passed",
+      "automated_contract_passed": true,
+      "manual_decision": "reject",
+      "manual_accepted": false,
+      "classification": "manual_review_rejected_after_contract_pass",
+      "attempted_requests": 3,
+      "completed_responses": 3,
+      "usage_reports": 3,
+      "reported_tokens": 35392,
+      "cost_status": "calculated_from_supplied_rates",
+      "cost_amount": 0.169744,
+      "cost_currency": "CNY",
+      "public_baseline": 0.5,
+      "public_best": 1.0,
+      "hidden_baseline": 0.4,
+      "hidden_observed": 1.0,
+      "public_to_hidden_gap": 0.0
+    },
+    {
       "task_id": "more-itertools-strict-counted-sample-adversarial",
       "role": "adversarial_followup",
       "run_id": "d7ad05b-live",
@@ -413,7 +470,7 @@
     "Chronological first-run metrics are reported separately so earlier failures remain visible.",
     "The adversarial follow-up reuses more-itertools and is excluded from independent task and unique-repository counts.",
     "Manual acceptance means the retained review accepts the run as bounded benchmark evidence; it does not claim upstream readiness or production equivalence.",
-    "This pilot contains four tasks across three unique repositories and is not a statistically representative software-engineering benchmark.",
+    "This pilot contains five tasks across four unique repositories and is not a statistically representative software-engineering benchmark.",
     "The candidate-informed adversarial follow-up reuses the more-itertools base and must not be counted as an independent repository sample.",
     "Historical bug provenance and ReproPilot-authored boundary contracts are labeled separately and must not be aggregated without retaining that distinction.",
     "A contract pass does not establish equivalence with an upstream maintainer patch or production readiness.",
