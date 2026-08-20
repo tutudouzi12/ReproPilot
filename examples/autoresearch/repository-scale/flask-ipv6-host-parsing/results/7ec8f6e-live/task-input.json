@@ -1,0 +1,83 @@
+{
+  "version": "repropilot.repository-evaluation-task/v1",
+  "id": "flask-ipv6-host-parsing",
+  "title": "Flask bracketed IPv6 host parsing",
+  "repository": {
+    "url": "https://github.com/pallets/flask.git",
+    "revision": "514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b",
+    "git_blob_sha256": {
+      "src/flask/app.py": "ed0ad667fc7ac326a7bdc317532d943af1dc3d8a9ad9f80a0a51f7fd9e8d3ca7",
+      "src/flask/testing.py": "60c60294d716a6102e9993ad8f14930ad421fde322d8d3b54c7be642acbad560",
+      "tests/test_basic.py": "02f801a3648fa63d8117111b1d8e3219aa946062f584fd9b252de5db6ac8ec17",
+      "tests/test_testing.py": "6d3a048b696cb704b29dc09c712d0ac6e52cfe28d5068a324c1b0b54dcd6fdab",
+      "pyproject.toml": "d4b8029dc2ce71866e45fee381bdfb91e0cfc35a67715c5e591bdde80cfc25f8",
+      "LICENSE.txt": "489a8e1108509ed98a37bb983e11e0f7e1d31f0bd8f99a79c8448e7ff37d07ea"
+    }
+  },
+  "provenance": {
+    "type": "historical_merged_pull_request",
+    "license": "BSD-3-Clause",
+    "issue_url": "https://github.com/pallets/flask/issues/6093",
+    "pull_request_url": "https://github.com/pallets/flask/pull/6096",
+    "base_commit": "514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b",
+    "fix_commit": "7203feabf723edae0286ae5dc64fec8ac4c91735",
+    "merged_commit": "05e9c6bd630ecf4ec0ec884b1fc7901663737bc7"
+  },
+  "objective": "Fix Flask's bracketed IPv6 host parsing so session transactions retain cookies and app.run() resolves SERVER_NAME host and port correctly, without regressing hostname, IPv4, default-port, or explicit port-zero behavior.",
+  "runtime": {
+    "python": "3.11",
+    "dependencies": [
+      "editable pinned Flask checkout",
+      "pytest==9.1.1",
+      "asgiref==3.12.1",
+      "python-dotenv==1.2.3",
+      "Werkzeug==3.1.8",
+      "blinker==1.9.0",
+      "click==8.4.2",
+      "itsdangerous==2.2.0",
+      "Jinja2==3.1.6",
+      "MarkupSafe==3.0.3"
+    ],
+    "distributions": [
+      "Flask",
+      "pytest",
+      "asgiref",
+      "python-dotenv",
+      "Werkzeug",
+      "blinker",
+      "click",
+      "itsdangerous",
+      "Jinja2",
+      "MarkupSafe"
+    ]
+  },
+  "commands": {
+    "upstream_tests": [
+      "python",
+      "-m",
+      "pytest",
+      "-q",
+      "--color=no"
+    ],
+    "public_evaluator": [
+      "python",
+      "evaluator.py"
+    ],
+    "hidden_evaluator": [
+      "python",
+      "holdout_evaluator.py"
+    ]
+  },
+  "metric_key": "metrics.ipv6_host_score",
+  "expected_baseline": {
+    "public_score": 0.5,
+    "hidden_score": 0.4
+  },
+  "command_timeout_seconds": 90,
+  "boundaries": [
+    "The task replays Flask issue #6093 and pull request #6096 against the merge commit's first parent; it is not an official Flask benchmark.",
+    "The public evaluator covers loopback IPv6 and ordinary-host controls; the hidden evaluator uses a full IPv6 address, an omitted port, IPv4, and explicit port zero.",
+    "The pull request head and merge commit are retained as provenance for human review and are not included in candidate proposer context.",
+    "A contract pass proves the frozen cases and pinned upstream suite passed; it does not prove semantic equivalence with the maintainer patch or complete IPv6 correctness."
+  ]
+}

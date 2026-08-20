@@ -1,0 +1,66 @@
+{
+  "version": "autoresearch.spec/v1",
+  "name": "flask-ipv6-host-parsing",
+  "objective": "Fix Flask's bracketed IPv6 host parsing so session transactions retain cookies and app.run() resolves SERVER_NAME host and port correctly, without regressing hostname, IPv4, default-port, or explicit port-zero behavior.",
+  "repository_revision": "514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b",
+  "editable_files": [
+    "src/flask/app.py",
+    "src/flask/testing.py"
+  ],
+  "protected_files": [
+    ".repropilot/uploads/02-evaluator.py",
+    ".repropilot/uploads/03-holdout_evaluator.py"
+  ],
+  "eval_command": [
+    "python",
+    ".repropilot/uploads/02-evaluator.py"
+  ],
+  "holdout_command": [
+    "python",
+    ".repropilot/uploads/03-holdout_evaluator.py"
+  ],
+  "guard_commands": [
+    [
+      "python",
+      "-m",
+      "py_compile",
+      "src/flask/app.py",
+      "src/flask/testing.py"
+    ],
+    [
+      "python",
+      "-m",
+      "pytest",
+      "-q",
+      "--color=no"
+    ]
+  ],
+  "metric_key": "metrics.ipv6_host_score",
+  "direction": "maximize",
+  "min_delta": 0.1,
+  "holdout_min_delta": 0.5,
+  "target_score": 1.0,
+  "max_trials": 8,
+  "max_wall_seconds": 600,
+  "search_runs": 3,
+  "search_aggregation": "worst",
+  "validation_runs": 3,
+  "dependencies": [
+    "pytest==9.1.1",
+    "asgiref==3.12.1",
+    "python-dotenv==1.2.3",
+    "Werkzeug==3.1.8",
+    "blinker==1.9.0",
+    "click==8.4.2",
+    "itsdangerous==2.2.0",
+    "Jinja2==3.1.6",
+    "MarkupSafe==3.0.3"
+  ],
+  "frozen_files": {
+    ".repropilot/uploads/02-evaluator.py": "9f8ecca2d727f09dfdb3477b2ffdd25ce30a1e62edce3616e8850f3672b06598",
+    ".repropilot/uploads/03-holdout_evaluator.py": "66a9af07294a4b582953ec62cb24fed970253fd4972d61dc8838f27fb4a98af4"
+  },
+  "frozen_workspace_sha256": "55d6082f43b5f3159484c5be4429a681de7e113ab283cbaacd913566bab554a5",
+  "source_path": ".repropilot/uploads/01-autoresearch.json",
+  "spec_sha256": "e019373943e9677107a125bf40fd3e41ed36f2e231e0340b924d1a24d51dec5b"
+}

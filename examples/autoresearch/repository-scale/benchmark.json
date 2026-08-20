@@ -70,6 +70,21 @@
       }
     },
     {
+      "id": "flask-ipv6-host-parsing",
+      "path": "flask-ipv6-host-parsing",
+      "repository_url": "https://github.com/pallets/flask.git",
+      "revision": "514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b",
+      "provenance_type": "historical_merged_pull_request",
+      "difficulty": "cross_module_framework_host_parsing",
+      "contract_sha256": {
+        "task.json": "745d7d72b369457d81008f229dd542a5a1f3ddd2e6f0570f1d023e1d56638301",
+        "autoresearch.json": "977a3f3058ac8047d2f972078f8616040126c8bfe3eaa16eaaa42b4d59eaafd5",
+        "evaluator.py": "9f8ecca2d727f09dfdb3477b2ffdd25ce30a1e62edce3616e8850f3672b06598",
+        "holdout_evaluator.py": "66a9af07294a4b582953ec62cb24fed970253fd4972d61dc8838f27fb4a98af4",
+        "baseline.json": "dafbcb032514863f731ead92a8cac303b29b8ef896b7ffccb608065dbd9ce2f6"
+      }
+    },
+    {
       "id": "more-itertools-strict-counted-sample-adversarial",
       "path": "more-itertools-strict-counted-sample-adversarial",
       "repository_url": "https://github.com/more-itertools/more-itertools.git",
@@ -87,7 +102,7 @@
     }
   ],
   "boundaries": [
-    "This pilot contains four tasks across three unique repositories and is not a statistically representative software-engineering benchmark.",
+    "This pilot contains five tasks across four unique repositories and is not a statistically representative software-engineering benchmark.",
     "The candidate-informed adversarial follow-up reuses the more-itertools base and must not be counted as an independent repository sample.",
     "Historical bug provenance and ReproPilot-authored boundary contracts are labeled separately and must not be aggregated without retaining that distinction.",
     "A contract pass does not establish equivalence with an upstream maintainer patch or production readiness.",

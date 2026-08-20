@@ -1,0 +1,47 @@
+--- a/src/flask/app.py
++++ b/src/flask/app.py
+@@ -721,7 +721,20 @@
+         sn_host = sn_port = None
+ 
+         if server_name:
+-            sn_host, _, sn_port = server_name.partition(":")
++            # Handle both regular host:port and bracketed IPv6 [host]:port formats
++            if server_name.startswith('['):
++                # IPv6 format [::1]:port or [::1]
++                end_bracket = server_name.find(']')
++                if end_bracket != -1:
++                    sn_host = server_name[1:end_bracket]  # Extract host without brackets
++                    if end_bracket + 1 < len(server_name) and server_name[end_bracket + 1] == ':':
++                        sn_port = server_name[end_bracket + 2:]  # Extract port after colon
++                else:
++                    # Invalid format, treat as host without port
++                    sn_host = server_name
++            else:
++                # Regular hostname:port format
++                sn_host, _, sn_port = server_name.partition(":")
+ 
+         if not host:
+             if sn_host:
+--- a/src/flask/testing.py
++++ b/src/flask/testing.py
+@@ -176,8 +176,19 @@
+         with ctx:
+             app.session_interface.save_session(app, sess, resp)
+ 
++        # Extract host without port, handling both IPv4/hostname and bracketed IPv6 formats
++        host = ctx.request.host
++        if host.startswith('['):
++            # IPv6 format [::1]:port, extract content between brackets
++            end_bracket = host.find(']')
++            if end_bracket != -1:
++                host = host[1:end_bracket]
++        else:
++            # Regular hostname:port or IPv4:port format
++            host = host.partition(":")[0]
++        
+         self._update_cookies_from_response(
+-            ctx.request.host.partition(":")[0],
++            host,
+             ctx.request.path,
+             resp.headers.getlist("Set-Cookie"),
+         )

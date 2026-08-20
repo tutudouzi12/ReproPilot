@@ -1,7 +1,7 @@
 {
   "version": "repropilot.repository-benchmark-run-selection/v1",
   "benchmark_id": "repository-scale-pilot-v1",
-  "recorded_at": "2026-08-20T02:20:58Z",
+  "recorded_at": "2026-08-20T05:47:10Z",
   "selection_policy": {
     "primary_run": "one manually reviewed release-evidence run per independent task",
     "development_history": "retained earlier runs contribute failure evidence but not selected contract-pass metrics",
@@ -59,6 +59,14 @@
       "result_sha256": "b334d770d51ac5db162a0f1359ed70d6d14881f49292b0b8efb681ad4f314680",
       "review": "more-itertools-strict-counted-sample/results/c261d99-live/review.json",
       "review_sha256": "328c1220acf08fac9d7225a2c6f035c2282bd3ff24f7ca241d1ac4e6ba36aaf1"
+    },
+    {
+      "task_id": "flask-ipv6-host-parsing",
+      "role": "primary",
+      "result": "flask-ipv6-host-parsing/results/7ec8f6e-live/result.json",
+      "result_sha256": "b4652b31f4cc366c521c5a29408220886eaf2a6a5a0e28541490eb4bb9cf2a73",
+      "review": "flask-ipv6-host-parsing/results/7ec8f6e-live/review.json",
+      "review_sha256": "4a35d2f49680561f8a82040ba9217a6ea84c3593423e582fe8f91626271c555e"
     },
     {
       "task_id": "more-itertools-strict-counted-sample-adversarial",

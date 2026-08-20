@@ -1,0 +1,103 @@
+{
+  "version": "repropilot.repository-evaluation-result/v1",
+  "recorded_at": "2026-08-20T05:40:06.686323Z",
+  "task_id": "flask-ipv6-host-parsing",
+  "outcome": "validation_passed",
+  "harness": {
+    "revision": "7ec8f6ebd47cdea471ec0a0c267b379cb4bca5b2",
+    "source_tree_dirty": false
+  },
+  "sanitization": {
+    "workspace_paths_replaced_with": "{workspace}"
+  },
+  "repository": {
+    "url": "https://github.com/pallets/flask.git",
+    "revision": "514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b",
+    "git_blob_sha256": {
+      "src/flask/app.py": "ed0ad667fc7ac326a7bdc317532d943af1dc3d8a9ad9f80a0a51f7fd9e8d3ca7",
+      "src/flask/testing.py": "60c60294d716a6102e9993ad8f14930ad421fde322d8d3b54c7be642acbad560",
+      "tests/test_basic.py": "02f801a3648fa63d8117111b1d8e3219aa946062f584fd9b252de5db6ac8ec17",
+      "tests/test_testing.py": "6d3a048b696cb704b29dc09c712d0ac6e52cfe28d5068a324c1b0b54dcd6fdab",
+      "pyproject.toml": "d4b8029dc2ce71866e45fee381bdfb91e0cfc35a67715c5e591bdde80cfc25f8",
+      "LICENSE.txt": "489a8e1108509ed98a37bb983e11e0f7e1d31f0bd8f99a79c8448e7ff37d07ea"
+    },
+    "editable_files": [
+      "src/flask/app.py",
+      "src/flask/testing.py"
+    ],
+    "working_tree_matches_git_blobs": true
+  },
+  "baseline_artifact_sha256": "dafbcb032514863f731ead92a8cac303b29b8ef896b7ffccb608065dbd9ce2f6",
+  "search": {
+    "baseline_score": 0.5,
+    "best_score": 1.0,
+    "completed_trials": 3,
+    "accepted_trials": 1,
+    "stop_reason": "target_score_reached",
+    "request_cap": 3
+  },
+  "model": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "request_count": 3,
+    "reported_request_count": 3,
+    "prompt_tokens": 33044,
+    "completion_tokens": 2348,
+    "total_tokens": 35392,
+    "attempted_request_count": 3,
+    "mode": "live_model"
+  },
+  "cost": {
+    "status": "calculated_from_supplied_rates",
+    "currency": "CNY",
+    "amount": 0.169744,
+    "input_cost_per_million": 4.0,
+    "output_cost_per_million": 16.0,
+    "basis": "provider-reported tokens multiplied by caller-supplied public list rates; not a billing receipt",
+    "pricing_source": "https://help.aliyun.com/zh/model-studio/model-pricing",
+    "pricing_tier": "Mainland China, 0<Token<=32K",
+    "pricing_verified_at": "2026-08-19"
+  },
+  "validation": {
+    "status": "passed",
+    "mode": "hidden_holdout",
+    "baseline_score": 0.4,
+    "acceptance_rule": "minimum_improvement",
+    "acceptance_delta": 0.5,
+    "acceptance_target_score": 0.9,
+    "observed_scores": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "observed_score": 1.0,
+    "candidate_intact": true,
+    "protected_files_intact": true,
+    "reason": ""
+  },
+  "failure": {
+    "error": ""
+  },
+  "boundaries": [
+    "The task replays Flask issue #6093 and pull request #6096 against the merge commit's first parent; it is not an official Flask benchmark.",
+    "The public evaluator covers loopback IPv6 and ordinary-host controls; the hidden evaluator uses a full IPv6 address, an omitted port, IPv4, and explicit port zero.",
+    "The pull request head and merge commit are retained as provenance for human review and are not included in candidate proposer context.",
+    "A contract pass proves the frozen cases and pinned upstream suite passed; it does not prove semantic equivalence with the maintainer patch or complete IPv6 correctness.",
+    "The candidate was executed by local subprocess with a stripped environment, not a network-isolated container.",
+    "The hidden evaluator content was excluded from proposer context but remains inspectable in this public evidence package.",
+    "Any monetary amount is token-derived from the cited public rate and is not a billing-console receipt."
+  ],
+  "artifact_sha256": {
+    "candidate.patch": "378637e57780bfdf52bab69f4c9303f91a9b380fd0971ab04b6cd424415a25da",
+    "final-files/src/flask/app.py": "3c09e3d26dcdef86a1a1a2ab3008981038a84f58712485b7f67a9ffcecb648e9",
+    "final-files/src/flask/testing.py": "4365a4e4c8cece3cefc366df381716a1f9b5a250e57e25855e7f68ebd9992470",
+    "frozen-spec.json": "269f4e548f547c6bd618dfd6ee2888c6ac381dd2e14994a9da299afce82fc5a8",
+    "initial-files/src/flask/app.py": "ed0ad667fc7ac326a7bdc317532d943af1dc3d8a9ad9f80a0a51f7fd9e8d3ca7",
+    "initial-files/src/flask/testing.py": "60c60294d716a6102e9993ad8f14930ad421fde322d8d3b54c7be642acbad560",
+    "model-responses.json": "fd4d2f5a217fdb82a0b215d4c98c9f2ccdf4d694b57dc170e3dbc68c78a283de",
+    "README.md": "17a7e8eb837395ce4e1c2d0312492346193d7a434f9de3e1cff7a92660aa8de0",
+    "task-input.json": "9b43b75713410d1c4a76c8ca6fb3adaa369a8563da49f456c70b456de08e8d98",
+    "trial-ledger.json": "a50bf0fa5eb839a4e8613f47dc028e9baf77d7eb47986218bd814cc3feabf58d",
+    "validation-report.json": "170d32a690f1e7b89f942243554497fb36bc45b5c932c6f5414e28868b3c0f3c"
+  }
+}
