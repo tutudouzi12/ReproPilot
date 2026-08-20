@@ -1,6 +1,8 @@
 {
   "version": "repropilot.repository-evaluation-review/v1",
   "status": "automated_contract_passed_manual_review_rejected",
+  "decision": "reject",
+  "classification": "manual_review_rejected_after_contract_pass",
   "automated_evidence": {
     "outcome": "validation_passed",
     "public_baseline": 0.6666666666666666,
