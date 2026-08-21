@@ -130,6 +130,43 @@ def test_apply_candidate_supports_unique_localized_edit(tmp_path: Path) -> None:
         )
 
 
+def test_apply_candidate_supports_multiple_localized_edits_to_one_file(tmp_path: Path) -> None:
+    root = workspace(tmp_path)
+    root.joinpath("candidate.py").write_text("SCORE = 1\nMODE = 'old'\n", encoding="utf-8")
+    spec = freeze(root)
+
+    records = _apply_candidate(
+        root,
+        spec,
+        CandidateProposal(
+            patches=[
+                CandidatePatch(path="candidate.py", search="SCORE = 1", replace="SCORE = 2"),
+                CandidatePatch(path="candidate.py", search="MODE = 'old'", replace="MODE = 'new'"),
+            ]
+        ),
+    )
+
+    assert root.joinpath("candidate.py").read_text(encoding="utf-8") == "SCORE = 2\nMODE = 'new'\n"
+    assert [record["operation"] for record in records] == ["replace_text", "replace_text"]
+
+
+def test_apply_candidate_rejects_combining_complete_and_localized_replacements(tmp_path: Path) -> None:
+    root = workspace(tmp_path)
+    spec = freeze(root)
+
+    with pytest.raises(ValueError, match="complete replacement cannot be combined"):
+        _apply_candidate(
+            root,
+            spec,
+            CandidateProposal(
+                patches=[
+                    CandidatePatch(path="candidate.py", search="SCORE = 1", replace="SCORE = 2"),
+                    CandidatePatch(path="candidate.py", content="SCORE = 3\n"),
+                ]
+            ),
+        )
+
+
 def test_apply_candidate_rejects_complete_replacement_for_excerpted_file(tmp_path: Path) -> None:
     root = workspace(tmp_path)
     root.joinpath("candidate.py").write_text("SCORE = 1\n" * 4000, encoding="utf-8")

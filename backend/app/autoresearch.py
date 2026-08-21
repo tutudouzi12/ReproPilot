@@ -517,21 +517,24 @@ def _apply_candidate(root: Path, spec: ResearchSpec, proposal: CandidateProposal
         raise ValueError("candidate must include at least one patch")
     editable = set(spec.editable_files)
     records: list[dict[str, Any]] = []
-    seen: set[str] = set()
+    operations: dict[str, str] = {}
     for patch in proposal.patches:
         path = _safe_existing_file(root, patch.path)
         relative = path.relative_to(root).as_posix()
-        if relative not in editable or relative in seen:
+        if relative not in editable:
             raise ValueError(f"candidate patch is not authorized: {patch.path}")
-        seen.add(relative)
         before = sha256_file(path)
         if patch.content is not None:
+            if relative in operations:
+                raise ValueError(f"complete replacement cannot be combined with other patches: {relative}")
             if path.stat().st_size > EDITABLE_CONTEXT_LIMIT:
                 raise ValueError(f"complete replacement is not allowed for excerpted file: {relative}")
             operation = "replace_file"
             content = patch.content.encode()
             record = {"path": relative, "operation": operation, "before_sha256": before}
         else:
+            if operations.get(relative) == "replace_file":
+                raise ValueError(f"complete replacement cannot be combined with other patches: {relative}")
             operation = "replace_text"
             original = path.read_text(encoding="utf-8")
             assert patch.search is not None and patch.replace is not None
@@ -547,6 +550,7 @@ def _apply_candidate(root: Path, spec: ResearchSpec, proposal: CandidateProposal
                 "before_sha256": before,
                 "search_sha256": hashlib.sha256(patch.search.encode()).hexdigest(),
             }
+        operations[relative] = operation
         if not content or len(content) > 256_000:
             raise ValueError(f"candidate content is empty or too large: {relative}")
         temporary = path.parent / f".{path.name}.candidate-{os.getpid()}.tmp"
