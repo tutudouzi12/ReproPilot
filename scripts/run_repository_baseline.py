@@ -20,6 +20,13 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+def preserve_python_executable(path: Path) -> Path:
+    candidate = path.absolute()
+    if not candidate.is_file():
+        raise ValueError(f"Python executable does not exist: {candidate}")
+    return candidate
+
+
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -195,7 +202,7 @@ def run_runtime_commands(
 def run(args: argparse.Namespace) -> dict[str, Any]:
     task_dir = args.task_dir.resolve(strict=True)
     checkout = args.checkout.resolve(strict=True)
-    python = args.python.resolve(strict=True)
+    python = preserve_python_executable(args.python)
     task_path = task_dir / "task.json"
     task = json.loads(task_path.read_text(encoding="utf-8"))
     if task.get("version") != TASK_VERSION:

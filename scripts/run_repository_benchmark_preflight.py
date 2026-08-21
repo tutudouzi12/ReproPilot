@@ -31,7 +31,7 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def parse_bindings(values: list[str], label: str) -> dict[str, Path]:
+def parse_bindings(values: list[str], label: str, *, preserve_final_symlink: bool = False) -> dict[str, Path]:
     bindings: dict[str, Path] = {}
     for value in values:
         task_id, separator, raw_path = value.partition("=")
@@ -41,7 +41,10 @@ def parse_bindings(values: list[str], label: str) -> dict[str, Path]:
             raise ValueError(f"{label} must use TASK_ID=PATH: {value!r}")
         if task_id in bindings:
             raise ValueError(f"duplicate {label} binding for {task_id}")
-        bindings[task_id] = Path(raw_path).resolve(strict=True)
+        candidate = Path(raw_path).absolute()
+        if not candidate.exists():
+            candidate.resolve(strict=True)
+        bindings[task_id] = candidate if preserve_final_symlink else candidate.resolve(strict=True)
     return bindings
 
 
@@ -202,6 +205,7 @@ def run_preflight(task: dict[str, Any], checkout: Path, python: Path) -> dict[st
         (python, f"{{python:{task_id}}}"),
         (task["task_dir"], f"{{task_dir:{task_id}}}"),
         (ROOT, "{harness}"),
+        (Path(sys.base_prefix), "{harness_python_root}"),
     ]
     return {
         "task_id": task_id,
@@ -243,7 +247,7 @@ def main() -> None:
         print(f"Repository benchmark manifest: {benchmark['id']} {len(tasks)} task(s) validated")
         return
     checkouts = parse_bindings(args.checkout, "checkout")
-    pythons = parse_bindings(args.python, "python")
+    pythons = parse_bindings(args.python, "python", preserve_final_symlink=True)
     selected = set(args.task)
     known = {str(task["id"]) for task in tasks}
     unknown = selected - known

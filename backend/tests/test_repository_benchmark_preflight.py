@@ -44,6 +44,25 @@ def test_parse_bindings_rejects_missing_and_duplicate_task_ids(tmp_path: Path) -
         repository_benchmark_preflight.parse_bindings([value, value], "checkout")
 
 
+def test_parse_bindings_can_preserve_virtualenv_python_symlink(tmp_path: Path) -> None:
+    target = tmp_path / "python-target"
+    target.write_text("", encoding="utf-8")
+    link = tmp_path / "python"
+    try:
+        link.symlink_to(target)
+    except OSError:
+        pytest.skip("creating symlinks is not permitted in this environment")
+
+    bindings = repository_benchmark_preflight.parse_bindings(
+        [f"sample={link}"],
+        "python",
+        preserve_final_symlink=True,
+    )
+
+    assert bindings["sample"] == link.absolute()
+    assert bindings["sample"] != link.resolve(strict=True)
+
+
 def test_sanitize_paths_replaces_windows_and_portable_forms(tmp_path: Path) -> None:
     source = tmp_path / "checkout"
     value = f"failed under {source} and {source.as_posix()}"

@@ -44,6 +44,13 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+def preserve_python_executable(path: Path) -> Path:
+    candidate = path.absolute()
+    if not candidate.is_file():
+        raise ValueError(f"Python executable does not exist: {candidate}")
+    return candidate
+
+
 def sha256_bytes(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()
 
@@ -492,7 +499,7 @@ async def preflight(task_dir: Path, checkout: Path, python: Path) -> None:
 async def run(args: argparse.Namespace) -> dict[str, Any]:
     task_dir = args.task_dir.resolve(strict=True)
     checkout = args.checkout.resolve(strict=True)
-    python = args.python.resolve(strict=True)
+    python = preserve_python_executable(args.python)
     if args.preflight_only:
         await preflight(task_dir, checkout, python)
         return {}
