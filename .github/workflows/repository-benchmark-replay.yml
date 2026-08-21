@@ -1,0 +1,50 @@
+name: Repository benchmark replay
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repository-benchmark-replay
+  cancel-in-progress: false
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+      - name: Run pinned cross-runtime replay
+        id: replay
+        shell: bash
+        run: |
+          set +e
+          python scripts/run_repository_benchmark_replay.py \
+            --manifest examples/autoresearch/repository-scale/replay.json \
+            --workspace "$RUNNER_TEMP/repropilot-replay" \
+            --output artifacts/repository-benchmark-replay.json
+          status=$?
+          echo "exit_code=$status" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Upload replay evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repository-benchmark-replay
+          path: artifacts/repository-benchmark-replay.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Enforce replay result
+        if: always()
+        shell: bash
+        run: test "${{ steps.replay.outputs.exit_code }}" = "0"

@@ -3,6 +3,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
+import re
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -113,6 +115,33 @@ def decoded_output(value: str | bytes | None) -> str:
     return value
 
 
+def expected_baseline_scores(task: dict[str, Any]) -> tuple[float, float]:
+    baseline_path = Path(task["task_dir"]) / "baseline.json"
+    payload = json.loads(baseline_path.read_text(encoding="utf-8"))
+    baseline = payload.get("baseline")
+    if not isinstance(baseline, dict):
+        raise ValueError(f"baseline contract is missing for {task['id']}")
+    try:
+        return float(baseline["public_score"]), float(baseline["hidden_score"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValueError(f"baseline scores are invalid for {task['id']}") from exc
+
+
+def parse_preflight_scores(stdout: str, task_id: str) -> tuple[float, float]:
+    match = re.search(
+        rf"^Repository preflight:\s+{re.escape(task_id)}\s+public=([-+0-9.eE]+)\s+hidden=([-+0-9.eE]+)\s*$",
+        stdout,
+        re.MULTILINE,
+    )
+    if match is None:
+        raise ValueError(f"preflight output did not contain scores for {task_id}")
+    public_score = float(match.group(1))
+    hidden_score = float(match.group(2))
+    if not math.isfinite(public_score) or not math.isfinite(hidden_score):
+        raise ValueError(f"preflight scores must be finite for {task_id}")
+    return public_score, hidden_score
+
+
 def run_preflight(task: dict[str, Any], checkout: Path, python: Path) -> dict[str, Any]:
     task_id = str(task["id"])
     command = [
@@ -145,6 +174,29 @@ def run_preflight(task: dict[str, Any], checkout: Path, python: Path) -> dict[st
         exit_code = 124
         stdout = decoded_output(exc.stdout)
         stderr = decoded_output(exc.stderr) + f"\npreflight process timed out after {timeout_seconds:g}s"
+    expected_public, expected_hidden = expected_baseline_scores(task)
+    observed_public: float | None = None
+    observed_hidden: float | None = None
+    scores_match = False
+    if exit_code == 0:
+        try:
+            observed_public, observed_hidden = parse_preflight_scores(stdout, task_id)
+            scores_match = math.isclose(observed_public, expected_public, rel_tol=0.0, abs_tol=0.00005) and math.isclose(
+                observed_hidden,
+                expected_hidden,
+                rel_tol=0.0,
+                abs_tol=0.00005,
+            )
+            if not scores_match:
+                exit_code = 2
+                stderr = (
+                    f"{stderr}\nbaseline score mismatch: expected public={expected_public:.4f} "
+                    f"hidden={expected_hidden:.4f}, observed public={observed_public:.4f} "
+                    f"hidden={observed_hidden:.4f}"
+                ).strip()
+        except ValueError as exc:
+            exit_code = 2
+            stderr = f"{stderr}\n{exc}".strip()
     replacements = [
         (checkout, f"{{checkout:{task_id}}}"),
         (python, f"{{python:{task_id}}}"),
@@ -157,6 +209,11 @@ def run_preflight(task: dict[str, Any], checkout: Path, python: Path) -> dict[st
         "exit_code": exit_code,
         "checkout": f"{{checkout:{task_id}}}",
         "python": f"{{python:{task_id}}}",
+        "expected_public_score": expected_public,
+        "expected_hidden_score": expected_hidden,
+        "observed_public_score": observed_public,
+        "observed_hidden_score": observed_hidden,
+        "scores_match_baseline": scores_match,
         "stdout": sanitize_paths(stdout, replacements),
         "stderr": sanitize_paths(stderr, replacements),
     }

@@ -55,7 +55,20 @@ py -3.11 scripts\run_repository_benchmark_preflight.py `
   --output <preflight-report.json>
 ```
 
-The runner checks benchmark-to-task identity and contract hashes before delegating to the repository preflight. It continues across task failures, emits one aggregate result, and exits non-zero if any selected task fails. Retained output replaces local checkout and interpreter paths with task-scoped placeholders.
+The runner checks benchmark-to-task identity and contract hashes before delegating to the repository preflight. It continues across task failures, verifies the observed public and hidden scores against each frozen `baseline.json`, emits one aggregate result, and exits non-zero if any selected task fails. Retained output replaces local checkout and interpreter paths with task-scoped placeholders.
+
+## Opt-in cross-runtime replay
+
+[`replay.json`](replay.json) selects Flask and p-queue as representative Python and TypeScript tasks and declares only exact package versions. The replay runner accepts the two supported setup kinds as argument lists; it does not execute shell text from the manifest. On a clean runner with Python 3.11 and Node 22, matching the retained runtime families:
+
+```powershell
+py -3.11 scripts\run_repository_benchmark_replay.py `
+  --manifest examples\autoresearch\repository-scale\replay.json `
+  --workspace <empty-workspace> `
+  --output <replay-report.json>
+```
+
+The opt-in `Repository benchmark replay` workflow runs weekly and through `workflow_dispatch`, uploads the report even when setup or Preflight fails, and then reflects the replay result in the job status. It does not run on pushes or pull requests. Clone and registry failures are labeled `setup_failed`; a clean setup whose observed score differs from the frozen baseline is labeled `preflight_failed`. No model credential is read and `model_requests` remains zero.
 
 ## Audited aggregate report
 
