@@ -14,6 +14,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -314,8 +315,11 @@ def materialize_workspace(checkout: Path, task_dir: Path, workspace: Path) -> tu
         checkout,
         workspace,
         dirs_exist_ok=True,
-        ignore=shutil.ignore_patterns(".git", "__pycache__", ".pytest_cache", "*.pyc"),
+        ignore=shutil.ignore_patterns(".git", "__pycache__", ".pytest_cache", "node_modules", "*.pyc"),
     )
+    dependency_directory = checkout / "node_modules"
+    if dependency_directory.is_dir():
+        copy_dependency_directory(dependency_directory, workspace / "node_modules")
     upload_root = workspace / ".repropilot" / "uploads"
     upload_root.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(task_dir / "autoresearch.json", upload_root / "01-autoresearch.json")
@@ -330,6 +334,40 @@ def materialize_workspace(checkout: Path, task_dir: Path, workspace: Path) -> tu
         source_path=".repropilot/uploads/01-autoresearch.json",
     )
     return payload, spec
+
+
+def copy_dependency_directory(source: Path, destination: Path) -> None:
+    resolved_source = source.resolve(strict=True)
+    if destination.exists():
+        raise ValueError(f"dependency destination already exists: {destination}")
+    if os.name != "nt":
+        shutil.copytree(resolved_source, destination, symlinks=True)
+        return
+    completed = subprocess.run(
+        [
+            "robocopy",
+            str(resolved_source),
+            str(destination),
+            "/E",
+            "/XJ",
+            "/NFL",
+            "/NDL",
+            "/NJH",
+            "/NJS",
+            "/NP",
+            "/R:1",
+            "/W:1",
+            "/MT:16",
+        ],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
+    if completed.returncode >= 8 or not destination.is_dir():
+        detail = completed.stderr.strip() or completed.stdout.strip() or "dependency copy failed"
+        raise RuntimeError(f"could not copy dependency directory: {detail}")
 
 
 def cost_record(usage: ModelUsage, attempted_requests: int, args: argparse.Namespace) -> dict[str, Any]:
@@ -401,7 +439,8 @@ def render_report(result: dict[str, Any], ledger: TrialLedger | None, task: dict
         f"target `{result['validation']['acceptance_target_score']}`, "
         f"delta `{result['validation']['acceptance_delta']}`",
         f"- Model: `{result['model']['provider']}/{result['model']['model']}`",
-        f"- Requests/tokens: `{result['model']['request_count']}` / `{result['model']['total_tokens']}`",
+        f"- Request attempts/usage reports/tokens: `{result['model']['attempted_request_count']}` / "
+        f"`{result['model']['reported_request_count']}` / `{result['model']['total_tokens']}`",
         f"- Token-derived cost: `{amount}`",
         f"- Editable files: `{', '.join(result['repository']['editable_files'])}`",
         "",
@@ -506,6 +545,12 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
     outcome = classify_outcome(ledger, report, run_error)
     cost = cost_record(usage, len(responses), args)
     validation_observed = report.observed_score if report is not None else None
+    model_record = usage.model_dump(mode="json")
+    if not model_record["provider"]:
+        model_record["provider"] = urlparse(client.base_url).hostname or client.base_url
+    if not model_record["model"]:
+        model_record["model"] = client.model
+
     result = {
         "version": RESULT_VERSION,
         "recorded_at": utc_now(),
@@ -530,7 +575,7 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
             "request_cap": args.max_live_requests,
         },
         "model": {
-            **usage.model_dump(mode="json"),
+            **model_record,
             "attempted_request_count": len(responses),
             "mode": "live_model",
         },

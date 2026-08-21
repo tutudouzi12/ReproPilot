@@ -171,6 +171,27 @@ def python_environment(python: Path, distributions: list[str]) -> dict[str, Any]
     return json.loads(value)
 
 
+def run_runtime_commands(
+    runtime: dict[str, Any],
+    python: Path,
+    task_dir: Path,
+    checkout: Path,
+    timeout_seconds: float,
+) -> dict[str, dict[str, Any]]:
+    results: dict[str, dict[str, Any]] = {}
+    for name, command in runtime.get("environment_commands", {}).items():
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError("runtime environment command names must be non-empty strings")
+        if not isinstance(command, list) or not command or not all(isinstance(argument, str) for argument in command):
+            raise ValueError(f"runtime environment command {name!r} must be a non-empty string list")
+        results[name] = run_command(
+            resolve_command(command, python, task_dir, task_relative=False),
+            checkout,
+            timeout_seconds,
+        )
+    return results
+
+
 def run(args: argparse.Namespace) -> dict[str, Any]:
     task_dir = args.task_dir.resolve(strict=True)
     checkout = args.checkout.resolve(strict=True)
@@ -210,7 +231,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     timeout_seconds = float(task.get("command_timeout_seconds", 30))
     commands = task["commands"]
     upstream = run_command(
-        resolve_command(commands["upstream_tests"], python, task_dir, task_relative=False),
+        resolve_command(commands["upstream_tests"], python, task_dir, task_relative=True),
         checkout,
         timeout_seconds,
     )
@@ -224,17 +245,22 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         checkout,
         timeout_seconds,
     )
+    runtime_commands = run_runtime_commands(task["runtime"], python, task_dir, checkout, timeout_seconds)
+
     replacements = [
         (checkout, "{target_checkout}"),
         (python, "{python}"),
         (task_dir, "{task_dir}"),
     ]
-    for result in (upstream, public, hidden):
+    for result in (upstream, public, hidden, *runtime_commands.values()):
         result["command"] = portable_command(result["command"], python, task_dir)
         sanitize_command_result(result, replacements)
     for label, result in (("upstream tests", upstream), ("public evaluator", public), ("hidden evaluator", hidden)):
         if result["exit_code"] != 0:
             raise RuntimeError(f"{label} failed: {result.get('error') or result['stderr']}")
+    for name, result in runtime_commands.items():
+        if result["exit_code"] != 0:
+            raise RuntimeError(f"runtime environment command {name!r} failed: {result.get('error') or result['stderr']}")
 
     metric_key = str(task["metric_key"])
     public_score = parse_metric(public["stdout"], metric_key)
@@ -250,6 +276,10 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         for path in sorted(task_dir.iterdir())
         if path.is_file() and path.name != args.output.name
     }
+    environment = python_environment(python, list(task["runtime"]["distributions"]))
+    if runtime_commands:
+        environment["runtime_commands"] = runtime_commands
+
     return {
         "version": BASELINE_VERSION,
         "recorded_at": utc_now(),
@@ -262,7 +292,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "git_blob_sha256": git_blob_hashes,
             "working_tree_matches_git_blobs": True,
         },
-        "environment": python_environment(python, list(task["runtime"]["distributions"])),
+        "environment": environment,
         "commands": {
             "upstream_tests": upstream,
             "public_evaluator": public,

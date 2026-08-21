@@ -85,6 +85,21 @@
       }
     },
     {
+      "id": "p-queue-abort-listener-cleanup",
+      "path": "p-queue-abort-listener-cleanup",
+      "repository_url": "https://github.com/sindresorhus/p-queue.git",
+      "revision": "5e400174a89395a44399713191b76544cf743fe5",
+      "provenance_type": "historical_merged_pull_request",
+      "difficulty": "cross_runtime_async_resource_cleanup",
+      "contract_sha256": {
+        "task.json": "2f0b2b8ec54efd2ecc9bd88cd3956327c7054d4e7644311a88303c44e1a32e9e",
+        "autoresearch.json": "a7cf059dae48726b2b757a2d6e2fd51ac189e0df6d321ac208aaccf324379407",
+        "evaluator.py": "7c19cd56172bbb03429061f5fb28ce04dcc15a21a80fe1dad6cca40e66022521",
+        "holdout_evaluator.py": "0d0df4cd26c6f1681838985016d24ffc3c160401078623e1ea8706d376d9304e",
+        "baseline.json": "06d28927eee1bbee44010601ce3262cabea307973efff3c50bcebe7b32418b97"
+      }
+    },
+    {
       "id": "more-itertools-strict-counted-sample-adversarial",
       "path": "more-itertools-strict-counted-sample-adversarial",
       "repository_url": "https://github.com/more-itertools/more-itertools.git",
@@ -102,7 +117,7 @@
     }
   ],
   "boundaries": [
-    "This pilot contains five tasks across four unique repositories and is not a statistically representative software-engineering benchmark.",
+    "This pilot contains six tasks across five unique repositories and is not a statistically representative software-engineering benchmark.",
     "The candidate-informed adversarial follow-up reuses the more-itertools base and must not be counted as an independent repository sample.",
     "Historical bug provenance and ReproPilot-authored boundary contracts are labeled separately and must not be aggregated without retaining that distinction.",
     "A contract pass does not establish equivalence with an upstream maintainer patch or production readiness.",

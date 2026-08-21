@@ -130,6 +130,43 @@ def test_apply_candidate_supports_unique_localized_edit(tmp_path: Path) -> None:
         )
 
 
+def test_apply_candidate_supports_multiple_localized_edits_to_one_file(tmp_path: Path) -> None:
+    root = workspace(tmp_path)
+    root.joinpath("candidate.py").write_text("SCORE = 1\nMODE = 'old'\n", encoding="utf-8")
+    spec = freeze(root)
+
+    records = _apply_candidate(
+        root,
+        spec,
+        CandidateProposal(
+            patches=[
+                CandidatePatch(path="candidate.py", search="SCORE = 1", replace="SCORE = 2"),
+                CandidatePatch(path="candidate.py", search="MODE = 'old'", replace="MODE = 'new'"),
+            ]
+        ),
+    )
+
+    assert root.joinpath("candidate.py").read_text(encoding="utf-8") == "SCORE = 2\nMODE = 'new'\n"
+    assert [record["operation"] for record in records] == ["replace_text", "replace_text"]
+
+
+def test_apply_candidate_rejects_combining_complete_and_localized_replacements(tmp_path: Path) -> None:
+    root = workspace(tmp_path)
+    spec = freeze(root)
+
+    with pytest.raises(ValueError, match="complete replacement cannot be combined"):
+        _apply_candidate(
+            root,
+            spec,
+            CandidateProposal(
+                patches=[
+                    CandidatePatch(path="candidate.py", search="SCORE = 1", replace="SCORE = 2"),
+                    CandidatePatch(path="candidate.py", content="SCORE = 3\n"),
+                ]
+            ),
+        )
+
+
 def test_apply_candidate_rejects_complete_replacement_for_excerpted_file(tmp_path: Path) -> None:
     root = workspace(tmp_path)
     root.joinpath("candidate.py").write_text("SCORE = 1\n" * 4000, encoding="utf-8")
@@ -205,6 +242,38 @@ async def test_llm_client_parses_openai_compatible_usage(monkeypatch):
         "completion_tokens": 2,
         "total_tokens": 13,
     }
+
+
+@pytest.mark.asyncio
+async def test_llm_client_retries_connect_errors_without_retrying_the_evaluation_budget(monkeypatch):
+    httpx = __import__("httpx")
+    attempts = 0
+
+    def handler(request):
+        nonlocal attempts
+        attempts += 1
+        if attempts < 3:
+            raise httpx.ConnectError("TLS handshake ended early", request=request)
+        return httpx.Response(
+            200,
+            json={
+                "choices": [{"message": {"content": "recovered"}}],
+                "usage": {"prompt_tokens": 5, "completion_tokens": 1, "total_tokens": 6},
+            },
+        )
+
+    async def no_wait(_seconds):
+        return None
+
+    monkeypatch.setattr("app.agents.asyncio.sleep", no_wait)
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    client = LLMClient(transport=httpx.MockTransport(handler))
+
+    completion = await client.complete_with_usage("system", "user")
+
+    assert attempts == 3
+    assert completion.content == "recovered"
+    assert completion.usage.request_count == 1
 
 
 @pytest.mark.asyncio

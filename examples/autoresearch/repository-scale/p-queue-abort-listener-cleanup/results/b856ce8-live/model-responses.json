@@ -1,0 +1,32 @@
+[
+  {
+    "request_number": 1,
+    "context_sha256": "ba1ddab189addd6e61dd6f4912458856a5c1dde78ce49a9fa5ae592a9b3f0832",
+    "context_characters": 25015,
+    "usage": null,
+    "raw_content": "",
+    "parsed_proposal": null,
+    "parse_error": "",
+    "request_error": "ConnectError: "
+  },
+  {
+    "request_number": 2,
+    "context_sha256": "128a0ee312f0b22c124cae912ed660cef49254da6778a2e4358c22f59942c807",
+    "context_characters": 25339,
+    "usage": null,
+    "raw_content": "",
+    "parsed_proposal": null,
+    "parse_error": "",
+    "request_error": "ConnectError: "
+  },
+  {
+    "request_number": 3,
+    "context_sha256": "4638d9c815e414930c1dbc0a34b41f13bc4e85e6cf4c40a3cc1b06ed83163a78",
+    "context_characters": 25651,
+    "usage": null,
+    "raw_content": "",
+    "parsed_proposal": null,
+    "parse_error": "",
+    "request_error": "ConnectError: "
+  }
+]

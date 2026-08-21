@@ -1,0 +1,53 @@
+{
+  "version": "autoresearch.spec/v1",
+  "name": "p-queue-abort-listener-cleanup",
+  "objective": "Ensure p-queue removes each AbortSignal listener after successful, rejected, timed-out, or aborted work so repeated use of a shared signal does not accumulate stale listeners while preserving queue behavior.",
+  "repository_revision": "5e400174a89395a44399713191b76544cf743fe5",
+  "editable_files": [
+    "source/index.ts"
+  ],
+  "protected_files": [
+    ".repropilot/uploads/02-evaluator.py",
+    ".repropilot/uploads/03-holdout_evaluator.py"
+  ],
+  "eval_command": [
+    "python",
+    ".repropilot/uploads/02-evaluator.py"
+  ],
+  "holdout_command": [
+    "python",
+    ".repropilot/uploads/03-holdout_evaluator.py"
+  ],
+  "guard_commands": [
+    [
+      "python",
+      ".repropilot/uploads/02-evaluator.py",
+      "--upstream"
+    ]
+  ],
+  "metric_key": "metrics.listener_cleanup_score",
+  "direction": "maximize",
+  "min_delta": 0.25,
+  "holdout_min_delta": 0.6,
+  "target_score": 1.0,
+  "max_trials": 6,
+  "max_wall_seconds": 900,
+  "search_runs": 2,
+  "search_aggregation": "worst",
+  "validation_runs": 3,
+  "dependencies": [
+    "node==22.23.1",
+    "eventemitter3==5.0.4",
+    "p-timeout==7.0.1",
+    "tsd==0.33.0",
+    "tsx==4.23.12",
+    "typescript==5.9.3"
+  ],
+  "frozen_files": {
+    ".repropilot/uploads/02-evaluator.py": "7c19cd56172bbb03429061f5fb28ce04dcc15a21a80fe1dad6cca40e66022521",
+    ".repropilot/uploads/03-holdout_evaluator.py": "0d0df4cd26c6f1681838985016d24ffc3c160401078623e1ea8706d376d9304e"
+  },
+  "frozen_workspace_sha256": "48a3a512a3e3b40e6e0aad7f05e1a98318388e155eea443c26ce53e8d6e21aea",
+  "source_path": ".repropilot/uploads/01-autoresearch.json",
+  "spec_sha256": "5a0e4549e97e9cdbcd0cca55b7ecd1797b2929ff9ae72a93343fac80c749b637"
+}

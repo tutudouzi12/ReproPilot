@@ -1,0 +1,101 @@
+{
+  "version": "repropilot.repository-baseline/v1",
+  "recorded_at": "2026-08-21T03:12:32.055435Z",
+  "task_id": "p-queue-abort-listener-cleanup",
+  "repository": {
+    "url": "https://github.com/sindresorhus/p-queue.git",
+    "requested_revision": "5e400174a89395a44399713191b76544cf743fe5",
+    "actual_revision": "5e400174a89395a44399713191b76544cf743fe5",
+    "source_tree_dirty": false,
+    "git_blob_sha256": {
+      "source/index.ts": "68e6ecef7217b99b3e616b3e55be2369e20770e14fa2bb516dd48c4d67dc1e86",
+      "source/options.ts": "0667a65ad097b59b128729f1e12794faf6430ae2c473a0fc341539c77d08496a",
+      "source/priority-queue.ts": "f31320502e82a59fb6ea8dc0b33cf2bdea9439cb906bfdfa293af5602d990db5",
+      "source/queue.ts": "eb1b7a853b05393edeb5e2ffd6be0610590677d3dc6f0c7edabc782d3bd61964",
+      "test/advanced.ts": "cd4f941f35a9615f154f0bd5b0e93c97810f3f87e4832d01f675d76217dc942f",
+      "test/basic.ts": "3e5aac37db74d42d6d9f1e9d05f83fcc1555d653be089eb6bfc28f9bdda7a73d",
+      "package.json": "710828baae9fbb68c513d55ef8786b057f681bed07efe81d33d03c6044616f5f",
+      "tsconfig.json": "4915654479be2c4167fab9c589a877731b7b26e2d31d2db3ed0abf34bd00a115",
+      "license": "5c932d88256b4ab958f64a856fa48e8bd1f55bc1d96b8149c65689e0c61789d3"
+    },
+    "working_tree_matches_git_blobs": true
+  },
+  "environment": {
+    "distributions": {},
+    "implementation": "CPython",
+    "platform": "Windows-10-10.0.22631-SP0",
+    "version": "3.11.9",
+    "runtime_commands": {
+      "node_packages": {
+        "command": [
+          "node",
+          "--input-type=commonjs",
+          "--eval",
+          "const fs=require('node:fs');const path=require('node:path');const root=JSON.parse(fs.readFileSync('package.json','utf8'));const names=['@sindresorhus/tsconfig','@types/benchmark','@types/node','benchmark','del-cli','delay','eventemitter3','in-range','p-defer','p-timeout','random-int','time-span','tsd','tsx','typescript','xo'];const packages=Object.fromEntries(names.map(name=>[name,JSON.parse(fs.readFileSync(`node_modules/${name}/package.json`,'utf8')).version]));const npm=JSON.parse(fs.readFileSync(path.join(path.dirname(process.execPath),'node_modules/npm/package.json'),'utf8')).version;console.log(JSON.stringify({node:process.version,npm,repository:{name:root.name,version:root.version},packages}));"
+        ],
+        "working_directory": "{target_checkout}",
+        "exit_code": 0,
+        "stdout": "{\"node\":\"v22.23.1\",\"npm\":\"10.9.8\",\"repository\":{\"name\":\"p-queue\",\"version\":\"9.0.0\"},\"packages\":{\"@sindresorhus/tsconfig\":\"8.1.0\",\"@types/benchmark\":\"2.1.5\",\"@types/node\":\"24.13.3\",\"benchmark\":\"2.1.4\",\"del-cli\":\"6.0.0\",\"delay\":\"6.0.0\",\"eventemitter3\":\"5.0.4\",\"in-range\":\"3.0.0\",\"p-defer\":\"4.0.1\",\"p-timeout\":\"7.0.1\",\"random-int\":\"3.1.0\",\"time-span\":\"5.1.0\",\"tsd\":\"0.33.0\",\"tsx\":\"4.23.12\",\"typescript\":\"5.9.3\",\"xo\":\"1.2.3\"}}\n",
+        "stderr": "",
+        "duration_ms": 78
+      }
+    }
+  },
+  "commands": {
+    "upstream_tests": {
+      "command": [
+        "{python}",
+        "{task_dir}/evaluator.py",
+        "--upstream"
+      ],
+      "working_directory": "{target_checkout}",
+      "exit_code": 0,
+      "stdout": "{\"upstream_checks_passed\": true, \"checks\": {\"node_functional_tests\": {\"command\": [\"node\", \"--import=tsx/esm\", \"--test\", \"test/*.ts\"], \"exit_code\": 0, \"duration_ms\": 39843, \"tests\": 129, \"pass\": 129, \"fail\": 0, \"skipped\": 0}, \"typescript_compile\": {\"command\": [\"node\", \"node_modules/typescript/bin/tsc\", \"--pretty\", \"false\"], \"exit_code\": 0, \"duration_ms\": 1469}, \"type_definition_tests\": {\"command\": [\"node\", \"node_modules/tsd/dist/cli.js\"], \"exit_code\": 0, \"duration_ms\": 4937}}}\n",
+      "stderr": "",
+      "duration_ms": 46396
+    },
+    "public_evaluator": {
+      "command": [
+        "{python}",
+        "{task_dir}/evaluator.py"
+      ],
+      "working_directory": "{target_checkout}",
+      "exit_code": 0,
+      "stdout": "{\"passed\": 2, \"total\": 4, \"cases\": [{\"name\": \"successCleanup\", \"passed\": false, \"error\": \"Error: value=42 listeners=1\"}, {\"name\": \"rejectionCleanup\", \"passed\": false, \"error\": \"Error: message=task failed listeners=1\"}, {\"name\": \"preAbortedControl\", \"passed\": true, \"observed\": {\"message\": \"already aborted\", \"listeners\": 0}}, {\"name\": \"noSignalControl\", \"passed\": true, \"observed\": {\"value\": 7, \"pending\": 0, \"size\": 0}}], \"metrics\": {\"listener_cleanup_score\": 0.5}}\n",
+      "stderr": "",
+      "duration_ms": 392
+    },
+    "hidden_evaluator": {
+      "command": [
+        "{python}",
+        "{task_dir}/holdout_evaluator.py"
+      ],
+      "working_directory": "{target_checkout}",
+      "exit_code": 0,
+      "stdout": "{\"passed\": 2, \"total\": 5, \"cases\": [{\"name\": \"sequentialSharedSignal\", \"passed\": false, \"error\": \"Error: values=0,1,2 listeners=3\"}, {\"name\": \"parallelSharedSignal\", \"passed\": false, \"error\": \"Error: values=1,2 listeners=2\"}, {\"name\": \"timeoutCleanup\", \"passed\": false, \"error\": \"Error: timedOut=true listeners=1\"}, {\"name\": \"abortWhileRunning\", \"passed\": true, \"observed\": {\"message\": \"cancelled\", \"listeners\": 0}}, {\"name\": \"noSignalControl\", \"passed\": true, \"observed\": {\"value\": 7, \"pending\": 0, \"size\": 0}}], \"metrics\": {\"listener_cleanup_score\": 0.4}}\n",
+      "stderr": "",
+      "duration_ms": 404
+    }
+  },
+  "baseline": {
+    "upstream_tests_passed": true,
+    "public_score": 0.5,
+    "hidden_score": 0.4,
+    "metric_key": "metrics.listener_cleanup_score"
+  },
+  "task_artifact_sha256": {
+    "autoresearch.json": "a7cf059dae48726b2b757a2d6e2fd51ac189e0df6d321ac208aaccf324379407",
+    "evaluator.py": "7c19cd56172bbb03429061f5fb28ce04dcc15a21a80fe1dad6cca40e66022521",
+    "holdout_evaluator.py": "0d0df4cd26c6f1681838985016d24ffc3c160401078623e1ea8706d376d9304e",
+    "README.md": "9e64def7b131e2e797c1566c04a7bd9afccd6c2dd57d27dde1020b298413c600",
+    "task.json": "2f0b2b8ec54efd2ecc9bd88cd3956327c7054d4e7644311a88303c44e1a32e9e"
+  },
+  "boundaries": [
+    "The task replays p-queue pull request #235 against its pinned base commit; it is not an official p-queue benchmark.",
+    "The selected upstream command runs all 129 pinned Node functional tests, TypeScript compilation, and tsd; the default npm test command also runs XO, whose TypeScript project-service lookup fails on this Windows environment before functional tests run.",
+    "The public evaluator covers success, rejection, pre-abort, and no-signal behavior; the hidden evaluator covers shared-signal sequencing, concurrency, timeout, in-flight abort, and a no-signal control.",
+    "The pull request head and merge commit are retained as provenance for human review and are not included in candidate proposer context.",
+    "The upstream repository disables package-lock generation; exact observed top-level package versions are retained, but this evidence is not a transitive dependency lock.",
+    "A contract pass proves the frozen cases and selected upstream checks passed; it does not prove semantic equivalence with the maintainer patch, complete resource-leak freedom, or upstream readiness."
+  ]
+}

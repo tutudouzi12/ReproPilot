@@ -1,35 +1,35 @@
 {
   "version": "repropilot.repository-benchmark-report/v1",
-  "recorded_at": "2026-08-20T05:47:10Z",
+  "recorded_at": "2026-08-21T03:55:25Z",
   "benchmark_id": "repository-scale-pilot-v1",
   "benchmark_title": "ReproPilot multi-repository pilot benchmark",
-  "benchmark_sha256": "fe65bff51cf98a2c94bc4d0d13e5ef7853464512436786d99d675adb3ebde5fe",
-  "run_selection_sha256": "143805af654c9a0e6da6e4253adec57bfcbd06f9ac179d4dbfaeabe3286822d2",
+  "benchmark_sha256": "946422823ec295c3531f37062fec0dfb6e38d3180c1e320eafaf827fbf82820a",
+  "run_selection_sha256": "686be8e8a8d3a802a0060c7a7b74a414be739de6300007177a0dda5dcd37fff9",
   "inventory": {
-    "task_count": 5,
-    "independent_task_count": 4,
-    "unique_repository_count": 4,
+    "task_count": 6,
+    "independent_task_count": 5,
+    "unique_repository_count": 5,
     "adversarial_followup_task_count": 1,
-    "retained_run_count": 8,
-    "selected_primary_run_count": 4
+    "retained_run_count": 11,
+    "selected_primary_run_count": 5
   },
   "selected_primary_metrics": {
     "automated_contract_pass_rate": {
       "numerator": 4,
-      "denominator": 4,
-      "rate": 1.0
+      "denominator": 5,
+      "rate": 0.8
     },
     "manual_acceptance_rate": {
       "numerator": 2,
-      "denominator": 4,
-      "rate": 0.5
+      "denominator": 5,
+      "rate": 0.4
     },
     "pass_at_1": {
       "numerator": 2,
-      "denominator": 4,
-      "rate": 0.5
+      "denominator": 5,
+      "rate": 0.4
     },
-    "mean_public_to_hidden_gap": 0.0,
+    "mean_public_to_hidden_gap": 0.02,
     "upstream_regression_rate": {
       "status": "not_calculated",
       "reason": "retained result schema does not expose one normalized upstream-regression field"
@@ -38,18 +38,19 @@
   "chronological_first_run_metrics": {
     "automated_pass_at_1": {
       "numerator": 1,
-      "denominator": 4,
-      "rate": 0.25
+      "denominator": 5,
+      "rate": 0.2
     },
     "manual_pass_at_1": {
       "numerator": 1,
-      "denominator": 4,
-      "rate": 0.25
+      "denominator": 5,
+      "rate": 0.2
     },
     "runs": [
       "flask-ipv6-host-parsing/results/7ec8f6e-live/result.json",
       "humanize-naturalsize-rounding/results/6511078-live/result.json",
       "more-itertools-strict-counted-sample/results/da3cfdd-live/result.json",
+      "p-queue-abort-listener-cleanup/results/b856ce8-live/result.json",
       "rank-bm25-boundary-robustness/results/af1178b-live/result.json"
     ]
   },
@@ -65,34 +66,36 @@
     }
   },
   "retained_evidence_totals": {
-    "attempted_requests": 16,
-    "completed_responses": 11,
-    "usage_reports": 11,
-    "reported_tokens": 114488,
+    "attempted_requests": 25,
+    "completed_responses": 14,
+    "usage_reports": 14,
+    "reported_tokens": 146368,
     "known_token_derived_cost": {
       "currency": "CNY",
       "amount": 0.609384,
       "runs_with_calculated_cost": 6,
-      "runs_without_complete_cost": 2
+      "runs_without_complete_cost": 5
     }
   },
   "automated_outcome_distribution": {
-    "candidate_stopped": 2,
+    "candidate_stopped": 5,
     "hidden_validation_failed": 2,
     "validation_passed": 4
   },
   "review_classification_distribution": {
     "contract_pass_review_accepted": 2,
-    "guard_rejection_then_provider_failures": 1,
+    "guard_rejection_then_provider_failures": 2,
+    "guard_rejections_and_provider_failure": 1,
     "hidden_validation_failed": 2,
     "manual_review_rejected_after_contract_pass": 2,
-    "provider_requests_failed_no_candidate": 1
+    "provider_requests_failed_no_candidate": 2
   },
   "failure_reason_distribution": {
-    "guard_rejection_then_provider_failures": 1,
+    "guard_rejection_then_provider_failures": 2,
+    "guard_rejections_and_provider_failure": 1,
     "hidden_validation_failed": 2,
     "manual_review_rejected_after_contract_pass": 2,
-    "provider_requests_failed_no_candidate": 1
+    "provider_requests_failed_no_candidate": 2
   },
   "selected_primary_runs": [
     {
@@ -206,6 +209,34 @@
       "hidden_baseline": 0.4,
       "hidden_observed": 1.0,
       "public_to_hidden_gap": 0.0
+    },
+    {
+      "task_id": "p-queue-abort-listener-cleanup",
+      "role": "primary",
+      "run_id": "d9cbaf2-live",
+      "result": "p-queue-abort-listener-cleanup/results/d9cbaf2-live/result.json",
+      "review": "p-queue-abort-listener-cleanup/results/d9cbaf2-live/review.json",
+      "recorded_at": "2026-08-21T03:50:17.914400Z",
+      "harness_revision": "d9cbaf266a572849ab9bbfdc8c185044cc8e75bc",
+      "repository_url": "https://github.com/sindresorhus/p-queue.git",
+      "contract_alignment": "current_contract",
+      "outcome": "candidate_stopped",
+      "automated_contract_passed": false,
+      "manual_decision": "reject",
+      "manual_accepted": false,
+      "classification": "guard_rejections_and_provider_failure",
+      "attempted_requests": 3,
+      "completed_responses": 2,
+      "usage_reports": 2,
+      "reported_tokens": 21889,
+      "cost_status": "not_calculated",
+      "cost_amount": null,
+      "cost_currency": "CNY",
+      "public_baseline": 0.5,
+      "public_best": 0.5,
+      "hidden_baseline": 0.4,
+      "hidden_observed": 0.4,
+      "public_to_hidden_gap": 0.1
     }
   ],
   "adversarial_followup_runs": [
@@ -436,6 +467,90 @@
       "public_to_hidden_gap": 0.0
     },
     {
+      "task_id": "p-queue-abort-listener-cleanup",
+      "role": "development_history",
+      "run_id": "b856ce8-live",
+      "result": "p-queue-abort-listener-cleanup/results/b856ce8-live/result.json",
+      "review": "p-queue-abort-listener-cleanup/results/b856ce8-live/review.json",
+      "recorded_at": "2026-08-21T03:19:27.428386Z",
+      "harness_revision": "b856ce813b2bbdf25a71d649a07a804463752f38",
+      "repository_url": "https://github.com/sindresorhus/p-queue.git",
+      "contract_alignment": "current_contract",
+      "outcome": "candidate_stopped",
+      "automated_contract_passed": false,
+      "manual_decision": "reject",
+      "manual_accepted": false,
+      "classification": "provider_requests_failed_no_candidate",
+      "attempted_requests": 3,
+      "completed_responses": 0,
+      "usage_reports": 0,
+      "reported_tokens": 0,
+      "cost_status": "not_calculated",
+      "cost_amount": null,
+      "cost_currency": "CNY",
+      "public_baseline": 0.5,
+      "public_best": 0.5,
+      "hidden_baseline": 0.4,
+      "hidden_observed": 0.4,
+      "public_to_hidden_gap": 0.1
+    },
+    {
+      "task_id": "p-queue-abort-listener-cleanup",
+      "role": "development_history",
+      "run_id": "81d5051-live",
+      "result": "p-queue-abort-listener-cleanup/results/81d5051-live/result.json",
+      "review": "p-queue-abort-listener-cleanup/results/81d5051-live/review.json",
+      "recorded_at": "2026-08-21T03:39:43.298247Z",
+      "harness_revision": "81d50512fe533b109cd41a125ad4a941ac495737",
+      "repository_url": "https://github.com/sindresorhus/p-queue.git",
+      "contract_alignment": "current_contract",
+      "outcome": "candidate_stopped",
+      "automated_contract_passed": false,
+      "manual_decision": "reject",
+      "manual_accepted": false,
+      "classification": "guard_rejection_then_provider_failures",
+      "attempted_requests": 3,
+      "completed_responses": 1,
+      "usage_reports": 1,
+      "reported_tokens": 9991,
+      "cost_status": "not_calculated",
+      "cost_amount": null,
+      "cost_currency": "CNY",
+      "public_baseline": 0.5,
+      "public_best": 0.5,
+      "hidden_baseline": 0.4,
+      "hidden_observed": 0.4,
+      "public_to_hidden_gap": 0.1
+    },
+    {
+      "task_id": "p-queue-abort-listener-cleanup",
+      "role": "primary",
+      "run_id": "d9cbaf2-live",
+      "result": "p-queue-abort-listener-cleanup/results/d9cbaf2-live/result.json",
+      "review": "p-queue-abort-listener-cleanup/results/d9cbaf2-live/review.json",
+      "recorded_at": "2026-08-21T03:50:17.914400Z",
+      "harness_revision": "d9cbaf266a572849ab9bbfdc8c185044cc8e75bc",
+      "repository_url": "https://github.com/sindresorhus/p-queue.git",
+      "contract_alignment": "current_contract",
+      "outcome": "candidate_stopped",
+      "automated_contract_passed": false,
+      "manual_decision": "reject",
+      "manual_accepted": false,
+      "classification": "guard_rejections_and_provider_failure",
+      "attempted_requests": 3,
+      "completed_responses": 2,
+      "usage_reports": 2,
+      "reported_tokens": 21889,
+      "cost_status": "not_calculated",
+      "cost_amount": null,
+      "cost_currency": "CNY",
+      "public_baseline": 0.5,
+      "public_best": 0.5,
+      "hidden_baseline": 0.4,
+      "hidden_observed": 0.4,
+      "public_to_hidden_gap": 0.1
+    },
+    {
       "task_id": "more-itertools-strict-counted-sample-adversarial",
       "role": "adversarial_followup",
       "run_id": "d7ad05b-live",
@@ -470,7 +585,7 @@
     "Chronological first-run metrics are reported separately so earlier failures remain visible.",
     "The adversarial follow-up reuses more-itertools and is excluded from independent task and unique-repository counts.",
     "Manual acceptance means the retained review accepts the run as bounded benchmark evidence; it does not claim upstream readiness or production equivalence.",
-    "This pilot contains five tasks across four unique repositories and is not a statistically representative software-engineering benchmark.",
+    "This pilot contains six tasks across five unique repositories and is not a statistically representative software-engineering benchmark.",
     "The candidate-informed adversarial follow-up reuses the more-itertools base and must not be counted as an independent repository sample.",
     "Historical bug provenance and ReproPilot-authored boundary contracts are labeled separately and must not be aggregated without retaining that distinction.",
     "A contract pass does not establish equivalence with an upstream maintainer patch or production readiness.",

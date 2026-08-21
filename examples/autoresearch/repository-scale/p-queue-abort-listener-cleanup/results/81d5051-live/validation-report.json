@@ -1,0 +1,57 @@
+{
+  "version": "autoresearch.validation/v1",
+  "spec_sha256": "5a0e4549e97e9cdbcd0cca55b7ecd1797b2929ff9ae72a93343fac80c749b637",
+  "status": "failed",
+  "validation_mode": "hidden_holdout",
+  "expected_score": 0.4,
+  "baseline_score": 0.4,
+  "acceptance_rule": "minimum_improvement",
+  "acceptance_delta": 0.6,
+  "acceptance_target_score": 1.0,
+  "observed_scores": [
+    0.4,
+    0.4,
+    0.4
+  ],
+  "observed_score": 0.4,
+  "mean_score": 0.4000000000000001,
+  "stddev": 0.0,
+  "passed_runs": 3,
+  "failed_runs": 0,
+  "score_matches": false,
+  "candidate_intact": true,
+  "protected_files_intact": true,
+  "command_results": [
+    {
+      "command": [
+        "python",
+        ".repropilot/uploads/03-holdout_evaluator.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"passed\": 2, \"total\": 5, \"cases\": [{\"name\": \"sequentialSharedSignal\", \"passed\": false, \"error\": \"Error: values=0,1,2 listeners=3\"}, {\"name\": \"parallelSharedSignal\", \"passed\": false, \"error\": \"Error: values=1,2 listeners=2\"}, {\"name\": \"timeoutCleanup\", \"passed\": false, \"error\": \"Error: timedOut=true listeners=1\"}, {\"name\": \"abortWhileRunning\", \"passed\": true, \"observed\": {\"message\": \"cancelled\", \"listeners\": 0}}, {\"name\": \"noSignalControl\", \"passed\": true, \"observed\": {\"value\": 7, \"pending\": 0, \"size\": 0}}], \"metrics\": {\"listener_cleanup_score\": 0.4}}\r\n",
+      "stderr": "",
+      "duration_ms": 375
+    },
+    {
+      "command": [
+        "python",
+        ".repropilot/uploads/03-holdout_evaluator.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"passed\": 2, \"total\": 5, \"cases\": [{\"name\": \"sequentialSharedSignal\", \"passed\": false, \"error\": \"Error: values=0,1,2 listeners=3\"}, {\"name\": \"parallelSharedSignal\", \"passed\": false, \"error\": \"Error: values=1,2 listeners=2\"}, {\"name\": \"timeoutCleanup\", \"passed\": false, \"error\": \"Error: timedOut=true listeners=1\"}, {\"name\": \"abortWhileRunning\", \"passed\": true, \"observed\": {\"message\": \"cancelled\", \"listeners\": 0}}, {\"name\": \"noSignalControl\", \"passed\": true, \"observed\": {\"value\": 7, \"pending\": 0, \"size\": 0}}], \"metrics\": {\"listener_cleanup_score\": 0.4}}\r\n",
+      "stderr": "",
+      "duration_ms": 375
+    },
+    {
+      "command": [
+        "python",
+        ".repropilot/uploads/03-holdout_evaluator.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"passed\": 2, \"total\": 5, \"cases\": [{\"name\": \"sequentialSharedSignal\", \"passed\": false, \"error\": \"Error: values=0,1,2 listeners=3\"}, {\"name\": \"parallelSharedSignal\", \"passed\": false, \"error\": \"Error: values=1,2 listeners=2\"}, {\"name\": \"timeoutCleanup\", \"passed\": false, \"error\": \"Error: timedOut=true listeners=1\"}, {\"name\": \"abortWhileRunning\", \"passed\": true, \"observed\": {\"message\": \"cancelled\", \"listeners\": 0}}, {\"name\": \"noSignalControl\", \"passed\": true, \"observed\": {\"value\": 7, \"pending\": 0, \"size\": 0}}], \"metrics\": {\"listener_cleanup_score\": 0.4}}\r\n",
+      "stderr": "",
+      "duration_ms": 375
+    }
+  ],
+  "reason": "fresh validation score did not satisfy the frozen acceptance rule"
+}

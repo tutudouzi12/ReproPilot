@@ -1,0 +1,63 @@
+{
+  "version": "repropilot.repository-evaluation-review/v1",
+  "status": "guard_rejection_then_provider_failures",
+  "decision": "reject",
+  "classification": "guard_rejection_then_provider_failures",
+  "automated_evidence": {
+    "public_baseline": 0.5,
+    "public_best": 0.5,
+    "hidden_baseline": 0.4,
+    "hidden_validation_runs": [
+      0.4,
+      0.4,
+      0.4
+    ],
+    "provider_attempts": 3,
+    "provider_responses": 1,
+    "provider_usage_reports": 1,
+    "reported_prompt_tokens": 7850,
+    "reported_completion_tokens": 2141,
+    "reported_total_tokens": 9991,
+    "accepted_trials": 0,
+    "candidate_patch_empty": true,
+    "candidate_intact": true,
+    "protected_files_intact": true
+  },
+  "search_history": [
+    {
+      "trial": 1,
+      "decision": "reject",
+      "finding": "The model returned two localized replacements for source/index.ts. The then-current patch engine rejected the second path as unauthorized before guard execution because it allowed only one patch entry per file."
+    },
+    {
+      "trial": 2,
+      "decision": "reject",
+      "finding": "The provider connection failed before returning model content or usage data."
+    },
+    {
+      "trial": 3,
+      "decision": "reject",
+      "finding": "The provider connection failed before returning model content or usage data."
+    }
+  ],
+  "manual_observations": [
+    {
+      "severity": "harness_limitation",
+      "finding": "A candidate may need multiple exact localized replacements in one editable file, but duplicate file paths were rejected even when each operation retained an independent search anchor.",
+      "impact": "The candidate was never executed, so this run cannot distinguish a semantically invalid repair from a valid multi-location edit.",
+      "disposition": "Allow sequential localized replacements for one file while continuing to reject any combination involving a complete-file replacement. Retain this run as pre-fix Harness evidence."
+    },
+    {
+      "severity": "failure_classification",
+      "finding": "One candidate was rejected by the patch engine and two attempts failed during connection setup.",
+      "impact": "No candidate reached the upstream guard or public evaluator, so the run is not a model repair success or a semantic model failure.",
+      "disposition": "Classify as guard rejection followed by provider failures and keep all attempted-request counters visible."
+    },
+    {
+      "severity": "cost_boundary",
+      "finding": "Only one of three provider attempts returned token usage.",
+      "impact": "The complete run cost cannot be calculated from retained usage data even though 9,991 tokens are reported for one response.",
+      "disposition": "Report cost as not calculated and do not treat missing usage as zero."
+    }
+  ]
+}
