@@ -4,6 +4,8 @@ import importlib.util
 import sys
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts" / "run_repository_baseline.py"
@@ -11,6 +13,18 @@ SPEC = importlib.util.spec_from_file_location("repository_baseline_script", SCRI
 assert SPEC is not None and SPEC.loader is not None
 repository_baseline = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(repository_baseline)
+
+
+def test_preserve_python_executable_keeps_virtualenv_symlink(tmp_path: Path) -> None:
+    target = tmp_path / "python-target"
+    target.write_text("", encoding="utf-8")
+    link = tmp_path / "python"
+    try:
+        link.symlink_to(target)
+    except OSError:
+        pytest.skip("creating symlinks is not permitted in this environment")
+
+    assert repository_baseline.preserve_python_executable(link) == link.absolute()
 
 
 def test_sanitize_command_result_replaces_local_paths(tmp_path: Path) -> None:

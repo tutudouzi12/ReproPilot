@@ -14,6 +14,18 @@ repository_evaluation = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(repository_evaluation)
 
 
+def test_preserve_python_executable_keeps_virtualenv_symlink(tmp_path: Path) -> None:
+    target = tmp_path / "python-target"
+    target.write_text("", encoding="utf-8")
+    link = tmp_path / "python"
+    try:
+        link.symlink_to(target)
+    except OSError:
+        pytest.skip("creating symlinks is not permitted in this environment")
+
+    assert repository_evaluation.preserve_python_executable(link) == link.absolute()
+
+
 def test_editable_sources_and_patch_support_nested_files(tmp_path: Path) -> None:
     source = tmp_path / "src" / "package" / "module.py"
     source.parent.mkdir(parents=True)
