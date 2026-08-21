@@ -14,6 +14,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -438,7 +439,8 @@ def render_report(result: dict[str, Any], ledger: TrialLedger | None, task: dict
         f"target `{result['validation']['acceptance_target_score']}`, "
         f"delta `{result['validation']['acceptance_delta']}`",
         f"- Model: `{result['model']['provider']}/{result['model']['model']}`",
-        f"- Requests/tokens: `{result['model']['request_count']}` / `{result['model']['total_tokens']}`",
+        f"- Request attempts/usage reports/tokens: `{result['model']['attempted_request_count']}` / "
+        f"`{result['model']['reported_request_count']}` / `{result['model']['total_tokens']}`",
         f"- Token-derived cost: `{amount}`",
         f"- Editable files: `{', '.join(result['repository']['editable_files'])}`",
         "",
@@ -543,6 +545,12 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
     outcome = classify_outcome(ledger, report, run_error)
     cost = cost_record(usage, len(responses), args)
     validation_observed = report.observed_score if report is not None else None
+    model_record = usage.model_dump(mode="json")
+    if not model_record["provider"]:
+        model_record["provider"] = urlparse(client.base_url).hostname or client.base_url
+    if not model_record["model"]:
+        model_record["model"] = client.model
+
     result = {
         "version": RESULT_VERSION,
         "recorded_at": utc_now(),
@@ -567,7 +575,7 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
             "request_cap": args.max_live_requests,
         },
         "model": {
-            **usage.model_dump(mode="json"),
+            **model_record,
             "attempted_request_count": len(responses),
             "mode": "live_model",
         },

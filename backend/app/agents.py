@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import ast
@@ -180,14 +181,21 @@ class LLMClient:
             "temperature": 0.2,
         }
         headers = {"Authorization": f"Bearer {self.api_key}"}
-        async with httpx.AsyncClient(timeout=120, transport=self.transport) as client:
-            response = await client.post(
-                f"{self.base_url}/chat/completions",
-                headers=headers,
-                json=payload,
-            )
-            response.raise_for_status()
-            data = response.json()
+        for attempt in range(3):
+            try:
+                async with httpx.AsyncClient(timeout=120, transport=self.transport) as client:
+                    response = await client.post(
+                        f"{self.base_url}/chat/completions",
+                        headers=headers,
+                        json=payload,
+                    )
+                    response.raise_for_status()
+                    data = response.json()
+                break
+            except httpx.ConnectError:
+                if attempt == 2:
+                    raise
+                await asyncio.sleep(0.5 * (2**attempt))
         raw_usage = data.get("usage") if isinstance(data, dict) else None
         raw_usage = raw_usage if isinstance(raw_usage, dict) else {}
         prompt_tokens = int(raw_usage.get("prompt_tokens", raw_usage.get("input_tokens", 0)) or 0)

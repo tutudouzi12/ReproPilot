@@ -208,6 +208,38 @@ async def test_llm_client_parses_openai_compatible_usage(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_llm_client_retries_connect_errors_without_retrying_the_evaluation_budget(monkeypatch):
+    httpx = __import__("httpx")
+    attempts = 0
+
+    def handler(request):
+        nonlocal attempts
+        attempts += 1
+        if attempts < 3:
+            raise httpx.ConnectError("TLS handshake ended early", request=request)
+        return httpx.Response(
+            200,
+            json={
+                "choices": [{"message": {"content": "recovered"}}],
+                "usage": {"prompt_tokens": 5, "completion_tokens": 1, "total_tokens": 6},
+            },
+        )
+
+    async def no_wait(_seconds):
+        return None
+
+    monkeypatch.setattr("app.agents.asyncio.sleep", no_wait)
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    client = LLMClient(transport=httpx.MockTransport(handler))
+
+    completion = await client.complete_with_usage("system", "user")
+
+    assert attempts == 3
+    assert completion.content == "recovered"
+    assert completion.usage.request_count == 1
+
+
+@pytest.mark.asyncio
 async def test_autoresearch_dependencies_only_use_frozen_contract(tmp_path):
     root = workspace(tmp_path)
     (root / "unrelated.py").write_text("import httpx\n", encoding="utf-8")
