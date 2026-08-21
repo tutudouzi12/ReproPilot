@@ -36,6 +36,7 @@ def test_replay_workflow_installs_harness_before_running_replay() -> None:
     install = "python -m pip install --disable-pip-version-check --no-input --editable ./backend"
     assert install in text
     assert text.index(install) < text.index("python scripts/run_repository_benchmark_replay.py")
+    assert "uses: actions/upload-artifact@v7" in text
 
 
 @pytest.mark.parametrize(
