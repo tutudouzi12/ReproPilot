@@ -1,7 +1,7 @@
 {
   "version": "repropilot.repository-benchmark-run-selection/v1",
   "benchmark_id": "repository-scale-pilot-v1",
-  "recorded_at": "2026-08-20T05:47:10Z",
+  "recorded_at": "2026-08-21T03:55:25Z",
   "selection_policy": {
     "primary_run": "one manually reviewed release-evidence run per independent task",
     "development_history": "retained earlier runs contribute failure evidence but not selected contract-pass metrics",
@@ -67,6 +67,30 @@
       "result_sha256": "b4652b31f4cc366c521c5a29408220886eaf2a6a5a0e28541490eb4bb9cf2a73",
       "review": "flask-ipv6-host-parsing/results/7ec8f6e-live/review.json",
       "review_sha256": "4a35d2f49680561f8a82040ba9217a6ea84c3593423e582fe8f91626271c555e"
+    },
+    {
+      "task_id": "p-queue-abort-listener-cleanup",
+      "role": "development_history",
+      "result": "p-queue-abort-listener-cleanup/results/b856ce8-live/result.json",
+      "result_sha256": "3464b6490c95101a277a120965e2648ec35a9f24231890ea90ff00b2139e683a",
+      "review": "p-queue-abort-listener-cleanup/results/b856ce8-live/review.json",
+      "review_sha256": "443e3786c80ad55a2d5957f794b764187dfc9e5e18a98562c3d4c97e23021984"
+    },
+    {
+      "task_id": "p-queue-abort-listener-cleanup",
+      "role": "development_history",
+      "result": "p-queue-abort-listener-cleanup/results/81d5051-live/result.json",
+      "result_sha256": "6c8b1ab62f7e3fb302017ad01a7c169266bf6d30adf8946dd192570ca1e5ca7c",
+      "review": "p-queue-abort-listener-cleanup/results/81d5051-live/review.json",
+      "review_sha256": "04affd7f692f2d37aa9e020b2e645a6e7046be4c060cf7f8e677f22750739b48"
+    },
+    {
+      "task_id": "p-queue-abort-listener-cleanup",
+      "role": "primary",
+      "result": "p-queue-abort-listener-cleanup/results/d9cbaf2-live/result.json",
+      "result_sha256": "29fbac54dfaf93a24c96bb60565477b316447bad7ad0633d5f83d6da5a786eba",
+      "review": "p-queue-abort-listener-cleanup/results/d9cbaf2-live/review.json",
+      "review_sha256": "a34da3696b0f72e28b4f8e99b6a2e2ce0f6cfbfa590b9aad3374a023cb194d7e"
     },
     {
       "task_id": "more-itertools-strict-counted-sample-adversarial",

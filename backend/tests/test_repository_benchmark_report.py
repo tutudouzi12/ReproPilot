@@ -165,12 +165,12 @@ def test_builds_checked_in_strict_report_deterministically(tmp_path: Path) -> No
     )
 
     assert report["inventory"] == {
-        "task_count": 5,
-        "independent_task_count": 4,
-        "unique_repository_count": 4,
+        "task_count": 6,
+        "independent_task_count": 5,
+        "unique_repository_count": 5,
         "adversarial_followup_task_count": 1,
-        "retained_run_count": 8,
-        "selected_primary_run_count": 4,
+        "retained_run_count": 11,
+        "selected_primary_run_count": 5,
     }
     assert report["selected_primary_metrics"]["manual_acceptance_rate"]["numerator"] == 2
     assert report["chronological_first_run_metrics"]["manual_pass_at_1"]["numerator"] == 1

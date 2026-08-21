@@ -1,0 +1,158 @@
+{
+  "version": "autoresearch.ledger/v1",
+  "spec_sha256": "5a0e4549e97e9cdbcd0cca55b7ecd1797b2929ff9ae72a93343fac80c749b637",
+  "status": "completed",
+  "metric_key": "metrics.listener_cleanup_score",
+  "direction": "maximize",
+  "baseline_score": 0.5,
+  "best_score": 0.5,
+  "holdout_baseline_score": 0.4,
+  "max_trials": 6,
+  "completed_trials": 3,
+  "accepted_trials": 0,
+  "stop_reason": "candidate_stopped",
+  "best_candidate_files": {
+    "source/index.ts": "68e6ecef7217b99b3e616b3e55be2369e20770e14fa2bb516dd48c4d67dc1e86"
+  },
+  "trials": [
+    {
+      "number": 0,
+      "status": "baseline",
+      "decision": "keep",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "frozen baseline",
+      "patches": [],
+      "metric": 0.5,
+      "metric_samples": [
+        0.5,
+        0.5
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py",
+            "--upstream"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"upstream_checks_passed\": true, \"checks\": {\"node_functional_tests\": {\"command\": [\"node\", \"--import=tsx/esm\", \"--test\", \"test/*.ts\"], \"exit_code\": 0, \"duration_ms\": 43718, \"tests\": 129, \"pass\": 129, \"fail\": 0, \"skipped\": 0}, \"typescript_compile\": {\"command\": [\"node\", \"node_modules/typescript/bin/tsc\", \"--pretty\", \"false\"], \"exit_code\": 0, \"duration_ms\": 4797}, \"type_definition_tests\": {\"command\": [\"node\", \"node_modules/tsd/dist/cli.js\"], \"exit_code\": 0, \"duration_ms\": 10983}}}\r\n",
+          "stderr": "",
+          "duration_ms": 59657
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"passed\": 2, \"total\": 4, \"cases\": [{\"name\": \"successCleanup\", \"passed\": false, \"error\": \"Error: value=42 listeners=1\"}, {\"name\": \"rejectionCleanup\", \"passed\": false, \"error\": \"Error: message=task failed listeners=1\"}, {\"name\": \"preAbortedControl\", \"passed\": true, \"observed\": {\"message\": \"already aborted\", \"listeners\": 0}}, {\"name\": \"noSignalControl\", \"passed\": true, \"observed\": {\"value\": 7, \"pending\": 0, \"size\": 0}}], \"metrics\": {\"listener_cleanup_score\": 0.5}}\r\n",
+          "stderr": "",
+          "duration_ms": 358
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py",
+            "--upstream"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"upstream_checks_passed\": true, \"checks\": {\"node_functional_tests\": {\"command\": [\"node\", \"--import=tsx/esm\", \"--test\", \"test/*.ts\"], \"exit_code\": 0, \"duration_ms\": 39718, \"tests\": 129, \"pass\": 129, \"fail\": 0, \"skipped\": 0}, \"typescript_compile\": {\"command\": [\"node\", \"node_modules/typescript/bin/tsc\", \"--pretty\", \"false\"], \"exit_code\": 0, \"duration_ms\": 1390}, \"type_definition_tests\": {\"command\": [\"node\", \"node_modules/tsd/dist/cli.js\"], \"exit_code\": 0, \"duration_ms\": 4891}}}\r\n",
+          "stderr": "",
+          "duration_ms": 46125
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"passed\": 2, \"total\": 4, \"cases\": [{\"name\": \"successCleanup\", \"passed\": false, \"error\": \"Error: value=42 listeners=1\"}, {\"name\": \"rejectionCleanup\", \"passed\": false, \"error\": \"Error: message=task failed listeners=1\"}, {\"name\": \"preAbortedControl\", \"passed\": true, \"observed\": {\"message\": \"already aborted\", \"listeners\": 0}}, {\"name\": \"noSignalControl\", \"passed\": true, \"observed\": {\"value\": 7, \"pending\": 0, \"size\": 0}}], \"metrics\": {\"listener_cleanup_score\": 0.5}}\r\n",
+          "stderr": "",
+          "duration_ms": 358
+        }
+      ],
+      "started_at": "2026-08-21T03:37:25.386888Z",
+      "finished_at": "2026-08-21T03:37:25.386888Z"
+    },
+    {
+      "number": 1,
+      "status": "rejected",
+      "decision": "reject",
+      "diagnosis": "The issue is that AbortSignal listeners are not being properly cleaned up after tasks complete. The current implementation adds a listener in #throwOnAbort but doesn't remove it when the task finishes successfully, is rejected, times out, or is aborted. This causes memory leaks when using shared AbortSignals.",
+      "hypothesis": "We need to ensure that AbortSignal listeners are removed in all code paths - successful completion, rejection, timeout, and abortion - by storing the listener reference and calling removeEventListener appropriately.",
+      "reason": "ValueError: candidate patch is not authorized: source/index.ts",
+      "patches": [],
+      "metric": null,
+      "metric_samples": [],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "",
+      "command_results": [],
+      "started_at": "2026-08-21T03:38:12.941535Z",
+      "finished_at": "2026-08-21T03:38:49.567994Z"
+    },
+    {
+      "number": 2,
+      "status": "rejected",
+      "decision": "reject",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "ConnectError",
+      "patches": [],
+      "metric": null,
+      "metric_samples": [],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "",
+      "command_results": [],
+      "started_at": "2026-08-21T03:38:49.567994Z",
+      "finished_at": "2026-08-21T03:39:10.996926Z"
+    },
+    {
+      "number": 3,
+      "status": "rejected",
+      "decision": "reject",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "ConnectError",
+      "patches": [],
+      "metric": null,
+      "metric_samples": [],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "",
+      "command_results": [],
+      "started_at": "2026-08-21T03:39:10.996926Z",
+      "finished_at": "2026-08-21T03:39:32.378564Z"
+    },
+    {
+      "number": 4,
+      "status": "stopped",
+      "decision": "reject",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "live request cap reached (3)",
+      "patches": [],
+      "metric": null,
+      "metric_samples": [],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "",
+      "command_results": [],
+      "started_at": "2026-08-21T03:39:32.379574Z",
+      "finished_at": "2026-08-21T03:39:32.411487Z"
+    }
+  ],
+  "command_runs": 6,
+  "command_duration_ms": 153029,
+  "model_usage": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "request_count": 1,
+    "reported_request_count": 1,
+    "prompt_tokens": 7850,
+    "completion_tokens": 2141,
+    "total_tokens": 9991
+  },
+  "started_at": "2026-08-21T03:35:37.905595Z",
+  "finished_at": "2026-08-21T03:39:33.470194Z"
+}

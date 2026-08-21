@@ -14,9 +14,10 @@ These tasks exercise repository acquisition and real project code. They remain b
 | [`humanize-naturalsize-rounding`](humanize-naturalsize-rounding/) | Historical merged PR [#329](https://github.com/python-humanize/humanize/pull/329) | `python-humanize/humanize@976484a655df046aa6849f440a4f0cd44fc4918c` | public `4/6`, hidden `1/6` | One historical defect plus 701 upstream tests |
 | [`more-itertools-strict-counted-sample`](more-itertools-strict-counted-sample/) | Historical merged PR [#944](https://github.com/more-itertools/more-itertools/pull/944) | `more-itertools/more-itertools@18225d856665bfc3bfdfcdbfa585290f92645daf` | public `4/6`, hidden `1/6` | Counted-sampling exception flow plus 825 upstream tests |
 | [`flask-ipv6-host-parsing`](flask-ipv6-host-parsing/) | Historical merged PR [#6096](https://github.com/pallets/flask/pull/6096) | `pallets/flask@514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b` | public `2/4`, hidden `2/5` | Two production modules plus 491 upstream tests |
+| [`p-queue-abort-listener-cleanup`](p-queue-abort-listener-cleanup/) | Historical merged PR [#235](https://github.com/sindresorhus/p-queue/pull/235) | `sindresorhus/p-queue@5e400174a89395a44399713191b76544cf743fe5` | public `2/4`, hidden `2/5` | TypeScript async cleanup plus 129 functional tests and type checks |
 | [`more-itertools-strict-counted-sample-adversarial`](more-itertools-strict-counted-sample-adversarial/) | Candidate-informed follow-up | Same pinned `more-itertools` base | public `4/6`, hidden `2/10` | Lazy-iterator non-regression; excluded from independent repository counts |
 
-The pilot therefore contains five tasks across four unique repositories. The adversarial follow-up is retained to show how manual review hardened a missed boundary; it is not an independent repository sample and must remain separately labeled in aggregates.
+The pilot therefore contains six tasks across five unique repositories. The adversarial follow-up is retained to show how manual review hardened a missed boundary; it is not an independent repository sample and must remain separately labeled in aggregates.
 
 ## Baseline contract
 
@@ -47,6 +48,8 @@ py -3.11 scripts\run_repository_benchmark_preflight.py `
   --python more-itertools-strict-counted-sample=<more-itertools-python> `
   --checkout flask-ipv6-host-parsing=<flask-checkout> `
   --python flask-ipv6-host-parsing=<flask-python> `
+  --checkout p-queue-abort-listener-cleanup=<p-queue-checkout> `
+  --python p-queue-abort-listener-cleanup=<python> `
   --checkout more-itertools-strict-counted-sample-adversarial=<more-itertools-checkout> `
   --python more-itertools-strict-counted-sample-adversarial=<more-itertools-python> `
   --output <preflight-report.json>

@@ -1,0 +1,158 @@
+{
+  "version": "autoresearch.ledger/v1",
+  "spec_sha256": "5a0e4549e97e9cdbcd0cca55b7ecd1797b2929ff9ae72a93343fac80c749b637",
+  "status": "completed",
+  "metric_key": "metrics.listener_cleanup_score",
+  "direction": "maximize",
+  "baseline_score": 0.5,
+  "best_score": 0.5,
+  "holdout_baseline_score": 0.4,
+  "max_trials": 6,
+  "completed_trials": 3,
+  "accepted_trials": 0,
+  "stop_reason": "candidate_stopped",
+  "best_candidate_files": {
+    "source/index.ts": "68e6ecef7217b99b3e616b3e55be2369e20770e14fa2bb516dd48c4d67dc1e86"
+  },
+  "trials": [
+    {
+      "number": 0,
+      "status": "baseline",
+      "decision": "keep",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "frozen baseline",
+      "patches": [],
+      "metric": 0.5,
+      "metric_samples": [
+        0.5,
+        0.5
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py",
+            "--upstream"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"upstream_checks_passed\": true, \"checks\": {\"node_functional_tests\": {\"command\": [\"node\", \"--import=tsx/esm\", \"--test\", \"test/*.ts\"], \"exit_code\": 0, \"duration_ms\": 42234, \"tests\": 129, \"pass\": 129, \"fail\": 0, \"skipped\": 0}, \"typescript_compile\": {\"command\": [\"node\", \"node_modules/typescript/bin/tsc\", \"--pretty\", \"false\"], \"exit_code\": 0, \"duration_ms\": 4375}, \"type_definition_tests\": {\"command\": [\"node\", \"node_modules/tsd/dist/cli.js\"], \"exit_code\": 0, \"duration_ms\": 9844}}}\r\n",
+          "stderr": "",
+          "duration_ms": 56609
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"passed\": 2, \"total\": 4, \"cases\": [{\"name\": \"successCleanup\", \"passed\": false, \"error\": \"Error: value=42 listeners=1\"}, {\"name\": \"rejectionCleanup\", \"passed\": false, \"error\": \"Error: message=task failed listeners=1\"}, {\"name\": \"preAbortedControl\", \"passed\": true, \"observed\": {\"message\": \"already aborted\", \"listeners\": 0}}, {\"name\": \"noSignalControl\", \"passed\": true, \"observed\": {\"value\": 7, \"pending\": 0, \"size\": 0}}], \"metrics\": {\"listener_cleanup_score\": 0.5}}\r\n",
+          "stderr": "",
+          "duration_ms": 343
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py",
+            "--upstream"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"upstream_checks_passed\": true, \"checks\": {\"node_functional_tests\": {\"command\": [\"node\", \"--import=tsx/esm\", \"--test\", \"test/*.ts\"], \"exit_code\": 0, \"duration_ms\": 39625, \"tests\": 129, \"pass\": 129, \"fail\": 0, \"skipped\": 0}, \"typescript_compile\": {\"command\": [\"node\", \"node_modules/typescript/bin/tsc\", \"--pretty\", \"false\"], \"exit_code\": 0, \"duration_ms\": 1453}, \"type_definition_tests\": {\"command\": [\"node\", \"node_modules/tsd/dist/cli.js\"], \"exit_code\": 0, \"duration_ms\": 4718}}}\r\n",
+          "stderr": "",
+          "duration_ms": 45921
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"passed\": 2, \"total\": 4, \"cases\": [{\"name\": \"successCleanup\", \"passed\": false, \"error\": \"Error: value=42 listeners=1\"}, {\"name\": \"rejectionCleanup\", \"passed\": false, \"error\": \"Error: message=task failed listeners=1\"}, {\"name\": \"preAbortedControl\", \"passed\": true, \"observed\": {\"message\": \"already aborted\", \"listeners\": 0}}, {\"name\": \"noSignalControl\", \"passed\": true, \"observed\": {\"value\": 7, \"pending\": 0, \"size\": 0}}], \"metrics\": {\"listener_cleanup_score\": 0.5}}\r\n",
+          "stderr": "",
+          "duration_ms": 328
+        }
+      ],
+      "started_at": "2026-08-21T03:18:05.927343Z",
+      "finished_at": "2026-08-21T03:18:05.927343Z"
+    },
+    {
+      "number": 1,
+      "status": "rejected",
+      "decision": "reject",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "ConnectError",
+      "patches": [],
+      "metric": null,
+      "metric_samples": [],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "",
+      "command_results": [],
+      "started_at": "2026-08-21T03:18:53.479664Z",
+      "finished_at": "2026-08-21T03:19:01.141977Z"
+    },
+    {
+      "number": 2,
+      "status": "rejected",
+      "decision": "reject",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "ConnectError",
+      "patches": [],
+      "metric": null,
+      "metric_samples": [],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "",
+      "command_results": [],
+      "started_at": "2026-08-21T03:19:01.141977Z",
+      "finished_at": "2026-08-21T03:19:08.401438Z"
+    },
+    {
+      "number": 3,
+      "status": "rejected",
+      "decision": "reject",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "ConnectError",
+      "patches": [],
+      "metric": null,
+      "metric_samples": [],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "",
+      "command_results": [],
+      "started_at": "2026-08-21T03:19:08.401438Z",
+      "finished_at": "2026-08-21T03:19:15.680786Z"
+    },
+    {
+      "number": 4,
+      "status": "stopped",
+      "decision": "reject",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "live request cap reached (3)",
+      "patches": [],
+      "metric": null,
+      "metric_samples": [],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "",
+      "command_results": [],
+      "started_at": "2026-08-21T03:19:15.680786Z",
+      "finished_at": "2026-08-21T03:19:15.714067Z"
+    }
+  ],
+  "command_runs": 6,
+  "command_duration_ms": 149731,
+  "model_usage": {
+    "provider": "",
+    "model": "",
+    "request_count": 0,
+    "reported_request_count": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0
+  },
+  "started_at": "2026-08-21T03:16:21.637799Z",
+  "finished_at": "2026-08-21T03:19:16.764596Z"
+}

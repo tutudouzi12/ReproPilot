@@ -1,0 +1,69 @@
+{
+  "version": "repropilot.repository-evaluation-review/v1",
+  "status": "guard_rejections_and_provider_failure",
+  "decision": "reject",
+  "classification": "guard_rejections_and_provider_failure",
+  "automated_evidence": {
+    "public_baseline": 0.5,
+    "public_best": 0.5,
+    "hidden_baseline": 0.4,
+    "hidden_validation_runs": [
+      0.4,
+      0.4,
+      0.4
+    ],
+    "provider_attempts": 3,
+    "provider_responses": 2,
+    "provider_usage_reports": 2,
+    "reported_prompt_tokens": 17724,
+    "reported_completion_tokens": 4165,
+    "reported_total_tokens": 21889,
+    "accepted_trials": 0,
+    "candidate_patch_empty": true,
+    "candidate_intact": true,
+    "protected_files_intact": true
+  },
+  "search_history": [
+    {
+      "trial": 1,
+      "decision": "reject",
+      "finding": "The candidate introduced an AbortController-based replacement that failed one of 129 pinned Node functional tests; the guard reported 128 passes and one failure."
+    },
+    {
+      "trial": 2,
+      "decision": "reject",
+      "finding": "The provider disconnected without sending a response, so no candidate or usage report was returned."
+    },
+    {
+      "trial": 3,
+      "decision": "reject",
+      "finding": "The candidate passed all 129 functional tests but failed both TypeScript compilation and tsd with an unused private method and Promise<unknown> type incompatibility."
+    }
+  ],
+  "manual_observations": [
+    {
+      "severity": "functional_regression",
+      "finding": "The first candidate changed abort behavior enough to fail a pinned upstream functional test before public scoring.",
+      "impact": "Listener cleanup cannot be accepted when established queue behavior regresses.",
+      "disposition": "Keep the guard rejection and rollback; do not score the candidate against public or hidden cases."
+    },
+    {
+      "severity": "type_regression",
+      "finding": "The second returned candidate preserved the functional suite but introduced two independently reported TypeScript/type-definition errors.",
+      "impact": "The patch would not satisfy the repository's published TypeScript contract even if its runtime listener behavior appeared plausible.",
+      "disposition": "Reject before public scoring and preserve the compiler and tsd diagnostics in the TrialLedger."
+    },
+    {
+      "severity": "failure_classification",
+      "finding": "Two model candidates reached the guard and were rolled back; one intervening provider attempt returned no response.",
+      "impact": "This is direct evidence of failed generated repairs plus one external provider failure, not a hidden-test failure or an accepted repair.",
+      "disposition": "Select this run as the primary fifth-repository result with manual decision reject."
+    },
+    {
+      "severity": "cost_boundary",
+      "finding": "Two of three provider attempts reported 21,889 tokens; the disconnected attempt returned no usage.",
+      "impact": "The complete run cost cannot be calculated from retained usage data.",
+      "disposition": "Report cost as not calculated and retain the reported token subtotal without presenting a billing amount."
+    }
+  ]
+}

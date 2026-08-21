@@ -1,0 +1,100 @@
+{
+  "version": "repropilot.repository-evaluation-result/v1",
+  "recorded_at": "2026-08-21T03:50:17.914400Z",
+  "task_id": "p-queue-abort-listener-cleanup",
+  "outcome": "candidate_stopped",
+  "harness": {
+    "revision": "d9cbaf266a572849ab9bbfdc8c185044cc8e75bc",
+    "source_tree_dirty": false
+  },
+  "sanitization": {
+    "workspace_paths_replaced_with": "{workspace}"
+  },
+  "repository": {
+    "url": "https://github.com/sindresorhus/p-queue.git",
+    "revision": "5e400174a89395a44399713191b76544cf743fe5",
+    "git_blob_sha256": {
+      "source/index.ts": "68e6ecef7217b99b3e616b3e55be2369e20770e14fa2bb516dd48c4d67dc1e86",
+      "source/options.ts": "0667a65ad097b59b128729f1e12794faf6430ae2c473a0fc341539c77d08496a",
+      "source/priority-queue.ts": "f31320502e82a59fb6ea8dc0b33cf2bdea9439cb906bfdfa293af5602d990db5",
+      "source/queue.ts": "eb1b7a853b05393edeb5e2ffd6be0610590677d3dc6f0c7edabc782d3bd61964",
+      "test/advanced.ts": "cd4f941f35a9615f154f0bd5b0e93c97810f3f87e4832d01f675d76217dc942f",
+      "test/basic.ts": "3e5aac37db74d42d6d9f1e9d05f83fcc1555d653be089eb6bfc28f9bdda7a73d",
+      "package.json": "710828baae9fbb68c513d55ef8786b057f681bed07efe81d33d03c6044616f5f",
+      "tsconfig.json": "4915654479be2c4167fab9c589a877731b7b26e2d31d2db3ed0abf34bd00a115",
+      "license": "5c932d88256b4ab958f64a856fa48e8bd1f55bc1d96b8149c65689e0c61789d3"
+    },
+    "editable_files": [
+      "source/index.ts"
+    ],
+    "working_tree_matches_git_blobs": true
+  },
+  "baseline_artifact_sha256": "06d28927eee1bbee44010601ce3262cabea307973efff3c50bcebe7b32418b97",
+  "search": {
+    "baseline_score": 0.5,
+    "best_score": 0.5,
+    "completed_trials": 3,
+    "accepted_trials": 0,
+    "stop_reason": "candidate_stopped",
+    "request_cap": 3
+  },
+  "model": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "request_count": 2,
+    "reported_request_count": 2,
+    "prompt_tokens": 17724,
+    "completion_tokens": 4165,
+    "total_tokens": 21889,
+    "attempted_request_count": 3,
+    "mode": "live_model"
+  },
+  "cost": {
+    "status": "not_calculated",
+    "currency": "CNY",
+    "amount": null,
+    "basis": "one or more provider request attempts failed before token usage was returned"
+  },
+  "validation": {
+    "status": "failed",
+    "mode": "hidden_holdout",
+    "baseline_score": 0.4,
+    "acceptance_rule": "minimum_improvement",
+    "acceptance_delta": 0.6,
+    "acceptance_target_score": 1.0,
+    "observed_scores": [
+      0.4,
+      0.4,
+      0.4
+    ],
+    "observed_score": 0.4,
+    "candidate_intact": true,
+    "protected_files_intact": true,
+    "reason": "fresh validation score did not satisfy the frozen acceptance rule"
+  },
+  "failure": {
+    "error": ""
+  },
+  "boundaries": [
+    "The task replays p-queue pull request #235 against its pinned base commit; it is not an official p-queue benchmark.",
+    "The selected upstream command runs all 129 pinned Node functional tests, TypeScript compilation, and tsd; the default npm test command also runs XO, whose TypeScript project-service lookup fails on this Windows environment before functional tests run.",
+    "The public evaluator covers success, rejection, pre-abort, and no-signal behavior; the hidden evaluator covers shared-signal sequencing, concurrency, timeout, in-flight abort, and a no-signal control.",
+    "The pull request head and merge commit are retained as provenance for human review and are not included in candidate proposer context.",
+    "The upstream repository disables package-lock generation; exact observed top-level package versions are retained, but this evidence is not a transitive dependency lock.",
+    "A contract pass proves the frozen cases and selected upstream checks passed; it does not prove semantic equivalence with the maintainer patch, complete resource-leak freedom, or upstream readiness.",
+    "The candidate was executed by local subprocess with a stripped environment, not a network-isolated container.",
+    "The hidden evaluator content was excluded from proposer context but remains inspectable in this public evidence package.",
+    "Any monetary amount is token-derived from the cited public rate and is not a billing-console receipt."
+  ],
+  "artifact_sha256": {
+    "candidate.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "final-files/source/index.ts": "68e6ecef7217b99b3e616b3e55be2369e20770e14fa2bb516dd48c4d67dc1e86",
+    "frozen-spec.json": "6365b0487cd55fe40477def2938b256a6c00ee2e134f3dcbef7e5432d99b580c",
+    "initial-files/source/index.ts": "68e6ecef7217b99b3e616b3e55be2369e20770e14fa2bb516dd48c4d67dc1e86",
+    "model-responses.json": "89ee0013f6bb669f67c1958310a08acddc524481dfa1156bbeebde3b2d339cfc",
+    "README.md": "445e29c428782b5100d30a095411ebb7241622710b18600ed79935531a36a77c",
+    "task-input.json": "be5b44ba45b887af6f6fa730e147c3ea0cd9dfc709e10ecd3c3daa3fbcc01e18",
+    "trial-ledger.json": "81ffe3b8f7cb4e7fee923747e44502817f474f1c3d71036bd7aa2511b29f838e",
+    "validation-report.json": "322a55ac456d5434b24884b3c4db4a48ec7d74699aa653cce61eb4b21470a8e5"
+  }
+}

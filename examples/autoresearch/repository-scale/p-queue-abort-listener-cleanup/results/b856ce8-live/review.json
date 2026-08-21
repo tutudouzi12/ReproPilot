@@ -1,0 +1,65 @@
+{
+  "version": "repropilot.repository-evaluation-review/v1",
+  "status": "provider_requests_failed_no_candidate",
+  "decision": "reject",
+  "classification": "provider_requests_failed_no_candidate",
+  "automated_evidence": {
+    "public_baseline": 0.5,
+    "public_best": 0.5,
+    "hidden_baseline": 0.4,
+    "hidden_validation_runs": [
+      0.4,
+      0.4,
+      0.4
+    ],
+    "provider_attempts": 3,
+    "provider_usage_reports": 0,
+    "accepted_trials": 0,
+    "candidate_patch_empty": true,
+    "candidate_intact": true,
+    "protected_files_intact": true
+  },
+  "request_failures": [
+    {
+      "request_number": 1,
+      "error_type": "ConnectError",
+      "summary": "The connection failed before model content or token usage was returned."
+    },
+    {
+      "request_number": 2,
+      "error_type": "ConnectError",
+      "summary": "The connection failed before model content or token usage was returned."
+    },
+    {
+      "request_number": 3,
+      "error_type": "ConnectError",
+      "summary": "The connection failed before model content or token usage was returned."
+    }
+  ],
+  "manual_observations": [
+    {
+      "severity": "failure_classification",
+      "finding": "All three bounded attempts failed during connection setup before returning model content, a parsed proposal, or usage data.",
+      "impact": "The run exercises the request cap and rollback path but provides no evidence that a model-generated candidate could or could not repair the task.",
+      "disposition": "Retain the run as provider-connectivity failure evidence and do not count it as a candidate or model-capability failure."
+    },
+    {
+      "severity": "transport_reliability",
+      "finding": "A post-run diagnostic reproduced an intermittent TLS unexpected-EOF ConnectError with Python httpx while an unauthenticated curl probe reached the same endpoint.",
+      "impact": "Without a connection-level retry, transient TLS setup failures consume the outer evaluation request cap before any provider response exists.",
+      "disposition": "Retry only httpx ConnectError inside LLMClient with a bounded backoff. Do not retry read timeouts or HTTP status errors because those may follow a provider-processed request."
+    },
+    {
+      "severity": "reporting_accuracy",
+      "finding": "The generated run README used usage request_count and displayed zero requests even though three request attempts were retained.",
+      "impact": "A reader could mistake zero usage reports for zero attempted network calls.",
+      "disposition": "Keep this generated artifact unchanged and update later reports to separate attempted requests, usage reports, and reported tokens."
+    },
+    {
+      "severity": "cost_boundary",
+      "finding": "No provider attempt returned token usage.",
+      "impact": "A token-derived monetary amount cannot be calculated from the retained evidence.",
+      "disposition": "Report cost as not calculated, not as zero cost or a billing receipt."
+    }
+  ]
+}

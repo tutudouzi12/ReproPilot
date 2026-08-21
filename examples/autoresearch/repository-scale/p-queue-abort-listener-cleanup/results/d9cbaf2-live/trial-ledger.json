@@ -1,0 +1,174 @@
+{
+  "version": "autoresearch.ledger/v1",
+  "spec_sha256": "5a0e4549e97e9cdbcd0cca55b7ecd1797b2929ff9ae72a93343fac80c749b637",
+  "status": "completed",
+  "metric_key": "metrics.listener_cleanup_score",
+  "direction": "maximize",
+  "baseline_score": 0.5,
+  "best_score": 0.5,
+  "holdout_baseline_score": 0.4,
+  "max_trials": 6,
+  "completed_trials": 3,
+  "accepted_trials": 0,
+  "stop_reason": "candidate_stopped",
+  "best_candidate_files": {
+    "source/index.ts": "68e6ecef7217b99b3e616b3e55be2369e20770e14fa2bb516dd48c4d67dc1e86"
+  },
+  "trials": [
+    {
+      "number": 0,
+      "status": "baseline",
+      "decision": "keep",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "frozen baseline",
+      "patches": [],
+      "metric": 0.5,
+      "metric_samples": [
+        0.5,
+        0.5
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py",
+            "--upstream"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"upstream_checks_passed\": true, \"checks\": {\"node_functional_tests\": {\"command\": [\"node\", \"--import=tsx/esm\", \"--test\", \"test/*.ts\"], \"exit_code\": 0, \"duration_ms\": 41500, \"tests\": 129, \"pass\": 129, \"fail\": 0, \"skipped\": 0}, \"typescript_compile\": {\"command\": [\"node\", \"node_modules/typescript/bin/tsc\", \"--pretty\", \"false\"], \"exit_code\": 0, \"duration_ms\": 4577}, \"type_definition_tests\": {\"command\": [\"node\", \"node_modules/tsd/dist/cli.js\"], \"exit_code\": 0, \"duration_ms\": 9890}}}\r\n",
+          "stderr": "",
+          "duration_ms": 56141
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"passed\": 2, \"total\": 4, \"cases\": [{\"name\": \"successCleanup\", \"passed\": false, \"error\": \"Error: value=42 listeners=1\"}, {\"name\": \"rejectionCleanup\", \"passed\": false, \"error\": \"Error: message=task failed listeners=1\"}, {\"name\": \"preAbortedControl\", \"passed\": true, \"observed\": {\"message\": \"already aborted\", \"listeners\": 0}}, {\"name\": \"noSignalControl\", \"passed\": true, \"observed\": {\"value\": 7, \"pending\": 0, \"size\": 0}}], \"metrics\": {\"listener_cleanup_score\": 0.5}}\r\n",
+          "stderr": "",
+          "duration_ms": 343
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py",
+            "--upstream"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"upstream_checks_passed\": true, \"checks\": {\"node_functional_tests\": {\"command\": [\"node\", \"--import=tsx/esm\", \"--test\", \"test/*.ts\"], \"exit_code\": 0, \"duration_ms\": 39812, \"tests\": 129, \"pass\": 129, \"fail\": 0, \"skipped\": 0}, \"typescript_compile\": {\"command\": [\"node\", \"node_modules/typescript/bin/tsc\", \"--pretty\", \"false\"], \"exit_code\": 0, \"duration_ms\": 1407}, \"type_definition_tests\": {\"command\": [\"node\", \"node_modules/tsd/dist/cli.js\"], \"exit_code\": 0, \"duration_ms\": 5046}}}\r\n",
+          "stderr": "",
+          "duration_ms": 46406
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"passed\": 2, \"total\": 4, \"cases\": [{\"name\": \"successCleanup\", \"passed\": false, \"error\": \"Error: value=42 listeners=1\"}, {\"name\": \"rejectionCleanup\", \"passed\": false, \"error\": \"Error: message=task failed listeners=1\"}, {\"name\": \"preAbortedControl\", \"passed\": true, \"observed\": {\"message\": \"already aborted\", \"listeners\": 0}}, {\"name\": \"noSignalControl\", \"passed\": true, \"observed\": {\"value\": 7, \"pending\": 0, \"size\": 0}}], \"metrics\": {\"listener_cleanup_score\": 0.5}}\r\n",
+          "stderr": "",
+          "duration_ms": 375
+        }
+      ],
+      "started_at": "2026-08-21T03:46:07.207922Z",
+      "finished_at": "2026-08-21T03:46:07.207922Z"
+    },
+    {
+      "number": 1,
+      "status": "rejected",
+      "decision": "reject",
+      "diagnosis": "The issue is that AbortSignal listeners are not being properly cleaned up after tasks complete. The current implementation adds a listener in the #throwOnAbort method using Promise.race, but there's no mechanism to remove these listeners when the task completes successfully, is rejected, times out, or is aborted. This causes memory leaks when using shared AbortSignals.",
+      "hypothesis": "We need to track AbortSignal listeners and remove them in the finally block after task completion to prevent accumulation of stale listeners.",
+      "reason": "RuntimeError: guard command failed: {\"upstream_checks_passed\": false, \"checks\": {\"node_functional_tests\": {\"command\": [\"node\", \"--import=tsx/esm\", \"--test\", \"test/*.ts\"], \"exit_code\": 1, \"duration_ms\": 39796, \"tests\": 129, \"pass\": 128, \"fail\": 1, \"skipped\": 0, \"stdout_tail\": \"pe: 'test'\\n  ...\\n# Subtest: runningTasks updates as tasks complete\\nok 106 - runningTasks updates as tasks complete\\n  ---\\n  duration_ms: 118.5305\\n  type: 'test'\\n  ...\\n# Subtest: runningTasks includes timeout information\\nok 107 - runningTasks includes timeout information\\n  ---\\n  duration_ms: 65.1094\\n  type: 'test'\\n  ...\\n# Subtest: runningTasks returns fresh arrays\\nok 108 - runningTasks returns fresh arrays\\n  ---\\n  duration_ms: 115.3378\\n  type: 'test'\\n  ...\\n# Subtest: runningTasks handles tasks without IDs\\nok 109 - runningTasks handles tasks without IDs\\n  ---\\n  duration_ms: 64.462\\n  type: 'test'\\n  ...\\n# Subtest: runningTasks works with interval rate limiting\\nok 110 - runningTasks works with interval rate limiting\\n  ---\\n  duration_ms: 169.1205\\n  type: 'test'\\n  ...\\n# Subtest: isSaturated property detects when queue is at capacity\\nok 111 - isSaturated property detects when queue is at capacity\\n  ---\\n  duration_ms: 230.6887\\n  type: 'test'\\n  ...\\n# Subtest: isSaturated with paused queue\\nok 112 - isSaturated with paused queue\\n  ---\\n  duration_ms: 117.8907\\n  type: 'test'\\n  ...\\n# Subtest: isSaturated with rate-limited queue\\nok 113 - isSaturated with rate-limited queue\\n  ---\\n  duration_ms: 176.2344\\n  type: 'test'\\n  ...\\n# Subtest: improved timeout error includes queue state\\nok 114 - improved timeout error includes queue state\\n  ---\\n  duration_ms: 108.2446\\n  type: 'test'\\n  ...\\n# Subtest: rate-limit rapid pause/start cycles\\nok 115 - rate-limit rapid pause/start cycles\\n  ---\\n  duration_ms: 333.3876\\n  type: 'test'\\n  ...\\n# Subtest: rate-limit edge case with zero-interval\\nok 116 - rate-limit edge case with zero-interval\\n  ---\\n  duration_ms: 20.9087\\n  type: 'test'\\n  ...\\n# Subtest: rate-limit state consistency with sync microtask scheduling\\nok 117 - rate-limit state consistency with sync microtask scheduling\\n  ---\\n  duration_ms: 227.6437\\n  type: 'test'\\n  ...\\n# Subtest: rate-limit with queue manipulation during rate-limit event\\nok 118 - rate-limit with queue manipulation during rate-limit event\\n  ---\\n  duration_ms: 247.9596\\n  type: 'test'\\n  ...\\n# Subtest: onRateLimit() with microtask race condition\\nok 119 - onRateLimit() with microtask race condition\\n  ---\\n  duration_ms: 113.6481\\n  type: 'test'\\n  ...\\n# Subtest: onRateLimitCleared() with microtask race condition\\nok 120 - onRateLimitCleared() with microtask race condition\\n  ---\\n  duration_ms: 235.7927\\n  type: 'test'\\n  ...\\n# Subtest: onRateLimit() called during state transition\\nok 121 - onRateLimit() called during state transition\\n  ---\\n  duration_ms: 111.1293\\n  type: 'test'\\n  ...\\n# Subtest: onRateLimit/onRateLimitCleared rapid transitions\\nok 122 - onRateLimit/onRateLimitCleared rapid transitions\\n  ---\\n  duration_ms: 290.1943\\n  type: 'test'\\n  ...\\n# Subtest: onRateLimit() resolves when rate limit is triggered\\nok 123 - onRateLimit() resolves when rate limit is triggered\\n  ---\\n  duration_ms: 132.1012\\n  type: 'test'\\n  ...\\n# Subtest: backlog drains before interval reset - triggers rate-limit-cleared\\nok 124 - backlog drains before interval reset - triggers rate-limit-cleared\\n  ---\\n  duration_ms: 2074.4648\\n  type: 'test'\\n  ...\\n# Subtest: setPriority validates input\\nok 125 - setPriority validates input\\n  ---\\n  duration_ms: 226.9395\\n  type: 'test'\\n  ...\\n# Subtest: timeout validation in constructor\\nok 126 - timeout validation in constructor\\n  ---\\n  duration_ms: 0.6056\\n  type: 'test'\\n  ...\\n# Subtest: carryover mode with no backlog does not report limited\\nok 127 - carryover mode with no backlog does not report limited\\n  ---\\n  duration_ms: 15.3482\\n  type: 'test'\\n  ...\\n# Subtest: clear() triggers immediate state ",
+      "patches": [
+        {
+          "path": "source/index.ts",
+          "operation": "replace_text",
+          "before_sha256": "68e6ecef7217b99b3e616b3e55be2369e20770e14fa2bb516dd48c4d67dc1e86",
+          "search_sha256": "85c8dd29bf1d1e0921cf037d8a8652ced68d4c8279083cef41a53dd036a7da48",
+          "after_sha256": "ee9756a6cf71d93ccb001ee3d449ebb9e3cbabd34d70e6e49ab047ccda8b8c80"
+        }
+      ],
+      "metric": null,
+      "metric_samples": [],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "",
+      "command_results": [],
+      "started_at": "2026-08-21T03:46:54.659884Z",
+      "finished_at": "2026-08-21T03:48:13.905339Z"
+    },
+    {
+      "number": 2,
+      "status": "rejected",
+      "decision": "reject",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "RemoteProtocolError: Server disconnected without sending a response.",
+      "patches": [],
+      "metric": null,
+      "metric_samples": [],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "",
+      "command_results": [],
+      "started_at": "2026-08-21T03:48:13.905339Z",
+      "finished_at": "2026-08-21T03:48:47.851055Z"
+    },
+    {
+      "number": 3,
+      "status": "rejected",
+      "decision": "reject",
+      "diagnosis": "The issue is that AbortSignal listeners are not being properly cleaned up after tasks complete. The current implementation adds a listener in the #throwOnAbort method using Promise.race, but there's no mechanism to remove these listeners when the task completes successfully, is rejected, times out, or is aborted. This causes memory leaks when using shared AbortSignals.",
+      "hypothesis": "We need to track AbortSignal listeners and remove them in the finally block after task completion to prevent accumulation of stale listeners.",
+      "reason": "RuntimeError: guard command failed: {\"upstream_checks_passed\": false, \"checks\": {\"node_functional_tests\": {\"command\": [\"node\", \"--import=tsx/esm\", \"--test\", \"test/*.ts\"], \"exit_code\": 0, \"duration_ms\": 39890, \"tests\": 129, \"pass\": 129, \"fail\": 0, \"skipped\": 0}, \"typescript_compile\": {\"command\": [\"node\", \"node_modules/typescript/bin/tsc\", \"--pretty\", \"false\"], \"exit_code\": 1, \"duration_ms\": 1359, \"stdout_tail\": \"source/index.ts(290,8): error TS6133: '#throwOnAbort' is declared but its value is never read.\\nsource/index.ts(406,7): error TS2322: Type 'Promise<unknown>' is not assignable to type 'TaskResultType | PromiseLike<TaskResultType>'.\\n  Type 'Promise<unknown>' is not assignable to type 'PromiseLike<TaskResultType>'.\\n    Types of property 'then' are incompatible.\\n      Type '<TResult1 = unknown, TResult2 = never>(onfulfilled?: ((value: unknown) => TResult1 | PromiseLike<TResult1>) | null | undefined, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null | undefined) => Promise<...>' is not assignable to type '<TResult1 = TaskResultType, TResult2 = never>(onfulfilled?: ((value: TaskResultType) => TResult1 | PromiseLike<TResult1>) | null | undefined, onrejected?: ((reason: any) => TResult2 | PromiseLike<...>) | ... 1 more ... | undefined) => PromiseLike<...>'.\\n        Types of parameters 'onfulfilled' and 'onfulfilled' are incompatible.\\n          Types of parameters 'value' and 'value' are incompatible.\\n            Type 'unknown' is not assignable to type 'TaskResultType'.\\n              'TaskResultType' could be instantiated with an arbitrary type which could be unrelated to 'unknown'.\\n\", \"stderr_tail\": \"\"}, \"type_definition_tests\": {\"command\": [\"node\", \"node_modules/tsd/dist/cli.js\"], \"exit_code\": 1, \"duration_ms\": 4875, \"stdout_tail\": \"\", \"stderr_tail\": \"\\n  source\\\\index.ts:290:7\\n  ×  290:7  #throwOnAbort is declared but its value is never read.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 \\n  ×  406:6  Type Promise<unknown> is not assignable to type TaskResultType | PromiseLike<TaskResultType>.\\n  Type Promise<unknown> is not assignable to type PromiseLike<TaskResultType>.\\n    Types of property then are incompatible.\\n      Type <TResult1 = unknown, TResult2 = never>(onfulfilled?: ((value: unknown) => TResult1 | PromiseLike<TResult1>) | null | undefined, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null | undefined) => Promise<...> is not assignable to type <TResult1 = TaskResultType, TResult2 = never>(onfulfilled?: ((value: TaskResultType) => TResult1 | PromiseLike<TResult1>) | null | undefined, onrejected?: ((reason: any) => TResult2 | PromiseLike<...>) | ... 1 more ... | undefined) => PromiseLike<...>.\\n        Types of parameters onfulfilled and onfulfilled are incompatible.\\n          Types of parameters value and value are incompatible.\\n            Type unknown is not assignable to type TaskResultType.\\n              TaskResultType could be instantiated with an arbitrary type which could be unrelated to unknown.  \\n\\n  2 errors\\n\\n\"}}}\r\n",
+      "patches": [
+        {
+          "path": "source/index.ts",
+          "operation": "replace_text",
+          "before_sha256": "68e6ecef7217b99b3e616b3e55be2369e20770e14fa2bb516dd48c4d67dc1e86",
+          "search_sha256": "df2edcf19a03d7d5e2e993dc60ca3e664d5ffafaa2351b387d7b9973734827b3",
+          "after_sha256": "51210901d91f36b3cd27e93029fe0a7ec46199bf2ad3ecc8f1292f0217c117f9"
+        }
+      ],
+      "metric": null,
+      "metric_samples": [],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "",
+      "command_results": [],
+      "started_at": "2026-08-21T03:48:47.851055Z",
+      "finished_at": "2026-08-21T03:50:06.810929Z"
+    },
+    {
+      "number": 4,
+      "status": "stopped",
+      "decision": "reject",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "live request cap reached (3)",
+      "patches": [],
+      "metric": null,
+      "metric_samples": [],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "",
+      "command_results": [],
+      "started_at": "2026-08-21T03:50:06.810929Z",
+      "finished_at": "2026-08-21T03:50:06.851347Z"
+    }
+  ],
+  "command_runs": 6,
+  "command_duration_ms": 149672,
+  "model_usage": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "request_count": 2,
+    "reported_request_count": 2,
+    "prompt_tokens": 17724,
+    "completion_tokens": 4165,
+    "total_tokens": 21889
+  },
+  "started_at": "2026-08-21T03:44:22.911009Z",
+  "finished_at": "2026-08-21T03:50:07.945629Z"
+}
