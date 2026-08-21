@@ -1,0 +1,58 @@
+{
+  "version": "repropilot.repository-benchmark-replay/v1",
+  "id": "repository-scale-cross-runtime-replay-v1",
+  "benchmark": "benchmark.json",
+  "tasks": [
+    {
+      "id": "flask-ipv6-host-parsing",
+      "setup": {
+        "kind": "python_venv",
+        "python_version": "3.11",
+        "editable_checkout": true,
+        "packages": [
+          "pytest==9.1.1",
+          "asgiref==3.12.1",
+          "python-dotenv==1.2.3",
+          "Werkzeug==3.1.8",
+          "blinker==1.9.0",
+          "click==8.4.2",
+          "itsdangerous==2.2.0",
+          "Jinja2==3.1.6",
+          "MarkupSafe==3.0.3"
+        ]
+      }
+    },
+    {
+      "id": "p-queue-abort-listener-cleanup",
+      "setup": {
+        "kind": "npm",
+        "node_major": 22,
+        "package_lock": false,
+        "packages": [
+          "@sindresorhus/tsconfig@8.1.0",
+          "@types/benchmark@2.1.5",
+          "@types/node@24.13.3",
+          "benchmark@2.1.4",
+          "del-cli@6.0.0",
+          "delay@6.0.0",
+          "eventemitter3@5.0.4",
+          "in-range@3.0.0",
+          "p-defer@4.0.1",
+          "p-timeout@7.0.1",
+          "random-int@3.1.0",
+          "time-span@5.1.0",
+          "tsd@0.33.0",
+          "tsx@4.23.12",
+          "typescript@5.9.3",
+          "xo@1.2.3"
+        ]
+      }
+    }
+  ],
+  "boundaries": [
+    "This opt-in replay covers two representative tasks, not the complete repository benchmark.",
+    "It makes no model request and does not create live model evidence.",
+    "Clone or package-registry failures are setup failures and remain distinct from frozen-baseline score mismatches.",
+    "The scheduled workflow does not run on push or pull_request and therefore does not gate ordinary changes."
+  ]
+}

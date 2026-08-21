@@ -4,6 +4,7 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -52,6 +53,40 @@ def test_sanitize_paths_replaces_windows_and_portable_forms(tmp_path: Path) -> N
     assert str(source) not in sanitized
     assert source.as_posix() not in sanitized
     assert sanitized.count("{checkout:sample}") == 2
+
+
+def test_parse_preflight_scores_requires_the_selected_task() -> None:
+    stdout = "Repository preflight: sample-task public=0.5000 hidden=0.4000\n"
+
+    assert repository_benchmark_preflight.parse_preflight_scores(stdout, "sample-task") == (0.5, 0.4)
+    with pytest.raises(ValueError, match="did not contain scores"):
+        repository_benchmark_preflight.parse_preflight_scores(stdout, "other-task")
+
+
+def test_run_preflight_rejects_score_drift(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    task_dir = tmp_path / "sample-task"
+    write_json(
+        task_dir / "baseline.json",
+        {"baseline": {"public_score": 0.5, "hidden_score": 0.4}},
+    )
+    task = {"id": "sample-task", "task_dir": task_dir, "task": {"command_timeout_seconds": 1}}
+    checkout = tmp_path / "checkout"
+    checkout.mkdir()
+    python = tmp_path / "python.exe"
+    python.write_text("", encoding="utf-8")
+    completed = SimpleNamespace(
+        returncode=0,
+        stdout="Repository preflight: sample-task public=0.7500 hidden=0.4000\n",
+        stderr="",
+    )
+    monkeypatch.setattr(repository_benchmark_preflight.subprocess, "run", lambda *args, **kwargs: completed)
+
+    result = repository_benchmark_preflight.run_preflight(task, checkout, python)
+
+    assert result["status"] == "failed"
+    assert result["exit_code"] == 2
+    assert result["scores_match_baseline"] is False
+    assert "baseline score mismatch" in result["stderr"]
 
 
 def test_load_benchmark_verifies_task_identity_and_contract_hashes(tmp_path: Path) -> None:
