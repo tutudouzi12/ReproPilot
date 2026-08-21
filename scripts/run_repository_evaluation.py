@@ -314,8 +314,11 @@ def materialize_workspace(checkout: Path, task_dir: Path, workspace: Path) -> tu
         checkout,
         workspace,
         dirs_exist_ok=True,
-        ignore=shutil.ignore_patterns(".git", "__pycache__", ".pytest_cache", "*.pyc"),
+        ignore=shutil.ignore_patterns(".git", "__pycache__", ".pytest_cache", "node_modules", "*.pyc"),
     )
+    dependency_directory = checkout / "node_modules"
+    if dependency_directory.is_dir():
+        copy_dependency_directory(dependency_directory, workspace / "node_modules")
     upload_root = workspace / ".repropilot" / "uploads"
     upload_root.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(task_dir / "autoresearch.json", upload_root / "01-autoresearch.json")
@@ -330,6 +333,40 @@ def materialize_workspace(checkout: Path, task_dir: Path, workspace: Path) -> tu
         source_path=".repropilot/uploads/01-autoresearch.json",
     )
     return payload, spec
+
+
+def copy_dependency_directory(source: Path, destination: Path) -> None:
+    resolved_source = source.resolve(strict=True)
+    if destination.exists():
+        raise ValueError(f"dependency destination already exists: {destination}")
+    if os.name != "nt":
+        shutil.copytree(resolved_source, destination, symlinks=True)
+        return
+    completed = subprocess.run(
+        [
+            "robocopy",
+            str(resolved_source),
+            str(destination),
+            "/E",
+            "/XJ",
+            "/NFL",
+            "/NDL",
+            "/NJH",
+            "/NJS",
+            "/NP",
+            "/R:1",
+            "/W:1",
+            "/MT:16",
+        ],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
+    if completed.returncode >= 8 or not destination.is_dir():
+        detail = completed.stderr.strip() or completed.stdout.strip() or "dependency copy failed"
+        raise RuntimeError(f"could not copy dependency directory: {detail}")
 
 
 def cost_record(usage: ModelUsage, attempted_requests: int, args: argparse.Namespace) -> dict[str, Any]:

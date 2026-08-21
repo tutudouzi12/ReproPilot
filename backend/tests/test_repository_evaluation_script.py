@@ -51,3 +51,18 @@ def test_write_editable_sources_rejects_path_escape(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="escaped output directory"):
         repository_evaluation.write_editable_sources(output, "initial-files", {"../outside.py": ""})
+
+
+def test_copy_dependency_directory_isolates_installed_packages(tmp_path: Path) -> None:
+    source = tmp_path / "checkout" / "node_modules"
+    package = source / "sample-package" / "package.json"
+    package.parent.mkdir(parents=True)
+    package.write_text('{"version":"1.0.0"}\n', encoding="utf-8")
+    destination = tmp_path / "workspace" / "node_modules"
+    destination.parent.mkdir()
+
+    repository_evaluation.copy_dependency_directory(source, destination)
+
+    assert (destination / "sample-package" / "package.json").read_text(encoding="utf-8") == '{"version":"1.0.0"}\n'
+    package.write_text('{"version":"1.0.1"}\n', encoding="utf-8")
+    assert (destination / "sample-package" / "package.json").read_text(encoding="utf-8") == '{"version":"1.0.0"}\n'
