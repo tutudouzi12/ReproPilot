@@ -29,6 +29,15 @@ def test_checked_in_replay_selects_python_and_node_tasks() -> None:
     assert [task["setup"]["kind"] for task in tasks] == ["python_venv", "npm"]
 
 
+def test_replay_workflow_installs_harness_before_running_replay() -> None:
+    workflow = ROOT / ".github" / "workflows" / "repository-benchmark-replay.yml"
+    text = workflow.read_text(encoding="utf-8")
+
+    install = "python -m pip install --disable-pip-version-check --no-input --editable ./backend"
+    assert install in text
+    assert text.index(install) < text.index("python scripts/run_repository_benchmark_replay.py")
+
+
 @pytest.mark.parametrize(
     ("setup", "message"),
     [

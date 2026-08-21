@@ -24,6 +24,8 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: "22"
+      - name: Install replay harness
+        run: python -m pip install --disable-pip-version-check --no-input --editable ./backend
       - name: Run pinned cross-runtime replay
         id: replay
         shell: bash
