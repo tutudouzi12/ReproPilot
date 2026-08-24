@@ -172,6 +172,7 @@ def test_checked_in_repository_benchmark_contracts_are_frozen() -> None:
         "more-itertools-strict-counted-sample",
         "flask-ipv6-host-parsing",
         "p-queue-abort-listener-cleanup",
+        "commons-codec-phonetic-boundaries",
         "more-itertools-strict-counted-sample-adversarial",
     ]
     assert tasks[-1]["aggregate_eligibility"] == "followup_only_not_independent_repository_sample"

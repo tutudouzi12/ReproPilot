@@ -1,0 +1,32 @@
+{
+  "version": "repropilot.repository-evaluation-attempt-failure/v1",
+  "recorded_at": "2026-08-24T14:47:29Z",
+  "task_id": "commons-codec-phonetic-boundaries",
+  "harness_revision": "a1909eacb4bb5a4203fa1516b32d3a0bcdc4e3bb",
+  "outcome": "packaging_failed",
+  "stage": "artifact_packaging",
+  "error": {
+    "type": "FileNotFoundError",
+    "message": "Windows path length prevented the retained initial PhoneticEngine.java source from being written.",
+    "artifact": "{output}/initial-files/src/main/java/org/apache/commons/codec/language/bm/PhoneticEngine.java"
+  },
+  "model": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "attempted_request_count": null,
+    "reported_request_count": null,
+    "total_tokens": null,
+    "reason": "The runner kept usage in memory and failed before model-responses.json and result.json were written. No request or token count is inferred."
+  },
+  "cost": {
+    "status": "not_calculated",
+    "currency": "CNY",
+    "amount": null,
+    "basis": "Provider usage was not retained before the packaging failure."
+  },
+  "boundaries": [
+    "This is harness packaging-failure evidence, not a model repair result.",
+    "No result.json is present, so strict benchmark result discovery excludes this attempt.",
+    "The incomplete attempt is retained and will not be overwritten or presented as a candidate failure."
+  ]
+}

@@ -38,6 +38,8 @@ from app.autoresearch import (  # noqa: E402
 
 TASK_VERSION = "repropilot.repository-evaluation-task/v1"
 RESULT_VERSION = "repropilot.repository-evaluation-result/v1"
+RETAINED_SOURCE_RELATIVE_LIMIT = 64
+RETAINED_SOURCE_PATH_LIMIT = 240
 
 
 def utc_now() -> str:
@@ -74,9 +76,15 @@ def sanitize_workspace_paths(value: Any, workspace: Path) -> Any:
     if isinstance(value, list):
         return [sanitize_workspace_paths(item, workspace) for item in value]
     if isinstance(value, str):
-        windows_path = str(workspace)
-        portable_path = workspace.as_posix()
-        return value.replace(windows_path, "{workspace}").replace(portable_path, "{workspace}")
+        replacements = (
+            (workspace, "{workspace}"),
+            (Path(tempfile.gettempdir()), "{temp}"),
+            (Path.home(), "{home}"),
+        )
+        sanitized = value
+        for path, placeholder in replacements:
+            sanitized = sanitized.replace(str(path), placeholder).replace(path.as_posix(), placeholder)
+        return sanitized
     return value
 
 
@@ -115,11 +123,15 @@ def write_editable_sources(output: Path, directory: str, sources: dict[str, str]
     root = (output / directory).resolve()
     root.mkdir(parents=True, exist_ok=True)
     for relative, source in sources.items():
+        normalized = Path(relative).as_posix()
         destination = (root / relative).resolve()
         try:
             destination.relative_to(root)
         except ValueError as exc:
             raise ValueError(f"editable artifact escaped output directory: {relative}") from exc
+        if len(normalized) > RETAINED_SOURCE_RELATIVE_LIMIT or len(str(destination)) >= RETAINED_SOURCE_PATH_LIMIT:
+            prefix = sha256_bytes(normalized.encode())[:12]
+            destination = root / f"{prefix}-{Path(relative).name}"
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(source, encoding="utf-8", newline="\n")
 
@@ -564,7 +576,11 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
         "task_id": task["id"],
         "outcome": outcome,
         "harness": {"revision": harness_revision, "source_tree_dirty": harness_dirty},
-        "sanitization": {"workspace_paths_replaced_with": "{workspace}"},
+        "sanitization": {
+            "workspace_paths_replaced_with": "{workspace}",
+            "temporary_paths_replaced_with": "{temp}",
+            "home_paths_replaced_with": "{home}",
+        },
         "repository": {
             "url": task["repository"]["url"],
             "revision": task["repository"]["revision"],
@@ -627,7 +643,8 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
         write_json(output / "trial-ledger.json", ledger_payload)
     if report_payload is not None:
         write_json(output / "validation-report.json", report_payload)
-    (output / "README.md").write_text(render_report(result, ledger, task), encoding="utf-8", newline="\n")
+    rendered_report = sanitize_workspace_paths(render_report(result, ledger, task), workspace_path)
+    (output / "README.md").write_text(rendered_report, encoding="utf-8", newline="\n")
     result["artifact_sha256"] = {
         path.relative_to(output).as_posix(): sha256_file(path)
         for path in sorted(output.rglob("*"))

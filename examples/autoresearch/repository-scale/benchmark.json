@@ -100,6 +100,21 @@
       }
     },
     {
+      "id": "commons-codec-phonetic-boundaries",
+      "path": "commons-codec-phonetic-boundaries",
+      "repository_url": "https://github.com/apache/commons-codec.git",
+      "revision": "41871c2cc31ebab1865736c61026d193409b30b5",
+      "provenance_type": "historical_merged_pull_request",
+      "difficulty": "single_module_java_phonetic_boundary",
+      "contract_sha256": {
+        "task.json": "505865016d4df794a3e55f267f386af1c1cb56dd5d0496b70813879c8e9708ea",
+        "autoresearch.json": "f76be3640c4a45041ada7a1266b8f949f0933eff80b554a5ca6f7ed45f40b147",
+        "evaluator.py": "cb150c39260e2175da489a268ad707f988978d30e5e77fead7ff8e91152a7dcf",
+        "holdout_evaluator.py": "f7ee9dae65a6f2f92b3a1e17b5abe46a5550d5954c5a64ee37575ffddec32d9e",
+        "baseline.json": "9b8168c1e9413cce6ec1d7c6b4e62a95cad3591a88ba1e7c26d4a75abe693aef"
+      }
+    },
+    {
       "id": "more-itertools-strict-counted-sample-adversarial",
       "path": "more-itertools-strict-counted-sample-adversarial",
       "repository_url": "https://github.com/more-itertools/more-itertools.git",
@@ -117,7 +132,7 @@
     }
   ],
   "boundaries": [
-    "This pilot contains six tasks across five unique repositories and is not a statistically representative software-engineering benchmark.",
+    "This pilot contains seven tasks across six unique repositories and is not a statistically representative software-engineering benchmark.",
     "The candidate-informed adversarial follow-up reuses the more-itertools base and must not be counted as an independent repository sample.",
     "Historical bug provenance and ReproPilot-authored boundary contracts are labeled separately and must not be aggregated without retaining that distinction.",
     "A contract pass does not establish equivalence with an upstream maintainer patch or production readiness.",

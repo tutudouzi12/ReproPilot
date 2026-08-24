@@ -1,0 +1,50 @@
+{
+  "version": "autoresearch.spec/v1",
+  "name": "commons-codec-phonetic-boundaries",
+  "objective": "Prevent PhoneticEngine.encode from throwing when Sephardic apostrophe splitting or name-prefix filtering produces an empty intermediate collection, while preserving ordinary phonetic encodings.",
+  "repository_revision": "41871c2cc31ebab1865736c61026d193409b30b5",
+  "editable_files": [
+    "src/main/java/org/apache/commons/codec/language/bm/PhoneticEngine.java"
+  ],
+  "protected_files": [
+    ".repropilot/uploads/02-evaluator.py",
+    ".repropilot/uploads/03-holdout_evaluator.py"
+  ],
+  "eval_command": [
+    "python",
+    ".repropilot/uploads/02-evaluator.py"
+  ],
+  "holdout_command": [
+    "python",
+    ".repropilot/uploads/03-holdout_evaluator.py"
+  ],
+  "guard_commands": [
+    [
+      "python",
+      ".repropilot/uploads/02-evaluator.py",
+      "--upstream"
+    ]
+  ],
+  "metric_key": "metrics.phonetic_boundary_score",
+  "direction": "maximize",
+  "min_delta": 0.25,
+  "holdout_min_delta": 0.6,
+  "target_score": 1.0,
+  "max_trials": 6,
+  "max_wall_seconds": 900,
+  "search_runs": 2,
+  "search_aggregation": "worst",
+  "validation_runs": 3,
+  "dependencies": [
+    "java==1.8.0_202",
+    "javac==1.8.0_202",
+    "maven==3.9.1"
+  ],
+  "frozen_files": {
+    ".repropilot/uploads/02-evaluator.py": "cb150c39260e2175da489a268ad707f988978d30e5e77fead7ff8e91152a7dcf",
+    ".repropilot/uploads/03-holdout_evaluator.py": "f7ee9dae65a6f2f92b3a1e17b5abe46a5550d5954c5a64ee37575ffddec32d9e"
+  },
+  "frozen_workspace_sha256": "d594b80c0123715fd18453a040d58238f6387b2516c922af8e9197832b5e58d8",
+  "source_path": ".repropilot/uploads/01-autoresearch.json",
+  "spec_sha256": "adfd6db64426d4cbdbd218278722ea92e9c9cec3da1aa4bc7359f98d291f2e64"
+}

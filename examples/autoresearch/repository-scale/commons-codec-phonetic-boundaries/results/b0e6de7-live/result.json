@@ -1,0 +1,91 @@
+{
+  "version": "repropilot.repository-evaluation-result/v1",
+  "recorded_at": "2026-08-24T15:10:42.904816Z",
+  "task_id": "commons-codec-phonetic-boundaries",
+  "outcome": "run_failed",
+  "harness": {
+    "revision": "b0e6de792ac110726a7be1d8aead8fedca5e6983",
+    "source_tree_dirty": false
+  },
+  "sanitization": {
+    "workspace_paths_replaced_with": "{workspace}"
+  },
+  "repository": {
+    "url": "https://github.com/apache/commons-codec.git",
+    "revision": "41871c2cc31ebab1865736c61026d193409b30b5",
+    "git_blob_sha256": {
+      "src/main/java/org/apache/commons/codec/language/bm/PhoneticEngine.java": "c613d91882d596aed8ba37e8080a372d185e61ec0d133d47e694294e652a04da",
+      "src/main/java/org/apache/commons/codec/language/bm/NameType.java": "7ab0dbe1eab51052ff7596da600d39ea951c3d16ecd0afe684cab0a84a37d156",
+      "src/main/java/org/apache/commons/codec/language/bm/RuleType.java": "c8feef2e52ad83d5605d9148e1b586145e75b1f590dd8c3399760b6681644f69",
+      "src/test/java/org/apache/commons/codec/language/bm/PhoneticEngineTest.java": "b21b67a810a4d32c51df144560b1f108bf9cb3db8899e21d1c6f28adb878475d",
+      "pom.xml": "4b9c7c477fdea08360c1850630c1bda89163a181240df025cdf395e993285861",
+      "LICENSE.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    "editable_files": [
+      "src/main/java/org/apache/commons/codec/language/bm/PhoneticEngine.java"
+    ],
+    "working_tree_matches_git_blobs": true
+  },
+  "baseline_artifact_sha256": "d324e5bf95eb48591fd635e9504f18ab79aff5f9d601a3d432434afe16e8c8cf",
+  "search": {
+    "baseline_score": 0.5,
+    "best_score": null,
+    "completed_trials": 0,
+    "accepted_trials": 0,
+    "stop_reason": "",
+    "request_cap": 1
+  },
+  "model": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "request_count": 0,
+    "reported_request_count": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0,
+    "attempted_request_count": 0,
+    "mode": "live_model"
+  },
+  "cost": {
+    "status": "exact_zero",
+    "currency": "CNY",
+    "amount": 0.0,
+    "basis": "no provider request was made"
+  },
+  "validation": {
+    "status": "not_run",
+    "mode": "hidden_holdout",
+    "baseline_score": 0.4,
+    "acceptance_rule": "not_run",
+    "acceptance_delta": null,
+    "acceptance_target_score": null,
+    "observed_scores": [],
+    "observed_score": null,
+    "candidate_intact": false,
+    "protected_files_intact": false,
+    "reason": "RuntimeError: AutoResearch non-editable workspace changed"
+  },
+  "failure": {
+    "error": "RuntimeError: AutoResearch non-editable workspace changed"
+  },
+  "boundaries": [
+    "The task replays Apache Commons Codec pull request #223 against the first parent of its merged commit; it is not an official Apache Commons Codec benchmark.",
+    "The public evaluator exposes apostrophe-only Sephardic inputs and ordinary controls; the hidden evaluator withholds prefix-only Sephardic and Ashkenazi inputs plus ordinary controls.",
+    "The evaluators compile the pinned Maven project and run a temporary Java probe outside the target checkout; they do not add tests or other files to the external repository.",
+    "The retained local baseline records Oracle JDK 8u202 and Maven 3.9.1; those versions describe this replay environment rather than a universal runtime requirement for Commons Codec.",
+    "The pull request head and merge commit are retained as provenance for human review and are not included in candidate proposer context.",
+    "A contract pass proves the frozen cases and selected upstream tests passed; it does not prove semantic equivalence with the maintainer patch, complete phonetic-input coverage, or upstream readiness.",
+    "The candidate was executed by local subprocess with a stripped environment, not a network-isolated container.",
+    "The hidden evaluator content was excluded from proposer context but remains inspectable in this public evidence package.",
+    "Any monetary amount is token-derived from the cited public rate and is not a billing-console receipt."
+  ],
+  "artifact_sha256": {
+    "candidate.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "final-files/41cc053e1c4c-PhoneticEngine.java": "c613d91882d596aed8ba37e8080a372d185e61ec0d133d47e694294e652a04da",
+    "frozen-spec.json": "54ca4dd49ec9301dd157bea1425b6776fed881a16902f71b8e62b90e3385d10f",
+    "initial-files/41cc053e1c4c-PhoneticEngine.java": "c613d91882d596aed8ba37e8080a372d185e61ec0d133d47e694294e652a04da",
+    "model-responses.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "README.md": "7373b943eab743f93f4b279f22e09120ed86f39fe55661a76ad9dbc399581756",
+    "task-input.json": "0c62ed4165842a5d0e072daabc8af76c357a29efe94f6377d1086ff12c218e5a"
+  }
+}

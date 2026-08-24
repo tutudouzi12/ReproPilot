@@ -1,0 +1,103 @@
+{
+  "version": "repropilot.repository-evaluation-result/v1",
+  "recorded_at": "2026-08-24T15:31:42.470505Z",
+  "task_id": "commons-codec-phonetic-boundaries",
+  "outcome": "candidate_stopped",
+  "harness": {
+    "revision": "ea4c2113d55b899c9fbf5c812a4942fc0b5bb3b1",
+    "source_tree_dirty": false
+  },
+  "sanitization": {
+    "workspace_paths_replaced_with": "{workspace}",
+    "temporary_paths_replaced_with": "{temp}"
+  },
+  "repository": {
+    "url": "https://github.com/apache/commons-codec.git",
+    "revision": "41871c2cc31ebab1865736c61026d193409b30b5",
+    "git_blob_sha256": {
+      "src/main/java/org/apache/commons/codec/language/bm/PhoneticEngine.java": "c613d91882d596aed8ba37e8080a372d185e61ec0d133d47e694294e652a04da",
+      "src/main/java/org/apache/commons/codec/language/bm/NameType.java": "7ab0dbe1eab51052ff7596da600d39ea951c3d16ecd0afe684cab0a84a37d156",
+      "src/main/java/org/apache/commons/codec/language/bm/RuleType.java": "c8feef2e52ad83d5605d9148e1b586145e75b1f590dd8c3399760b6681644f69",
+      "src/test/java/org/apache/commons/codec/language/bm/PhoneticEngineTest.java": "b21b67a810a4d32c51df144560b1f108bf9cb3db8899e21d1c6f28adb878475d",
+      "pom.xml": "4b9c7c477fdea08360c1850630c1bda89163a181240df025cdf395e993285861",
+      "LICENSE.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    "editable_files": [
+      "src/main/java/org/apache/commons/codec/language/bm/PhoneticEngine.java"
+    ],
+    "working_tree_matches_git_blobs": true
+  },
+  "baseline_artifact_sha256": "9b8168c1e9413cce6ec1d7c6b4e62a95cad3591a88ba1e7c26d4a75abe693aef",
+  "search": {
+    "baseline_score": 0.5,
+    "best_score": 0.5,
+    "completed_trials": 1,
+    "accepted_trials": 0,
+    "stop_reason": "candidate_stopped",
+    "request_cap": 1
+  },
+  "model": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "request_count": 1,
+    "reported_request_count": 1,
+    "prompt_tokens": 5573,
+    "completion_tokens": 711,
+    "total_tokens": 6284,
+    "attempted_request_count": 1,
+    "mode": "live_model"
+  },
+  "cost": {
+    "status": "calculated_from_supplied_rates",
+    "currency": "CNY",
+    "amount": 0.033668,
+    "input_cost_per_million": 4.0,
+    "output_cost_per_million": 16.0,
+    "basis": "provider-reported tokens multiplied by caller-supplied public list rates; not a billing receipt",
+    "pricing_source": "https://help.aliyun.com/zh/model-studio/model-pricing",
+    "pricing_tier": "Mainland China, 0<Token<=32K",
+    "pricing_verified_at": "2026-08-19"
+  },
+  "validation": {
+    "status": "failed",
+    "mode": "hidden_holdout",
+    "baseline_score": 0.4,
+    "acceptance_rule": "minimum_improvement",
+    "acceptance_delta": 0.6,
+    "acceptance_target_score": 1.0,
+    "observed_scores": [
+      0.4,
+      0.4,
+      0.4
+    ],
+    "observed_score": 0.4,
+    "candidate_intact": true,
+    "protected_files_intact": true,
+    "reason": "fresh validation score did not satisfy the frozen acceptance rule"
+  },
+  "failure": {
+    "error": ""
+  },
+  "boundaries": [
+    "The task replays Apache Commons Codec pull request #223 against the first parent of its merged commit; it is not an official Apache Commons Codec benchmark.",
+    "The public evaluator exposes apostrophe-only Sephardic inputs and ordinary controls; the hidden evaluator withholds prefix-only Sephardic and Ashkenazi inputs plus ordinary controls.",
+    "Each evaluator copies the candidate workspace without .git, .repropilot, or target directories and runs Maven plus the Java probe against that disposable copy; build artifacts do not mutate the governed candidate workspace.",
+    "The retained local baseline records Oracle JDK 8u202 and Maven 3.9.1; those versions describe this replay environment rather than a universal runtime requirement for Commons Codec.",
+    "The pull request head and merge commit are retained as provenance for human review and are not included in candidate proposer context.",
+    "A contract pass proves the frozen cases and selected upstream tests passed; it does not prove semantic equivalence with the maintainer patch, complete phonetic-input coverage, or upstream readiness.",
+    "The candidate was executed by local subprocess with a stripped environment, not a network-isolated container.",
+    "The hidden evaluator content was excluded from proposer context but remains inspectable in this public evidence package.",
+    "Any monetary amount is token-derived from the cited public rate and is not a billing-console receipt."
+  ],
+  "artifact_sha256": {
+    "candidate.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "final-files/41cc053e1c4c-PhoneticEngine.java": "c613d91882d596aed8ba37e8080a372d185e61ec0d133d47e694294e652a04da",
+    "frozen-spec.json": "32c3476cb0c5042efca7ab3ed467d794ef0887525e37566c280d441d09f7f0aa",
+    "initial-files/41cc053e1c4c-PhoneticEngine.java": "c613d91882d596aed8ba37e8080a372d185e61ec0d133d47e694294e652a04da",
+    "model-responses.json": "2f238b40287d3c7d03670b09e2195bfdf96723472db16dad54704b0cbfe977bc",
+    "README.md": "31124931fd3e9439c8b8e8fa6dc68f6736e23f91a713ab2a1d5840129f3630e2",
+    "task-input.json": "e37247fbd76054d7afdb8daa69c68a7fbc06bc9eeb04e0504cc908093a65b33e",
+    "trial-ledger.json": "198ba7cd09d098e6ee3e02ee6bcb157578d4109d900bdb664b8b20f1cfe7796e",
+    "validation-report.json": "345de6cb11dfa41730b1d2df345a2a04bf3f27a84532856cbf68f07362eba92d"
+  }
+}

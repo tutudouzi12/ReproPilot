@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -12,6 +13,23 @@ SPEC = importlib.util.spec_from_file_location("repository_evaluation_script", SC
 assert SPEC is not None and SPEC.loader is not None
 repository_evaluation = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(repository_evaluation)
+
+
+def test_sanitize_workspace_paths_replaces_workspace_temp_and_home(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    value = {
+        "workspace": str(workspace / "source.py"),
+        "temporary": str(Path(tempfile.gettempdir()) / "evaluator" / "target"),
+        "home": str(Path.home() / ".m2" / "repository"),
+    }
+
+    sanitized = repository_evaluation.sanitize_workspace_paths(value, workspace)
+
+    assert sanitized == {
+        "workspace": str(Path("{workspace}") / "source.py"),
+        "temporary": str(Path("{temp}") / "evaluator" / "target"),
+        "home": str(Path("{home}") / ".m2" / "repository"),
+    }
 
 
 def test_preserve_python_executable_keeps_virtualenv_symlink(tmp_path: Path) -> None:
@@ -55,6 +73,23 @@ def test_write_editable_sources_preserves_repository_paths(tmp_path: Path) -> No
 
     retained = output / "initial-files" / "src" / "package" / "module.py"
     assert retained.read_text(encoding="utf-8") == "value = 1\n"
+
+
+def test_write_editable_sources_shortens_long_repository_paths(tmp_path: Path) -> None:
+    output = tmp_path / "evidence"
+    output.mkdir()
+    relative = "src/main/java/org/apache/commons/codec/language/bm/PhoneticEngine.java"
+
+    repository_evaluation.write_editable_sources(
+        output,
+        "initial-files",
+        {relative: "class PhoneticEngine {}\n"},
+    )
+
+    prefix = repository_evaluation.sha256_bytes(relative.encode())[:12]
+    retained = output / "initial-files" / f"{prefix}-PhoneticEngine.java"
+    assert retained.read_text(encoding="utf-8") == "class PhoneticEngine {}\n"
+    assert not (output / "initial-files" / relative).exists()
 
 
 def test_write_editable_sources_rejects_path_escape(tmp_path: Path) -> None:
