@@ -1,0 +1,40 @@
+{
+  "version": "repropilot.repository-evaluation-review/v1",
+  "status": "pre_request_harness_integrity_failure",
+  "decision": "reject",
+  "classification": "pre_request_harness_integrity_failure",
+  "automated_evidence": {
+    "public_baseline": 0.5,
+    "public_best": null,
+    "hidden_baseline": 0.4,
+    "hidden_validation_runs": [],
+    "provider_attempts": 0,
+    "provider_responses": 0,
+    "provider_usage_reports": 0,
+    "reported_total_tokens": 0,
+    "accepted_trials": 0,
+    "candidate_patch_empty": true,
+    "candidate_intact": false,
+    "protected_files_intact": false
+  },
+  "manual_observations": [
+    {
+      "severity": "harness_failure",
+      "finding": "Maven created target build artifacts inside the governed candidate workspace, and the harness rejected those non-editable changes before the first model request.",
+      "impact": "This run did not evaluate a generated repair and cannot be classified as a model failure.",
+      "disposition": "Retain it as development-history evidence for the evaluator isolation defect."
+    },
+    {
+      "severity": "usage_boundary",
+      "finding": "No provider request was attempted or completed and no tokens were reported.",
+      "impact": "The failed run consumed no model-request allowance according to the retained counters.",
+      "disposition": "Report the exact zero token-derived cost without implying a billing-console receipt."
+    },
+    {
+      "severity": "remediation",
+      "finding": "Harness revision ea4c211 moved Maven compilation and tests to a disposable copy while preserving the governed workspace.",
+      "impact": "The subsequent bounded run crossed the integrity gate and reached a real candidate evaluation.",
+      "disposition": "Use the later run as primary evidence and this run only as visible failure history."
+    }
+  ]
+}

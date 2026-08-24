@@ -1,0 +1,57 @@
+{
+  "version": "autoresearch.validation/v1",
+  "spec_sha256": "adfd6db64426d4cbdbd218278722ea92e9c9cec3da1aa4bc7359f98d291f2e64",
+  "status": "failed",
+  "validation_mode": "hidden_holdout",
+  "expected_score": 0.4,
+  "baseline_score": 0.4,
+  "acceptance_rule": "minimum_improvement",
+  "acceptance_delta": 0.6,
+  "acceptance_target_score": 1.0,
+  "observed_scores": [
+    0.4,
+    0.4,
+    0.4
+  ],
+  "observed_score": 0.4,
+  "mean_score": 0.4000000000000001,
+  "stddev": 0.0,
+  "passed_runs": 3,
+  "failed_runs": 0,
+  "score_matches": false,
+  "candidate_intact": true,
+  "protected_files_intact": true,
+  "command_results": [
+    {
+      "command": [
+        "python",
+        ".repropilot/uploads/03-holdout_evaluator.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"passed\": 2, \"total\": 5, \"cases\": [{\"name\": \"sephardic_al_prefix\", \"passed\": false, \"observed\": \"StringIndexOutOfBoundsException: String index out of range: -1\"}, {\"name\": \"sephardic_el_prefix\", \"passed\": false, \"observed\": \"StringIndexOutOfBoundsException: String index out of range: -1\"}, {\"name\": \"ashkenazi_bar_prefix\", \"passed\": false, \"observed\": \"StringIndexOutOfBoundsException: String index out of range: -1\"}, {\"name\": \"generic_da_control\", \"passed\": true, \"observed\": \"da|di\"}, {\"name\": \"ordinary_name_control\", \"passed\": true, \"observed\": \"zmit\"}], \"build\": {\"maven_compile_duration_ms\": 12202}, \"metrics\": {\"phonetic_boundary_score\": 0.4}}\r\n",
+      "stderr": "",
+      "duration_ms": 16250
+    },
+    {
+      "command": [
+        "python",
+        ".repropilot/uploads/03-holdout_evaluator.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"passed\": 2, \"total\": 5, \"cases\": [{\"name\": \"sephardic_al_prefix\", \"passed\": false, \"observed\": \"StringIndexOutOfBoundsException: String index out of range: -1\"}, {\"name\": \"sephardic_el_prefix\", \"passed\": false, \"observed\": \"StringIndexOutOfBoundsException: String index out of range: -1\"}, {\"name\": \"ashkenazi_bar_prefix\", \"passed\": false, \"observed\": \"StringIndexOutOfBoundsException: String index out of range: -1\"}, {\"name\": \"generic_da_control\", \"passed\": true, \"observed\": \"da|di\"}, {\"name\": \"ordinary_name_control\", \"passed\": true, \"observed\": \"zmit\"}], \"build\": {\"maven_compile_duration_ms\": 8782}, \"metrics\": {\"phonetic_boundary_score\": 0.4}}\r\n",
+      "stderr": "",
+      "duration_ms": 11344
+    },
+    {
+      "command": [
+        "python",
+        ".repropilot/uploads/03-holdout_evaluator.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"passed\": 2, \"total\": 5, \"cases\": [{\"name\": \"sephardic_al_prefix\", \"passed\": false, \"observed\": \"StringIndexOutOfBoundsException: String index out of range: -1\"}, {\"name\": \"sephardic_el_prefix\", \"passed\": false, \"observed\": \"StringIndexOutOfBoundsException: String index out of range: -1\"}, {\"name\": \"ashkenazi_bar_prefix\", \"passed\": false, \"observed\": \"StringIndexOutOfBoundsException: String index out of range: -1\"}, {\"name\": \"generic_da_control\", \"passed\": true, \"observed\": \"da|di\"}, {\"name\": \"ordinary_name_control\", \"passed\": true, \"observed\": \"zmit\"}], \"build\": {\"maven_compile_duration_ms\": 9234}, \"metrics\": {\"phonetic_boundary_score\": 0.4}}\r\n",
+      "stderr": "",
+      "duration_ms": 11844
+    }
+  ],
+  "reason": "fresh validation score did not satisfy the frozen acceptance rule"
+}

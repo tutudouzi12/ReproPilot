@@ -1,20 +1,20 @@
 # ReproPilot multi-repository pilot benchmark results
 
-- Evidence snapshot: `2026-08-21T03:55:25Z`
+- Evidence snapshot: `2026-08-24T15:33:52Z`
 - Benchmark: `repository-scale-pilot-v1`
-- Tasks / independent tasks / unique repositories: `6` / `5` / `5`
-- Retained runs: `11`
+- Tasks / independent tasks / unique repositories: `7` / `6` / `6`
+- Retained runs: `13`
 
 ## Selected primary metrics
 
 | Metric | Value |
 | --- | ---: |
-| Automated contract pass rate | 4/5 (0.8000) |
-| Manual acceptance rate | 2/5 (0.4000) |
-| Manual pass@1 | 2/5 (0.4000) |
-| Chronological first-run automated pass@1 | 1/5 (0.2000) |
-| Chronological first-run manual pass@1 | 1/5 (0.2000) |
-| Mean public-to-hidden gap | 0.02 |
+| Automated contract pass rate | 4/6 (0.6667) |
+| Manual acceptance rate | 2/6 (0.3333) |
+| Manual pass@1 | 2/6 (0.3333) |
+| Chronological first-run automated pass@1 | 1/6 (0.1667) |
+| Chronological first-run manual pass@1 | 1/6 (0.1667) |
+| Mean public-to-hidden gap | 0.033333 |
 
 > Selected primary runs are post-development release-evidence selections. Chronological first-run metrics are shown separately so earlier failures are not hidden.
 
@@ -27,6 +27,7 @@
 | `more-itertools-strict-counted-sample` | [`c261d99-live`](more-itertools-strict-counted-sample/results/c261d99-live/) | `validation_passed` | `reject` | 1 -> 1 | 1 | 10359 | 0.050724 CNY |
 | `flask-ipv6-host-parsing` | [`7ec8f6e-live`](flask-ipv6-host-parsing/results/7ec8f6e-live/) | `validation_passed` | `reject` | 1 -> 1 | 3 | 35392 | 0.169744 CNY |
 | `p-queue-abort-listener-cleanup` | [`d9cbaf2-live`](p-queue-abort-listener-cleanup/results/d9cbaf2-live/) | `candidate_stopped` | `reject` | 0.5 -> 0.4 | 3 | 21889 | not calculated |
+| `commons-codec-phonetic-boundaries` | [`ea4c211-live`](commons-codec-phonetic-boundaries/results/ea4c211-live/) | `candidate_stopped` | `reject` | 0.5 -> 0.4 | 1 | 6284 | 0.033668 CNY |
 
 ## Manually accepted pass efficiency
 
@@ -48,11 +49,13 @@
 | `guard_rejections_and_provider_failure` | 1 |
 | `hidden_validation_failed` | 2 |
 | `manual_review_rejected_after_contract_pass` | 2 |
+| `pre_request_harness_integrity_failure` | 1 |
 | `provider_requests_failed_no_candidate` | 2 |
+| `upstream_guard_rejected_candidate` | 1 |
 
-Retained attempts / completed responses / usage reports / reported tokens: `25` / `14` / `14` / `146368`.
+Retained attempts / completed responses / usage reports / reported tokens: `26` / `15` / `15` / `152652`.
 
-Known token-derived cost: `0.609384 CNY` across `6` runs; `5` runs lack complete cost data.
+Known token-derived cost: `0.643052 CNY` across `8` runs; `5` runs lack complete cost data.
 
 ## Reporting boundaries
 
@@ -60,7 +63,7 @@ Known token-derived cost: `0.609384 CNY` across `6` runs; `5` runs lack complete
 - Chronological first-run metrics are reported separately so earlier failures remain visible.
 - The adversarial follow-up reuses more-itertools and is excluded from independent task and unique-repository counts.
 - Manual acceptance means the retained review accepts the run as bounded benchmark evidence; it does not claim upstream readiness or production equivalence.
-- This pilot contains six tasks across five unique repositories and is not a statistically representative software-engineering benchmark.
+- This pilot contains seven tasks across six unique repositories and is not a statistically representative software-engineering benchmark.
 - The candidate-informed adversarial follow-up reuses the more-itertools base and must not be counted as an independent repository sample.
 - Historical bug provenance and ReproPilot-authored boundary contracts are labeled separately and must not be aggregated without retaining that distinction.
 - A contract pass does not establish equivalence with an upstream maintainer patch or production readiness.

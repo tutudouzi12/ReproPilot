@@ -1,0 +1,59 @@
+{
+  "version": "repropilot.repository-evaluation-review/v1",
+  "status": "upstream_guard_rejected_candidate",
+  "decision": "reject",
+  "classification": "upstream_guard_rejected_candidate",
+  "automated_evidence": {
+    "public_baseline": 0.5,
+    "public_best": 0.5,
+    "hidden_baseline": 0.4,
+    "hidden_validation_runs": [
+      0.4,
+      0.4,
+      0.4
+    ],
+    "provider_attempts": 1,
+    "provider_responses": 1,
+    "provider_usage_reports": 1,
+    "reported_prompt_tokens": 5573,
+    "reported_completion_tokens": 711,
+    "reported_total_tokens": 6284,
+    "accepted_trials": 0,
+    "candidate_patch_empty": true,
+    "candidate_intact": true,
+    "protected_files_intact": true
+  },
+  "search_history": [
+    {
+      "trial": 1,
+      "decision": "reject",
+      "finding": "The model returned two localized PhoneticEngine replacements, but the upstream Maven guard reported one failure among 1,339 tests: testSolrSEPHARDIC expected danZelo|dandZelo|danxelo and observed anZelo|andZelo|anxelo."
+    }
+  ],
+  "manual_observations": [
+    {
+      "severity": "functional_regression",
+      "finding": "The candidate's empty-prefix handling removed meaningful leading content for an established Sephardic name case.",
+      "impact": "The generated repair cannot be accepted even though its diagnosis targeted the correct boundary area.",
+      "disposition": "Keep the upstream guard rejection and rollback; do not present this task as a contract pass."
+    },
+    {
+      "severity": "failure_classification",
+      "finding": "One provider response produced a parseable candidate that reached deterministic repository testing and was rejected before public scoring.",
+      "impact": "This is direct failed-repair evidence, distinct from provider failure, hidden-test failure, or harness failure.",
+      "disposition": "Select this manually reviewed reject as the primary sixth-repository result."
+    },
+    {
+      "severity": "rollback_integrity",
+      "finding": "The final candidate file matches the initial file, protected files remained intact, and repeated hidden validation stayed at the 0.4 baseline.",
+      "impact": "The rejected model change did not leak into the retained final workspace.",
+      "disposition": "Retain the empty final candidate patch together with the proposal response and TrialLedger as rollback evidence."
+    },
+    {
+      "severity": "cost_boundary",
+      "finding": "The provider reported 5,573 prompt tokens and 711 completion tokens for one response.",
+      "impact": "The calculated 0.033668 CNY is reproducible from the supplied public rates but is not a billing receipt.",
+      "disposition": "Report the token-derived amount with its pricing source and verification date."
+    }
+  ]
+}

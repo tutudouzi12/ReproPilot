@@ -1,35 +1,35 @@
 {
   "version": "repropilot.repository-benchmark-report/v1",
-  "recorded_at": "2026-08-21T03:55:25Z",
+  "recorded_at": "2026-08-24T15:33:52Z",
   "benchmark_id": "repository-scale-pilot-v1",
   "benchmark_title": "ReproPilot multi-repository pilot benchmark",
-  "benchmark_sha256": "946422823ec295c3531f37062fec0dfb6e38d3180c1e320eafaf827fbf82820a",
-  "run_selection_sha256": "686be8e8a8d3a802a0060c7a7b74a414be739de6300007177a0dda5dcd37fff9",
+  "benchmark_sha256": "b12bfa95f51c8bbf7e3e875d810f08548de0762de5caaa014c9d015af494173c",
+  "run_selection_sha256": "4d2909ed20d8c6243d33520af3f6b79701124071873af5620c398b35e83d0421",
   "inventory": {
-    "task_count": 6,
-    "independent_task_count": 5,
-    "unique_repository_count": 5,
+    "task_count": 7,
+    "independent_task_count": 6,
+    "unique_repository_count": 6,
     "adversarial_followup_task_count": 1,
-    "retained_run_count": 11,
-    "selected_primary_run_count": 5
+    "retained_run_count": 13,
+    "selected_primary_run_count": 6
   },
   "selected_primary_metrics": {
     "automated_contract_pass_rate": {
       "numerator": 4,
-      "denominator": 5,
-      "rate": 0.8
+      "denominator": 6,
+      "rate": 0.6666666666666666
     },
     "manual_acceptance_rate": {
       "numerator": 2,
-      "denominator": 5,
-      "rate": 0.4
+      "denominator": 6,
+      "rate": 0.3333333333333333
     },
     "pass_at_1": {
       "numerator": 2,
-      "denominator": 5,
-      "rate": 0.4
+      "denominator": 6,
+      "rate": 0.3333333333333333
     },
-    "mean_public_to_hidden_gap": 0.02,
+    "mean_public_to_hidden_gap": 0.03333333333333333,
     "upstream_regression_rate": {
       "status": "not_calculated",
       "reason": "retained result schema does not expose one normalized upstream-regression field"
@@ -38,15 +38,16 @@
   "chronological_first_run_metrics": {
     "automated_pass_at_1": {
       "numerator": 1,
-      "denominator": 5,
-      "rate": 0.2
+      "denominator": 6,
+      "rate": 0.16666666666666666
     },
     "manual_pass_at_1": {
       "numerator": 1,
-      "denominator": 5,
-      "rate": 0.2
+      "denominator": 6,
+      "rate": 0.16666666666666666
     },
     "runs": [
+      "commons-codec-phonetic-boundaries/results/b0e6de7-live/result.json",
       "flask-ipv6-host-parsing/results/7ec8f6e-live/result.json",
       "humanize-naturalsize-rounding/results/6511078-live/result.json",
       "more-itertools-strict-counted-sample/results/da3cfdd-live/result.json",
@@ -66,20 +67,21 @@
     }
   },
   "retained_evidence_totals": {
-    "attempted_requests": 25,
-    "completed_responses": 14,
-    "usage_reports": 14,
-    "reported_tokens": 146368,
+    "attempted_requests": 26,
+    "completed_responses": 15,
+    "usage_reports": 15,
+    "reported_tokens": 152652,
     "known_token_derived_cost": {
       "currency": "CNY",
-      "amount": 0.609384,
-      "runs_with_calculated_cost": 6,
+      "amount": 0.643052,
+      "runs_with_calculated_cost": 8,
       "runs_without_complete_cost": 5
     }
   },
   "automated_outcome_distribution": {
-    "candidate_stopped": 5,
+    "candidate_stopped": 6,
     "hidden_validation_failed": 2,
+    "run_failed": 1,
     "validation_passed": 4
   },
   "review_classification_distribution": {
@@ -88,14 +90,18 @@
     "guard_rejections_and_provider_failure": 1,
     "hidden_validation_failed": 2,
     "manual_review_rejected_after_contract_pass": 2,
-    "provider_requests_failed_no_candidate": 2
+    "pre_request_harness_integrity_failure": 1,
+    "provider_requests_failed_no_candidate": 2,
+    "upstream_guard_rejected_candidate": 1
   },
   "failure_reason_distribution": {
     "guard_rejection_then_provider_failures": 2,
     "guard_rejections_and_provider_failure": 1,
     "hidden_validation_failed": 2,
     "manual_review_rejected_after_contract_pass": 2,
-    "provider_requests_failed_no_candidate": 2
+    "pre_request_harness_integrity_failure": 1,
+    "provider_requests_failed_no_candidate": 2,
+    "upstream_guard_rejected_candidate": 1
   },
   "selected_primary_runs": [
     {
@@ -231,6 +237,34 @@
       "reported_tokens": 21889,
       "cost_status": "not_calculated",
       "cost_amount": null,
+      "cost_currency": "CNY",
+      "public_baseline": 0.5,
+      "public_best": 0.5,
+      "hidden_baseline": 0.4,
+      "hidden_observed": 0.4,
+      "public_to_hidden_gap": 0.1
+    },
+    {
+      "task_id": "commons-codec-phonetic-boundaries",
+      "role": "primary",
+      "run_id": "ea4c211-live",
+      "result": "commons-codec-phonetic-boundaries/results/ea4c211-live/result.json",
+      "review": "commons-codec-phonetic-boundaries/results/ea4c211-live/review.json",
+      "recorded_at": "2026-08-24T15:31:42.470505Z",
+      "harness_revision": "ea4c2113d55b899c9fbf5c812a4942fc0b5bb3b1",
+      "repository_url": "https://github.com/apache/commons-codec.git",
+      "contract_alignment": "current_contract",
+      "outcome": "candidate_stopped",
+      "automated_contract_passed": false,
+      "manual_decision": "reject",
+      "manual_accepted": false,
+      "classification": "upstream_guard_rejected_candidate",
+      "attempted_requests": 1,
+      "completed_responses": 1,
+      "usage_reports": 1,
+      "reported_tokens": 6284,
+      "cost_status": "calculated_from_supplied_rates",
+      "cost_amount": 0.033668,
       "cost_currency": "CNY",
       "public_baseline": 0.5,
       "public_best": 0.5,
@@ -551,6 +585,62 @@
       "public_to_hidden_gap": 0.1
     },
     {
+      "task_id": "commons-codec-phonetic-boundaries",
+      "role": "development_history",
+      "run_id": "b0e6de7-live",
+      "result": "commons-codec-phonetic-boundaries/results/b0e6de7-live/result.json",
+      "review": "commons-codec-phonetic-boundaries/results/b0e6de7-live/review.json",
+      "recorded_at": "2026-08-24T15:10:42.904816Z",
+      "harness_revision": "b0e6de792ac110726a7be1d8aead8fedca5e6983",
+      "repository_url": "https://github.com/apache/commons-codec.git",
+      "contract_alignment": "historical_pre_portability_contract",
+      "outcome": "run_failed",
+      "automated_contract_passed": false,
+      "manual_decision": "reject",
+      "manual_accepted": false,
+      "classification": "pre_request_harness_integrity_failure",
+      "attempted_requests": 0,
+      "completed_responses": 0,
+      "usage_reports": 0,
+      "reported_tokens": 0,
+      "cost_status": "exact_zero",
+      "cost_amount": 0.0,
+      "cost_currency": "CNY",
+      "public_baseline": 0.5,
+      "public_best": null,
+      "hidden_baseline": 0.4,
+      "hidden_observed": null,
+      "public_to_hidden_gap": null
+    },
+    {
+      "task_id": "commons-codec-phonetic-boundaries",
+      "role": "primary",
+      "run_id": "ea4c211-live",
+      "result": "commons-codec-phonetic-boundaries/results/ea4c211-live/result.json",
+      "review": "commons-codec-phonetic-boundaries/results/ea4c211-live/review.json",
+      "recorded_at": "2026-08-24T15:31:42.470505Z",
+      "harness_revision": "ea4c2113d55b899c9fbf5c812a4942fc0b5bb3b1",
+      "repository_url": "https://github.com/apache/commons-codec.git",
+      "contract_alignment": "current_contract",
+      "outcome": "candidate_stopped",
+      "automated_contract_passed": false,
+      "manual_decision": "reject",
+      "manual_accepted": false,
+      "classification": "upstream_guard_rejected_candidate",
+      "attempted_requests": 1,
+      "completed_responses": 1,
+      "usage_reports": 1,
+      "reported_tokens": 6284,
+      "cost_status": "calculated_from_supplied_rates",
+      "cost_amount": 0.033668,
+      "cost_currency": "CNY",
+      "public_baseline": 0.5,
+      "public_best": 0.5,
+      "hidden_baseline": 0.4,
+      "hidden_observed": 0.4,
+      "public_to_hidden_gap": 0.1
+    },
+    {
       "task_id": "more-itertools-strict-counted-sample-adversarial",
       "role": "adversarial_followup",
       "run_id": "d7ad05b-live",
@@ -585,7 +675,7 @@
     "Chronological first-run metrics are reported separately so earlier failures remain visible.",
     "The adversarial follow-up reuses more-itertools and is excluded from independent task and unique-repository counts.",
     "Manual acceptance means the retained review accepts the run as bounded benchmark evidence; it does not claim upstream readiness or production equivalence.",
-    "This pilot contains six tasks across five unique repositories and is not a statistically representative software-engineering benchmark.",
+    "This pilot contains seven tasks across six unique repositories and is not a statistically representative software-engineering benchmark.",
     "The candidate-informed adversarial follow-up reuses the more-itertools base and must not be counted as an independent repository sample.",
     "Historical bug provenance and ReproPilot-authored boundary contracts are labeled separately and must not be aggregated without retaining that distinction.",
     "A contract pass does not establish equivalence with an upstream maintainer patch or production readiness.",

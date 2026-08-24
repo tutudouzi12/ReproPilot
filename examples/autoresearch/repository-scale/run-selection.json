@@ -1,7 +1,7 @@
 {
   "version": "repropilot.repository-benchmark-run-selection/v1",
   "benchmark_id": "repository-scale-pilot-v1",
-  "recorded_at": "2026-08-21T03:55:25Z",
+  "recorded_at": "2026-08-24T15:33:52Z",
   "selection_policy": {
     "primary_run": "one manually reviewed release-evidence run per independent task",
     "development_history": "retained earlier runs contribute failure evidence but not selected contract-pass metrics",
@@ -91,6 +91,23 @@
       "result_sha256": "29fbac54dfaf93a24c96bb60565477b316447bad7ad0633d5f83d6da5a786eba",
       "review": "p-queue-abort-listener-cleanup/results/d9cbaf2-live/review.json",
       "review_sha256": "a34da3696b0f72e28b4f8e99b6a2e2ce0f6cfbfa590b9aad3374a023cb194d7e"
+    },
+    {
+      "task_id": "commons-codec-phonetic-boundaries",
+      "role": "development_history",
+      "contract_alignment": "historical_pre_portability_contract",
+      "result": "commons-codec-phonetic-boundaries/results/b0e6de7-live/result.json",
+      "result_sha256": "3406a219eea9b541cbc2175641374a290d14d514c946a3795bff0e778df8cb5d",
+      "review": "commons-codec-phonetic-boundaries/results/b0e6de7-live/review.json",
+      "review_sha256": "bbc29d31a2d31fc2bd02b9a3e87fd5a354d4887f8de9350b6cfcf07b66a65ae2"
+    },
+    {
+      "task_id": "commons-codec-phonetic-boundaries",
+      "role": "primary",
+      "result": "commons-codec-phonetic-boundaries/results/ea4c211-live/result.json",
+      "result_sha256": "2af94d042c27a9de3f9fea8ee027132e9415cca17c24f91c62cc4fd1378d08e7",
+      "review": "commons-codec-phonetic-boundaries/results/ea4c211-live/review.json",
+      "review_sha256": "8adf27faf363adb403ebb10c60ed31288bfd22c0241280b9e6c7fce3e0bf611a"
     },
     {
       "task_id": "more-itertools-strict-counted-sample-adversarial",

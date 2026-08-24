@@ -1,0 +1,141 @@
+{
+  "version": "autoresearch.ledger/v1",
+  "spec_sha256": "adfd6db64426d4cbdbd218278722ea92e9c9cec3da1aa4bc7359f98d291f2e64",
+  "status": "completed",
+  "metric_key": "metrics.phonetic_boundary_score",
+  "direction": "maximize",
+  "baseline_score": 0.5,
+  "best_score": 0.5,
+  "holdout_baseline_score": 0.4,
+  "max_trials": 6,
+  "completed_trials": 1,
+  "accepted_trials": 0,
+  "stop_reason": "candidate_stopped",
+  "best_candidate_files": {
+    "src/main/java/org/apache/commons/codec/language/bm/PhoneticEngine.java": "8e2984a4235f41a9b699ac8987146f138e1557627b943778a36cfe81dc8bb316"
+  },
+  "trials": [
+    {
+      "number": 0,
+      "status": "baseline",
+      "decision": "keep",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "frozen baseline",
+      "patches": [],
+      "metric": 0.5,
+      "metric_samples": [
+        0.5,
+        0.5
+      ],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "worst",
+      "command_results": [
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py",
+            "--upstream"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"upstream_checks_passed\": true, \"command\": [\"mvn\", \"-q\", \"-Drat.skip=true\", \"test\"], \"exit_code\": 0, \"duration_ms\": 328078, \"surefire\": {\"tests\": 1339, \"failures\": 0, \"errors\": 0, \"skipped\": 66}}\r\n",
+          "stderr": "",
+          "duration_ms": 330625
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"passed\": 2, \"total\": 4, \"cases\": [{\"name\": \"triple_apostrophe\", \"passed\": false, \"observed\": \"ArrayIndexOutOfBoundsException: -1\"}, {\"name\": \"single_apostrophe\", \"passed\": false, \"observed\": \"ArrayIndexOutOfBoundsException: -1\"}, {\"name\": \"generic_da_control\", \"passed\": true, \"observed\": \"da|di\"}, {\"name\": \"ordinary_name_control\", \"passed\": true, \"observed\": \"zmit\"}], \"build\": {\"maven_compile_duration_ms\": 8530}, \"metrics\": {\"phonetic_boundary_score\": 0.5}}\r\n",
+          "stderr": "",
+          "duration_ms": 10890
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py",
+            "--upstream"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"upstream_checks_passed\": true, \"command\": [\"mvn\", \"-q\", \"-Drat.skip=true\", \"test\"], \"exit_code\": 0, \"duration_ms\": 37313, \"surefire\": {\"tests\": 1339, \"failures\": 0, \"errors\": 0, \"skipped\": 66}}\r\n",
+          "stderr": "",
+          "duration_ms": 39796
+        },
+        {
+          "command": [
+            "python",
+            ".repropilot/uploads/02-evaluator.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"passed\": 2, \"total\": 4, \"cases\": [{\"name\": \"triple_apostrophe\", \"passed\": false, \"observed\": \"ArrayIndexOutOfBoundsException: -1\"}, {\"name\": \"single_apostrophe\", \"passed\": false, \"observed\": \"ArrayIndexOutOfBoundsException: -1\"}, {\"name\": \"generic_da_control\", \"passed\": true, \"observed\": \"da|di\"}, {\"name\": \"ordinary_name_control\", \"passed\": true, \"observed\": \"zmit\"}], \"build\": {\"maven_compile_duration_ms\": 8219}, \"metrics\": {\"phonetic_boundary_score\": 0.5}}\r\n",
+          "stderr": "",
+          "duration_ms": 10578
+        }
+      ],
+      "started_at": "2026-08-24T15:29:11.000674Z",
+      "finished_at": "2026-08-24T15:29:11.000674Z"
+    },
+    {
+      "number": 1,
+      "status": "rejected",
+      "decision": "reject",
+      "diagnosis": "The PhoneticEngine.encode method can throw exceptions when Sephardic apostrophe splitting or name-prefix filtering produces empty intermediate collections. Specifically, when splitting on apostrophes in SEPHARDIC mode, if the last part after splitting is empty, or when all words are removed by prefix filtering, downstream operations like join() or iteration fail on empty collections.",
+      "hypothesis": "Adding explicit empty collection checks before processing will prevent exceptions while preserving normal phonetic encoding behavior.",
+      "reason": "RuntimeError: guard command failed: {\"upstream_checks_passed\": false, \"command\": [\"mvn\", \"-q\", \"-Drat.skip=true\", \"test\"], \"exit_code\": 1, \"duration_ms\": 38578, \"surefire\": {\"tests\": 0, \"failures\": 0, \"errors\": 0, \"skipped\": 0}, \"stdout_tail\": \"[ERROR] Tests run: 4, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.019 s <<< FAILURE! -- in org.apache.commons.codec.language.bm.PhoneticEngineRegressionTest\\n[ERROR] org.apache.commons.codec.language.bm.PhoneticEngineRegressionTest.testSolrSEPHARDIC -- Time elapsed: 0.008 s <<< FAILURE!\\norg.opentest4j.AssertionFailedError: expected: <danZelo|dandZelo|danxelo> but was: <anZelo|andZelo|anxelo>\\n\\tat org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)\\n\\tat org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)\\n\\tat org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)\\n\\tat org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)\\n\\tat org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)\\n\\tat org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1141)\\n\\tat org.apache.commons.codec.language.bm.PhoneticEngineRegressionTest.testSolrSEPHARDIC(PhoneticEngineRegressionTest.java:258)\\n\\tat java.lang.reflect.Method.invoke(Method.java:498)\\n\\tat java.util.ArrayList.forEach(ArrayList.java:1257)\\n\\tat java.util.ArrayList.forEach(ArrayList.java:1257)\\n\\n[ERROR] Failures: \\n[ERROR]   PhoneticEngineRegressionTest.testSolrSEPHARDIC:258 expected: <danZelo|dandZelo|danxelo> but was: <anZelo|andZelo|anxelo>\\n[ERROR] Tests run: 1339, Failures: 1, Errors: 0, Skipped: 66\\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.1.2:test (default-test) on project commons-codec: There are test failures.\\n[ERROR] \\n[ERROR] Please refer to {temp}\\\\rp-codec-mk5ghi89\\\\repo\\\\target\\\\surefire-reports for the individual test results.\\n[ERROR] Please refer to dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.\\n[ERROR] -> [Help 1]\\n[ERROR] \\n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\\n[ERROR] \\n[ERROR] For more information about the errors and possible solutions, please read the following articles:\\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException\\n\", \"stderr_tail\": \"\"}\r\n",
+      "patches": [
+        {
+          "path": "src/main/java/org/apache/commons/codec/language/bm/PhoneticEngine.java",
+          "operation": "replace_text",
+          "before_sha256": "8e2984a4235f41a9b699ac8987146f138e1557627b943778a36cfe81dc8bb316",
+          "search_sha256": "2d6d538bd15686ce805a75ed8768cb93facadd688b5166ab735552b2dd0ff235",
+          "after_sha256": "0c351c79e943e2334ba98ad9c62b3428c2187235c2d4a2994c3b155c4a03aa55"
+        },
+        {
+          "path": "src/main/java/org/apache/commons/codec/language/bm/PhoneticEngine.java",
+          "operation": "replace_text",
+          "before_sha256": "0c351c79e943e2334ba98ad9c62b3428c2187235c2d4a2994c3b155c4a03aa55",
+          "search_sha256": "c73479ae873d4432ae630187f554b7bad52fc2a24626f0623803de522bc08cc7",
+          "after_sha256": "01e2240ed47d2c96e3f5ded1db9530b34a653cdc73bb0e1517d880102b875fcd"
+        }
+      ],
+      "metric": null,
+      "metric_samples": [],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "",
+      "command_results": [],
+      "started_at": "2026-08-24T15:30:03.148330Z",
+      "finished_at": "2026-08-24T15:30:58.414206Z"
+    },
+    {
+      "number": 2,
+      "status": "stopped",
+      "decision": "reject",
+      "diagnosis": "",
+      "hypothesis": "",
+      "reason": "live request cap reached (1)",
+      "patches": [],
+      "metric": null,
+      "metric_samples": [],
+      "metric_stddev": 0.0,
+      "metric_aggregation": "",
+      "command_results": [],
+      "started_at": "2026-08-24T15:30:58.414206Z",
+      "finished_at": "2026-08-24T15:30:58.445800Z"
+    }
+  ],
+  "command_runs": 6,
+  "command_duration_ms": 443105,
+  "model_usage": {
+    "provider": "dashscope.aliyuncs.com",
+    "model": "qwen3-coder-plus",
+    "request_count": 1,
+    "reported_request_count": 1,
+    "prompt_tokens": 5573,
+    "completion_tokens": 711,
+    "total_tokens": 6284
+  },
+  "started_at": "2026-08-24T15:22:38.178828Z",
+  "finished_at": "2026-08-24T15:30:59.470263Z"
+}
