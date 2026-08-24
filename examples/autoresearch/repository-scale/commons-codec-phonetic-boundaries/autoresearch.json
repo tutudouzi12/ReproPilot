@@ -1,0 +1,39 @@
+{
+  "version": "autoresearch.spec/v1",
+  "name": "commons-codec-phonetic-boundaries",
+  "repository_revision": "41871c2cc31ebab1865736c61026d193409b30b5",
+  "objective": "Prevent PhoneticEngine.encode from throwing when Sephardic apostrophe splitting or name-prefix filtering produces an empty intermediate collection, while preserving ordinary phonetic encodings.",
+  "editable_files": [
+    "src/main/java/org/apache/commons/codec/language/bm/PhoneticEngine.java"
+  ],
+  "protected_files": [
+    ".repropilot/uploads/02-evaluator.py",
+    ".repropilot/uploads/03-holdout_evaluator.py"
+  ],
+  "eval_command": [
+    "python",
+    ".repropilot/uploads/02-evaluator.py"
+  ],
+  "holdout_command": [
+    "python",
+    ".repropilot/uploads/03-holdout_evaluator.py"
+  ],
+  "guard_commands": [
+    ["python", ".repropilot/uploads/02-evaluator.py", "--upstream"]
+  ],
+  "metric_key": "metrics.phonetic_boundary_score",
+  "direction": "maximize",
+  "min_delta": 0.25,
+  "holdout_min_delta": 0.6,
+  "target_score": 1.0,
+  "max_trials": 6,
+  "max_wall_seconds": 900,
+  "search_runs": 2,
+  "search_aggregation": "worst",
+  "validation_runs": 3,
+  "dependencies": [
+    "java==1.8.0_202",
+    "javac==1.8.0_202",
+    "maven==3.9.1"
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "version": "repropilot.repository-evaluation-task/v1",
+  "id": "commons-codec-phonetic-boundaries",
+  "title": "Apache Commons Codec phonetic boundary handling",
+  "repository": {
+    "url": "https://github.com/apache/commons-codec.git",
+    "revision": "41871c2cc31ebab1865736c61026d193409b30b5",
+    "git_blob_sha256": {
+      "src/main/java/org/apache/commons/codec/language/bm/PhoneticEngine.java": "c613d91882d596aed8ba37e8080a372d185e61ec0d133d47e694294e652a04da",
+      "src/main/java/org/apache/commons/codec/language/bm/NameType.java": "7ab0dbe1eab51052ff7596da600d39ea951c3d16ecd0afe684cab0a84a37d156",
+      "src/main/java/org/apache/commons/codec/language/bm/RuleType.java": "c8feef2e52ad83d5605d9148e1b586145e75b1f590dd8c3399760b6681644f69",
+      "src/test/java/org/apache/commons/codec/language/bm/PhoneticEngineTest.java": "b21b67a810a4d32c51df144560b1f108bf9cb3db8899e21d1c6f28adb878475d",
+      "pom.xml": "4b9c7c477fdea08360c1850630c1bda89163a181240df025cdf395e993285861",
+      "LICENSE.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    }
+  },
+  "provenance": {
+    "type": "historical_merged_pull_request",
+    "license": "Apache-2.0",
+    "issue_url": "https://issues.apache.org/jira/browse/CODEC-315",
+    "pull_request_url": "https://github.com/apache/commons-codec/pull/223",
+    "base_commit": "41871c2cc31ebab1865736c61026d193409b30b5",
+    "fix_commit": "ee02460a26b350ab4b8f0c5fa4c4772312b2bf8f",
+    "merged_commit": "1f908b266411c28862c3952f3a3002ed19837b1b"
+  },
+  "objective": "Prevent PhoneticEngine.encode from throwing when Sephardic apostrophe splitting or name-prefix filtering produces an empty intermediate collection, while preserving ordinary phonetic encodings.",
+  "runtime": {
+    "python": "3.11",
+    "java": "1.8.0_202",
+    "javac": "1.8.0_202",
+    "maven": "3.9.1",
+    "dependencies": [
+      "commons-codec==1.16.1-SNAPSHOT",
+      "commons-parent==64",
+      "junit-jupiter==5.10.0"
+    ],
+    "distributions": [],
+    "environment_commands": {
+      "java_maven_toolchain": [
+        "python",
+        "-c",
+        "import json,shutil,subprocess; names=['java','javac','mvn']; print(json.dumps({name:subprocess.check_output([shutil.which(name) or name,'-version'],stderr=subprocess.STDOUT,text=True,encoding='utf-8',errors='replace').splitlines()[0] for name in names},sort_keys=True))"
+      ]
+    }
+  },
+  "commands": {
+    "upstream_tests": ["python", "evaluator.py", "--upstream"],
+    "public_evaluator": ["python", "evaluator.py"],
+    "hidden_evaluator": ["python", "holdout_evaluator.py"]
+  },
+  "metric_key": "metrics.phonetic_boundary_score",
+  "expected_baseline": {
+    "public_score": 0.5,
+    "hidden_score": 0.4
+  },
+  "command_timeout_seconds": 360,
+  "boundaries": [
+    "The task replays Apache Commons Codec pull request #223 against the first parent of its merged commit; it is not an official Apache Commons Codec benchmark.",
+    "The public evaluator exposes apostrophe-only Sephardic inputs and ordinary controls; the hidden evaluator withholds prefix-only Sephardic and Ashkenazi inputs plus ordinary controls.",
+    "The evaluators compile the pinned Maven project and run a temporary Java probe outside the target checkout; they do not add tests or other files to the external repository.",
+    "The retained local baseline records Oracle JDK 8u202 and Maven 3.9.1; those versions describe this replay environment rather than a universal runtime requirement for Commons Codec.",
+    "The pull request head and merge commit are retained as provenance for human review and are not included in candidate proposer context.",
+    "A contract pass proves the frozen cases and selected upstream tests passed; it does not prove semantic equivalence with the maintainer patch, complete phonetic-input coverage, or upstream readiness."
+  ]
+}
