@@ -57,6 +57,23 @@ def test_write_editable_sources_preserves_repository_paths(tmp_path: Path) -> No
     assert retained.read_text(encoding="utf-8") == "value = 1\n"
 
 
+def test_write_editable_sources_shortens_long_repository_paths(tmp_path: Path) -> None:
+    output = tmp_path / "evidence"
+    output.mkdir()
+    relative = "src/main/java/org/apache/commons/codec/language/bm/PhoneticEngine.java"
+
+    repository_evaluation.write_editable_sources(
+        output,
+        "initial-files",
+        {relative: "class PhoneticEngine {}\n"},
+    )
+
+    prefix = repository_evaluation.sha256_bytes(relative.encode())[:12]
+    retained = output / "initial-files" / f"{prefix}-PhoneticEngine.java"
+    assert retained.read_text(encoding="utf-8") == "class PhoneticEngine {}\n"
+    assert not (output / "initial-files" / relative).exists()
+
+
 def test_write_editable_sources_rejects_path_escape(tmp_path: Path) -> None:
     output = tmp_path / "evidence"
     output.mkdir()

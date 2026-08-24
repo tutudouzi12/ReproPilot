@@ -38,6 +38,8 @@ from app.autoresearch import (  # noqa: E402
 
 TASK_VERSION = "repropilot.repository-evaluation-task/v1"
 RESULT_VERSION = "repropilot.repository-evaluation-result/v1"
+RETAINED_SOURCE_RELATIVE_LIMIT = 64
+RETAINED_SOURCE_PATH_LIMIT = 240
 
 
 def utc_now() -> str:
@@ -115,11 +117,15 @@ def write_editable_sources(output: Path, directory: str, sources: dict[str, str]
     root = (output / directory).resolve()
     root.mkdir(parents=True, exist_ok=True)
     for relative, source in sources.items():
+        normalized = Path(relative).as_posix()
         destination = (root / relative).resolve()
         try:
             destination.relative_to(root)
         except ValueError as exc:
             raise ValueError(f"editable artifact escaped output directory: {relative}") from exc
+        if len(normalized) > RETAINED_SOURCE_RELATIVE_LIMIT or len(str(destination)) >= RETAINED_SOURCE_PATH_LIMIT:
+            prefix = sha256_bytes(normalized.encode())[:12]
+            destination = root / f"{prefix}-{Path(relative).name}"
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(source, encoding="utf-8", newline="\n")
 
