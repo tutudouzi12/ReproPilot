@@ -57,7 +57,7 @@
   "boundaries": [
     "The task replays Apache Commons Codec pull request #223 against the first parent of its merged commit; it is not an official Apache Commons Codec benchmark.",
     "The public evaluator exposes apostrophe-only Sephardic inputs and ordinary controls; the hidden evaluator withholds prefix-only Sephardic and Ashkenazi inputs plus ordinary controls.",
-    "The evaluators compile the pinned Maven project and run a temporary Java probe outside the target checkout; they do not add tests or other files to the external repository.",
+    "Each evaluator copies the candidate workspace without .git, .repropilot, or target directories and runs Maven plus the Java probe against that disposable copy; build artifacts do not mutate the governed candidate workspace.",
     "The retained local baseline records Oracle JDK 8u202 and Maven 3.9.1; those versions describe this replay environment rather than a universal runtime requirement for Commons Codec.",
     "The pull request head and merge commit are retained as provenance for human review and are not included in candidate proposer context.",
     "A contract pass proves the frozen cases and selected upstream tests passed; it does not prove semantic equivalence with the maintainer patch, complete phonetic-input coverage, or upstream readiness."

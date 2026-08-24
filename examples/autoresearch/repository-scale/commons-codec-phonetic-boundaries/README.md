@@ -6,7 +6,7 @@ The public contract exposes apostrophe-only Sephardic inputs that trigger `Array
 
 ## Baseline
 
-The retained baseline was recorded with CPython 3.11, Oracle JDK 8u202, and Maven 3.9.1. The evaluator supplies an isolated Maven settings file that uses Maven Central over HTTPS because the host's configured HTTP mirrors cannot resolve the historical plugin metadata. The settings file and Java probe are created in temporary directories outside the target checkout.
+The retained baseline was recorded with CPython 3.11, Oracle JDK 8u202, and Maven 3.9.1. The evaluator supplies an isolated Maven settings file that uses Maven Central over HTTPS because the host's configured HTTP mirrors cannot resolve the historical plugin metadata. Each evaluation copies the candidate workspace to a temporary directory while excluding `.git`, `.repropilot`, and existing `target` directories; Maven and the Java probe run against that disposable copy so build artifacts cannot mutate the governed candidate workspace.
 
 ```powershell
 py -3.11 scripts\run_repository_baseline.py `

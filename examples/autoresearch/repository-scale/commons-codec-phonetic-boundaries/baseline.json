@@ -1,6 +1,6 @@
 {
   "version": "repropilot.repository-baseline/v1",
-  "recorded_at": "2026-08-24T14:39:52.879427Z",
+  "recorded_at": "2026-08-24T15:19:40.201104Z",
   "task_id": "commons-codec-phonetic-boundaries",
   "repository": {
     "url": "https://github.com/apache/commons-codec.git",
@@ -33,7 +33,7 @@
         "exit_code": 0,
         "stdout": "{\"java\": \"java version \\\"1.8.0_202\\\"\", \"javac\": \"javac 1.8.0_202\", \"mvn\": \"Apache Maven 3.9.1 (2e178502fcdbffc201671fb2537d0cb4b4cc58f8)\"}\n",
         "stderr": "",
-        "duration_ms": 862
+        "duration_ms": 811
       }
     }
   },
@@ -46,9 +46,9 @@
       ],
       "working_directory": "{target_checkout}",
       "exit_code": 0,
-      "stdout": "{\"upstream_checks_passed\": true, \"command\": [\"mvn\", \"-q\", \"-Drat.skip=true\", \"test\"], \"exit_code\": 0, \"duration_ms\": 30780, \"surefire\": {\"tests\": 1339, \"failures\": 0, \"errors\": 0, \"skipped\": 66}}\n",
+      "stdout": "{\"upstream_checks_passed\": true, \"command\": [\"mvn\", \"-q\", \"-Drat.skip=true\", \"test\"], \"exit_code\": 0, \"duration_ms\": 37140, \"surefire\": {\"tests\": 1339, \"failures\": 0, \"errors\": 0, \"skipped\": 66}}\n",
       "stderr": "",
-      "duration_ms": 32267
+      "duration_ms": 39570
     },
     "public_evaluator": {
       "command": [
@@ -57,9 +57,9 @@
       ],
       "working_directory": "{target_checkout}",
       "exit_code": 0,
-      "stdout": "{\"passed\": 2, \"total\": 4, \"cases\": [{\"name\": \"triple_apostrophe\", \"passed\": false, \"observed\": \"ArrayIndexOutOfBoundsException: -1\"}, {\"name\": \"single_apostrophe\", \"passed\": false, \"observed\": \"ArrayIndexOutOfBoundsException: -1\"}, {\"name\": \"generic_da_control\", \"passed\": true, \"observed\": \"da|di\"}, {\"name\": \"ordinary_name_control\", \"passed\": true, \"observed\": \"zmit\"}], \"build\": {\"maven_compile_duration_ms\": 5360}, \"metrics\": {\"phonetic_boundary_score\": 0.5}}\n",
+      "stdout": "{\"passed\": 2, \"total\": 4, \"cases\": [{\"name\": \"triple_apostrophe\", \"passed\": false, \"observed\": \"ArrayIndexOutOfBoundsException: -1\"}, {\"name\": \"single_apostrophe\", \"passed\": false, \"observed\": \"ArrayIndexOutOfBoundsException: -1\"}, {\"name\": \"generic_da_control\", \"passed\": true, \"observed\": \"da|di\"}, {\"name\": \"ordinary_name_control\", \"passed\": true, \"observed\": \"zmit\"}], \"build\": {\"maven_compile_duration_ms\": 7514}, \"metrics\": {\"phonetic_boundary_score\": 0.5}}\n",
       "stderr": "",
-      "duration_ms": 6680
+      "duration_ms": 9751
     },
     "hidden_evaluator": {
       "command": [
@@ -68,9 +68,9 @@
       ],
       "working_directory": "{target_checkout}",
       "exit_code": 0,
-      "stdout": "{\"passed\": 2, \"total\": 5, \"cases\": [{\"name\": \"sephardic_al_prefix\", \"passed\": false, \"observed\": \"StringIndexOutOfBoundsException: String index out of range: -1\"}, {\"name\": \"sephardic_el_prefix\", \"passed\": false, \"observed\": \"StringIndexOutOfBoundsException: String index out of range: -1\"}, {\"name\": \"ashkenazi_bar_prefix\", \"passed\": false, \"observed\": \"StringIndexOutOfBoundsException: String index out of range: -1\"}, {\"name\": \"generic_da_control\", \"passed\": true, \"observed\": \"da|di\"}, {\"name\": \"ordinary_name_control\", \"passed\": true, \"observed\": \"zmit\"}], \"build\": {\"maven_compile_duration_ms\": 4702}, \"metrics\": {\"phonetic_boundary_score\": 0.4}}\n",
+      "stdout": "{\"passed\": 2, \"total\": 5, \"cases\": [{\"name\": \"sephardic_al_prefix\", \"passed\": false, \"observed\": \"StringIndexOutOfBoundsException: String index out of range: -1\"}, {\"name\": \"sephardic_el_prefix\", \"passed\": false, \"observed\": \"StringIndexOutOfBoundsException: String index out of range: -1\"}, {\"name\": \"ashkenazi_bar_prefix\", \"passed\": false, \"observed\": \"StringIndexOutOfBoundsException: String index out of range: -1\"}, {\"name\": \"generic_da_control\", \"passed\": true, \"observed\": \"da|di\"}, {\"name\": \"ordinary_name_control\", \"passed\": true, \"observed\": \"zmit\"}], \"build\": {\"maven_compile_duration_ms\": 7578}, \"metrics\": {\"phonetic_boundary_score\": 0.4}}\n",
       "stderr": "",
-      "duration_ms": 6024
+      "duration_ms": 9807
     }
   },
   "baseline": {
@@ -81,15 +81,15 @@
   },
   "task_artifact_sha256": {
     "autoresearch.json": "f76be3640c4a45041ada7a1266b8f949f0933eff80b554a5ca6f7ed45f40b147",
-    "evaluator.py": "38861d2e0803862498b16786e5c46adee806102a36f3f8c31337f1690a88660e",
+    "evaluator.py": "cb150c39260e2175da489a268ad707f988978d30e5e77fead7ff8e91152a7dcf",
     "holdout_evaluator.py": "f7ee9dae65a6f2f92b3a1e17b5abe46a5550d5954c5a64ee37575ffddec32d9e",
-    "README.md": "1018324c93d9e0908cacfff74211107e7c61262aed464b66a44ab805fb08d8f2",
-    "task.json": "38cc0f7860d0078bc51a9902f8cc2e7782d61de3319bfa7212dc3ce84bfc65e9"
+    "README.md": "174d4e1f641f92c48bbd0db4ff5c33d74108ee1623190201e811c249e52d5179",
+    "task.json": "505865016d4df794a3e55f267f386af1c1cb56dd5d0496b70813879c8e9708ea"
   },
   "boundaries": [
     "The task replays Apache Commons Codec pull request #223 against the first parent of its merged commit; it is not an official Apache Commons Codec benchmark.",
     "The public evaluator exposes apostrophe-only Sephardic inputs and ordinary controls; the hidden evaluator withholds prefix-only Sephardic and Ashkenazi inputs plus ordinary controls.",
-    "The evaluators compile the pinned Maven project and run a temporary Java probe outside the target checkout; they do not add tests or other files to the external repository.",
+    "Each evaluator copies the candidate workspace without .git, .repropilot, or target directories and runs Maven plus the Java probe against that disposable copy; build artifacts do not mutate the governed candidate workspace.",
     "The retained local baseline records Oracle JDK 8u202 and Maven 3.9.1; those versions describe this replay environment rather than a universal runtime requirement for Commons Codec.",
     "The pull request head and merge commit are retained as provenance for human review and are not included in candidate proposer context.",
     "A contract pass proves the frozen cases and selected upstream tests passed; it does not prove semantic equivalence with the maintainer patch, complete phonetic-input coverage, or upstream readiness."

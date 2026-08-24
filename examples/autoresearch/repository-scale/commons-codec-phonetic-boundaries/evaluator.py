@@ -9,9 +9,10 @@ import sys
 import tempfile
 import time
 import xml.etree.ElementTree as ET
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 
 MAVEN_SETTINGS = """<?xml version="1.0" encoding="UTF-8"?>
@@ -53,12 +54,13 @@ def _run(
     command: list[str],
     timeout_seconds: float,
     environment: dict[str, str] | None = None,
+    working_directory: Path | None = None,
 ) -> dict[str, Any]:
     started = time.monotonic()
     try:
         completed = subprocess.run(
             command,
-            cwd=Path.cwd(),
+            cwd=working_directory or Path.cwd(),
             env=environment,
             capture_output=True,
             text=True,
@@ -84,7 +86,11 @@ def _run(
         }
 
 
-def _maven(arguments: list[str], timeout_seconds: float) -> dict[str, Any]:
+def _maven(
+    arguments: list[str],
+    timeout_seconds: float,
+    working_directory: Path,
+) -> dict[str, Any]:
     executable = shutil.which("mvn")
     javac = shutil.which("javac")
     if executable is None or javac is None:
@@ -109,7 +115,21 @@ def _maven(arguments: list[str], timeout_seconds: float) -> dict[str, Any]:
             ],
             timeout_seconds,
             environment,
+            working_directory,
         )
+
+
+@contextmanager
+def _isolated_workspace() -> Iterator[Path]:
+    source = Path.cwd()
+    with tempfile.TemporaryDirectory(prefix="rp-codec-") as temporary:
+        workspace = Path(temporary) / "repo"
+        shutil.copytree(
+            source,
+            workspace,
+            ignore=shutil.ignore_patterns(".git", ".repropilot", "target"),
+        )
+        yield workspace
 
 
 def _java_literal(value: str) -> str:
@@ -161,8 +181,12 @@ public final class ReproPilotCodecProbe {{
 """
 
 
-def evaluate_cases(cases: list[Case]) -> dict[str, Any]:
-    compile_result = _maven(["-DskipTests", "compile"], timeout_seconds=300)
+def _evaluate_cases(cases: list[Case], workspace: Path) -> dict[str, Any]:
+    compile_result = _maven(
+        ["-DskipTests", "compile"],
+        timeout_seconds=300,
+        working_directory=workspace,
+    )
     if compile_result["exit_code"] != 0:
         raise RuntimeError(compile_result["stderr"] or compile_result["stdout"] or "Maven compile failed")
 
@@ -170,7 +194,7 @@ def evaluate_cases(cases: list[Case]) -> dict[str, Any]:
     java = shutil.which("java")
     if javac is None or java is None:
         raise RuntimeError("Java compiler and runtime are required on PATH")
-    classes = (Path.cwd() / "target" / "classes").resolve(strict=True)
+    classes = (workspace / "target" / "classes").resolve(strict=True)
     with tempfile.TemporaryDirectory(prefix="repropilot-codec-probe-") as temporary:
         probe_root = Path(temporary)
         source = probe_root / "ReproPilotCodecProbe.java"
@@ -178,12 +202,14 @@ def evaluate_cases(cases: list[Case]) -> dict[str, Any]:
         compile_probe = _run(
             [javac, "-encoding", "UTF-8", "-cp", str(classes), "-d", str(probe_root), str(source)],
             timeout_seconds=60,
+            working_directory=workspace,
         )
         if compile_probe["exit_code"] != 0:
             raise RuntimeError(compile_probe["stderr"] or compile_probe["stdout"] or "Java probe compile failed")
         run_probe = _run(
             [java, "-cp", os.pathsep.join([str(probe_root), str(classes)]), "ReproPilotCodecProbe"],
             timeout_seconds=60,
+            working_directory=workspace,
         )
         if run_probe["exit_code"] != 0:
             raise RuntimeError(run_probe["stderr"] or run_probe["stdout"] or "Java probe failed")
@@ -205,14 +231,20 @@ def evaluate_cases(cases: list[Case]) -> dict[str, Any]:
     }
 
 
+def evaluate_cases(cases: list[Case]) -> dict[str, Any]:
+    with _isolated_workspace() as workspace:
+        return _evaluate_cases(cases, workspace)
+
+
 def upstream_checks() -> dict[str, Any]:
-    result = _maven(["test"], timeout_seconds=330)
-    totals = {"tests": 0, "failures": 0, "errors": 0, "skipped": 0}
-    if result["exit_code"] == 0:
-        for report in sorted((Path.cwd() / "target" / "surefire-reports").glob("TEST-*.xml")):
-            attributes = ET.parse(report).getroot().attrib
-            for key in totals:
-                totals[key] += int(float(attributes.get(key, "0")))
+    with _isolated_workspace() as workspace:
+        result = _maven(["test"], timeout_seconds=330, working_directory=workspace)
+        totals = {"tests": 0, "failures": 0, "errors": 0, "skipped": 0}
+        if result["exit_code"] == 0:
+            for report in sorted((workspace / "target" / "surefire-reports").glob("TEST-*.xml")):
+                attributes = ET.parse(report).getroot().attrib
+                for key in totals:
+                    totals[key] += int(float(attributes.get(key, "0")))
     payload: dict[str, Any] = {
         "upstream_checks_passed": result["exit_code"] == 0,
         "command": ["mvn", "-q", "-Drat.skip=true", "test"],
