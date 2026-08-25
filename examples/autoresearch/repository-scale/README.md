@@ -68,7 +68,7 @@ py -3.11 scripts\run_repository_benchmark_replay.py `
   --output <replay-report.json>
 ```
 
-The opt-in `Repository benchmark replay` workflow runs weekly and through `workflow_dispatch`, configures Temurin JDK 8, uploads the report even when setup or Preflight fails, and then reflects the replay result in the job status. It does not run on pushes or pull requests. Clone, registry, and toolchain failures are labeled `setup_failed`; a clean setup whose observed score differs from the frozen baseline is labeled `preflight_failed`. No model credential is read and `model_requests` remains zero.
+The opt-in `Repository benchmark replay` workflow runs weekly and through `workflow_dispatch`, configures Temurin JDK 8, uploads the report even when setup or Preflight fails, and then reflects the replay result in the job status. It does not run on pushes or pull requests. Clone, registry, toolchain, and Maven dependency failures are labeled `setup_failed` with a specific `failed_stage`; a clean setup whose observed score differs from the frozen baseline is labeled `preflight_failed`. No model credential is read and `model_requests` remains zero.
 
 ## Audited aggregate report
 

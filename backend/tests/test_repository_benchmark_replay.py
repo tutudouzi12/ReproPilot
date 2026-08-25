@@ -101,6 +101,8 @@ def test_setup_contract_rejects_unknown_command_fields(setup: dict) -> None:
     [
         ({"kind": "maven", "java_major": 7, "maven_major": 3}, "supported Java major"),
         ({"kind": "maven", "java_major": 8, "maven_major": 4}, "Maven major 3"),
+        ({"kind": "maven", "java_major": 8.0, "maven_major": 3}, "supported Java major"),
+        ({"kind": "maven", "java_major": 8, "maven_major": 3.0}, "Maven major 3"),
     ],
 )
 def test_maven_setup_rejects_unsupported_toolchain(setup: dict, message: str) -> None:
@@ -178,7 +180,7 @@ def test_maven_setup_validates_and_records_fixed_tool_commands(
             "javac_version": {"stdout": "javac 1.8.0_442\n", "stderr": ""},
             "maven_version": {"stdout": "Apache Maven 3.9.9\n", "stderr": ""},
         }
-        return {"exit_code": 0, "duration_ms": 1, **outputs[stage]}
+        return {"exit_code": 0, "duration_ms": 1, **outputs.get(stage, {"stdout": "", "stderr": ""})}
 
     monkeypatch.setattr(repository_benchmark_replay, "run_stage", fake_run_stage)
     monkeypatch.setattr(repository_benchmark_replay.shutil, "which", lambda name: f"/tools/{name}")
@@ -190,8 +192,21 @@ def test_maven_setup_validates_and_records_fixed_tool_commands(
     python, runtime = repository_benchmark_replay.prepare_runtime(task, tmp_path / "checkout", tmp_path, [])
 
     assert python == Path(repository_benchmark_replay.sys.executable)
-    assert [stage for stage, _ in calls] == ["java_version", "javac_version", "maven_version"]
-    assert [command[1:] for _, command in calls] == [["-version"], ["-version"], ["-version"]]
+    assert [stage for stage, _ in calls] == [
+        "java_version",
+        "javac_version",
+        "maven_version",
+        "maven_dependencies",
+    ]
+    assert [command[1:] for _, command in calls[:3]] == [["-version"], ["-version"], ["-version"]]
+    assert calls[3][1][1:] == [
+        "--batch-mode",
+        "--quiet",
+        "-Drat.skip=true",
+        "-DskipTests",
+        "-DincludeScope=compile",
+        "org.apache.maven.plugins:maven-dependency-plugin:3.9.0:resolve",
+    ]
     assert runtime == {
         "python": f"{repository_benchmark_replay.sys.version_info.major}.{repository_benchmark_replay.sys.version_info.minor}",
         "node": "",
@@ -266,6 +281,74 @@ def test_runtime_validation_failure_is_classified_as_setup_failure(
     assert result["failed_stage"] == "runtime_validation"
     assert result["error_type"] == "ValueError"
     assert result["preflight"] is None
+
+
+def test_maven_dependency_failure_is_classified_before_preflight(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    checkout = tmp_path / "checkout"
+    checkout.mkdir()
+    monkeypatch.setattr(repository_benchmark_replay, "prepare_checkout", lambda task, workspace, records: checkout)
+    monkeypatch.setattr(repository_benchmark_replay.shutil, "which", lambda name: f"/tools/{name}")
+
+    def fake_run_stage(stage, command, cwd, workspace, records, timeout_seconds):
+        outputs = {
+            "java_version": {"stdout": "", "stderr": 'openjdk version "1.8.0_442"\n'},
+            "javac_version": {"stdout": "javac 1.8.0_442\n", "stderr": ""},
+            "maven_version": {"stdout": "Apache Maven 3.9.9\n", "stderr": ""},
+        }
+        result = {"exit_code": 0, "duration_ms": 1, **outputs.get(stage, {"stdout": "", "stderr": ""})}
+        if stage == "maven_dependencies":
+            result["exit_code"] = 1
+            raise repository_benchmark_replay.StageFailure(stage, result)
+        return result
+
+    monkeypatch.setattr(repository_benchmark_replay, "run_stage", fake_run_stage)
+    monkeypatch.setattr(
+        repository_benchmark_replay.preflight,
+        "run_preflight",
+        lambda task, checkout, python: pytest.fail("Preflight must not run after dependency setup fails"),
+    )
+    task = {
+        "id": "sample-maven",
+        "setup": {"kind": "maven", "java_major": 8, "maven_major": 3},
+        "task": {"repository": {"url": "https://github.com/example/project.git", "revision": "a" * 40}},
+    }
+
+    result = repository_benchmark_replay.replay_task(task, tmp_path)
+
+    assert result["status"] == "setup_failed"
+    assert result["failed_stage"] == "maven_dependencies"
+    assert result["preflight"] is None
+
+
+def test_preflight_failure_remains_separate_after_clean_setup(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    checkout = tmp_path / "checkout"
+    checkout.mkdir()
+    monkeypatch.setattr(repository_benchmark_replay, "prepare_checkout", lambda task, workspace, records: checkout)
+    monkeypatch.setattr(
+        repository_benchmark_replay,
+        "prepare_runtime",
+        lambda task, checkout, workspace, records: (Path(repository_benchmark_replay.sys.executable), {"python": "3.11"}),
+    )
+    monkeypatch.setattr(
+        repository_benchmark_replay.preflight,
+        "run_preflight",
+        lambda task, checkout, python: {"status": "failed", "exit_code": 2},
+    )
+    task = {
+        "id": "sample-maven",
+        "setup": {"kind": "maven", "java_major": 8, "maven_major": 3},
+        "task": {"repository": {"url": "https://github.com/example/project.git", "revision": "a" * 40}},
+    }
+
+    result = repository_benchmark_replay.replay_task(task, tmp_path)
+
+    assert result["status"] == "preflight_failed"
+    assert "failed_stage" not in result
+    assert result["preflight"]["exit_code"] == 2
 
 
 def test_checkout_retries_transient_clone_in_separate_directories(

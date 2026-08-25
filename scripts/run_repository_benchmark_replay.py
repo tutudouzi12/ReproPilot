@@ -124,9 +124,9 @@ def validate_setup(task_id: str, value: Any) -> dict[str, Any]:
         )
         java_major = value.get("java_major")
         maven_major = value.get("maven_major")
-        if java_major not in {8, 11, 17, 21}:
+        if type(java_major) is not int or java_major not in {8, 11, 17, 21}:
             raise ValueError(f"Maven replay setup must pin a supported Java major for {task_id}")
-        if maven_major != 3:
+        if type(maven_major) is not int or maven_major != 3:
             raise ValueError(f"Maven replay setup must pin Maven major 3 for {task_id}")
         return {"kind": kind, "java_major": java_major, "maven_major": maven_major}
     raise ValueError(f"unsupported replay setup kind for {task_id}: {kind!r}")
@@ -368,6 +368,22 @@ def prepare_runtime(
         raise ValueError(f"Javac {setup['java_major']} is required, found {javac_version}")
     if _major_version(maven_version, "Maven") != setup["maven_major"]:
         raise ValueError(f"Maven {setup['maven_major']} is required, found {maven_version}")
+    run_stage(
+        "maven_dependencies",
+        [
+            maven,
+            "--batch-mode",
+            "--quiet",
+            "-Drat.skip=true",
+            "-DskipTests",
+            "-DincludeScope=compile",
+            "org.apache.maven.plugins:maven-dependency-plugin:3.9.0:resolve",
+        ],
+        checkout,
+        workspace,
+        records,
+        900,
+    )
     return Path(sys.executable), {
         "python": f"{sys.version_info.major}.{sys.version_info.minor}",
         "node": "",
