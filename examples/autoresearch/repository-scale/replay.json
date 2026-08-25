@@ -47,10 +47,19 @@
           "xo@1.2.3"
         ]
       }
+    },
+    {
+      "id": "commons-codec-phonetic-boundaries",
+      "setup": {
+        "kind": "maven",
+        "java_major": 8,
+        "maven_major": 3
+      }
     }
   ],
   "boundaries": [
-    "This opt-in replay covers two representative tasks, not the complete repository benchmark.",
+    "This opt-in replay covers three representative Python, TypeScript, and Java tasks, not the complete repository benchmark.",
+    "Java and Maven major versions are validated while the exact detected toolchain versions are retained in each replay result.",
     "It makes no model request and does not create live model evidence.",
     "Clone or package-registry failures are setup failures and remain distinct from frozen-baseline score mismatches.",
     "The scheduled workflow does not run on push or pull_request and therefore does not gate ordinary changes."

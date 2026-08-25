@@ -59,7 +59,7 @@ The runner checks benchmark-to-task identity and contract hashes before delegati
 
 ## Opt-in cross-runtime replay
 
-[`replay.json`](replay.json) selects Flask and p-queue as representative Python and TypeScript tasks and declares only exact package versions. The replay runner accepts the two supported setup kinds as argument lists; it does not execute shell text from the manifest. On a clean runner with Python 3.11 and Node 22, matching the retained runtime families:
+[`replay.json`](replay.json) selects Flask, p-queue, and Commons Codec as representative Python, TypeScript, and Java tasks. Python and npm dependencies use exact package versions; the Maven setup pins supported Java and Maven major versions and records the exact detected toolchain. The replay runner accepts only the three built-in setup kinds as argument lists and rejects unknown setup fields; it does not execute shell text from the manifest. On a clean runner with Python 3.11, Node 22, Java 8, and Maven 3, matching the retained runtime families:
 
 ```powershell
 py -3.11 scripts\run_repository_benchmark_replay.py `
@@ -68,7 +68,7 @@ py -3.11 scripts\run_repository_benchmark_replay.py `
   --output <replay-report.json>
 ```
 
-The opt-in `Repository benchmark replay` workflow runs weekly and through `workflow_dispatch`, uploads the report even when setup or Preflight fails, and then reflects the replay result in the job status. It does not run on pushes or pull requests. Clone and registry failures are labeled `setup_failed`; a clean setup whose observed score differs from the frozen baseline is labeled `preflight_failed`. No model credential is read and `model_requests` remains zero.
+The opt-in `Repository benchmark replay` workflow runs weekly and through `workflow_dispatch`, configures Temurin JDK 8, uploads the report even when setup or Preflight fails, and then reflects the replay result in the job status. It does not run on pushes or pull requests. Clone, registry, toolchain, and Maven dependency failures are labeled `setup_failed` with a specific `failed_stage`; a clean setup whose observed score differs from the frozen baseline is labeled `preflight_failed`. No model credential is read and `model_requests` remains zero.
 
 ## Audited aggregate report
 

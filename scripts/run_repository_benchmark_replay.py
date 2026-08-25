@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import os
@@ -28,6 +29,9 @@ PYTHON_REQUIREMENT = re.compile(
     r"^[A-Za-z0-9][A-Za-z0-9._-]*(?:\[[A-Za-z0-9,._-]+\])?==[A-Za-z0-9][A-Za-z0-9.+_-]*$"
 )
 NPM_REQUIREMENT = re.compile(r"^(?:@[a-z0-9][a-z0-9._-]*/)?[a-z0-9][a-z0-9._-]*@[0-9][A-Za-z0-9.+_-]*$")
+JAVA_VERSION = re.compile(r'(?:java|openjdk) version "([^"]+)"', re.IGNORECASE)
+JAVAC_VERSION = re.compile(r"\bjavac\s+([^\s]+)", re.IGNORECASE)
+MAVEN_VERSION = re.compile(r"\bApache Maven\s+([^\s]+)", re.IGNORECASE)
 
 
 class StageFailure(RuntimeError):
@@ -57,11 +61,38 @@ def _validate_packages(values: Any, pattern: re.Pattern[str], label: str) -> lis
     return packages
 
 
+def _reject_unknown_fields(value: dict[str, Any], allowed: set[str], label: str) -> None:
+    unknown = sorted(set(value) - allowed)
+    if unknown:
+        raise ValueError(f"{label} contains unsupported fields: {', '.join(unknown)}")
+
+
+def _version_from_result(pattern: re.Pattern[str], result: dict[str, Any], label: str) -> str:
+    output = f"{result['stdout']}\n{result['stderr']}"
+    match = pattern.search(output)
+    if match is None:
+        raise ValueError(f"could not parse {label} version")
+    return match.group(1)
+
+
+def _major_version(value: str, label: str) -> int:
+    parts = value.split(".")
+    selected = parts[1] if len(parts) > 1 and parts[0] == "1" else parts[0]
+    if not selected.isdigit():
+        raise ValueError(f"could not parse {label} major version from {value!r}")
+    return int(selected)
+
+
 def validate_setup(task_id: str, value: Any) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ValueError(f"replay setup must be an object for {task_id}")
     kind = str(value.get("kind", ""))
     if kind == "python_venv":
+        _reject_unknown_fields(
+            value,
+            {"kind", "python_version", "editable_checkout", "packages"},
+            f"python replay setup for {task_id}",
+        )
         if value.get("python_version") != "3.11" or value.get("editable_checkout") is not True:
             raise ValueError(f"python replay setup must pin Python 3.11 and editable_checkout for {task_id}")
         return {
@@ -71,6 +102,11 @@ def validate_setup(task_id: str, value: Any) -> dict[str, Any]:
             "packages": _validate_packages(value.get("packages"), PYTHON_REQUIREMENT, f"{task_id} Python packages"),
         }
     if kind == "npm":
+        _reject_unknown_fields(
+            value,
+            {"kind", "node_major", "package_lock", "packages"},
+            f"npm replay setup for {task_id}",
+        )
         node_major = value.get("node_major")
         if not isinstance(node_major, int) or not 20 <= node_major <= 24 or value.get("package_lock") is not False:
             raise ValueError(f"npm replay setup must pin a supported Node major and disable package-lock for {task_id}")
@@ -80,6 +116,19 @@ def validate_setup(task_id: str, value: Any) -> dict[str, Any]:
             "package_lock": False,
             "packages": _validate_packages(value.get("packages"), NPM_REQUIREMENT, f"{task_id} npm packages"),
         }
+    if kind == "maven":
+        _reject_unknown_fields(
+            value,
+            {"kind", "java_major", "maven_major"},
+            f"Maven replay setup for {task_id}",
+        )
+        java_major = value.get("java_major")
+        maven_major = value.get("maven_major")
+        if type(java_major) is not int or java_major not in {8, 11, 17, 21}:
+            raise ValueError(f"Maven replay setup must pin a supported Java major for {task_id}")
+        if type(maven_major) is not int or maven_major != 3:
+            raise ValueError(f"Maven replay setup must pin Maven major 3 for {task_id}")
+        return {"kind": kind, "java_major": java_major, "maven_major": maven_major}
     raise ValueError(f"unsupported replay setup kind for {task_id}: {kind!r}")
 
 
@@ -159,6 +208,12 @@ def sanitize_command(command: list[str], workspace: Path) -> list[str]:
         sanitized[0] = "{node}"
     elif executable_name in {"npm", "npm.cmd", "npm.exe"}:
         sanitized[0] = "{npm}"
+    elif executable_name in {"java", "java.exe"}:
+        sanitized[0] = "{java}"
+    elif executable_name in {"javac", "javac.exe"}:
+        sanitized[0] = "{javac}"
+    elif executable_name in {"mvn", "mvn.cmd", "mvn.exe"}:
+        sanitized[0] = "{maven}"
     return sanitized
 
 
@@ -195,6 +250,11 @@ def venv_python(directory: Path) -> Path:
     return directory / relative
 
 
+def checkout_directory_name(task_id: str, attempt: int) -> str:
+    prefix = hashlib.sha256(task_id.encode()).hexdigest()[:12]
+    return prefix if attempt == 1 else f"{prefix}-{attempt}"
+
+
 def prepare_checkout(task: dict[str, Any], workspace: Path, records: list[dict[str, Any]]) -> Path:
     task_id = str(task["id"])
     checkout_root = workspace / "checkouts"
@@ -203,7 +263,7 @@ def prepare_checkout(task: dict[str, Any], workspace: Path, records: list[dict[s
     checkout: Path | None = None
     last_result: dict[str, Any] | None = None
     for attempt in range(1, 4):
-        candidate = checkout_root / (task_id if attempt == 1 else f"{task_id}-clone-attempt-{attempt}")
+        candidate = checkout_root / checkout_directory_name(task_id, attempt)
         command = [
             "git",
             "clone",
@@ -266,26 +326,71 @@ def prepare_runtime(
         run_stage("python_dependencies", command, workspace, workspace, records, 900)
         return python, {"python": setup["python_version"], "node": ""}
 
-    node = shutil.which("node")
-    npm = shutil.which("npm.cmd" if os.name == "nt" else "npm")
-    if node is None or npm is None:
-        raise ValueError("Node and npm are required for npm replay setup")
-    version_result = run_stage("node_version", [node, "--version"], workspace, workspace, records, 60)
-    node_version = version_result["stdout"].strip().removeprefix("v")
-    if node_version.split(".", 1)[0] != str(setup["node_major"]):
-        raise ValueError(f"Node {setup['node_major']} is required, found {node_version}")
-    command = [
-        npm,
-        "install",
-        "--ignore-scripts",
-        "--no-audit",
-        "--no-fund",
-        "--no-save",
-        "--package-lock=false",
-        *setup["packages"],
-    ]
-    run_stage("npm_dependencies", command, checkout, workspace, records, 900)
-    return Path(sys.executable), {"python": f"{sys.version_info.major}.{sys.version_info.minor}", "node": node_version}
+    if setup["kind"] == "npm":
+        node = shutil.which("node")
+        npm = shutil.which("npm.cmd" if os.name == "nt" else "npm")
+        if node is None or npm is None:
+            raise ValueError("Node and npm are required for npm replay setup")
+        version_result = run_stage("node_version", [node, "--version"], workspace, workspace, records, 60)
+        node_version = version_result["stdout"].strip().removeprefix("v")
+        if node_version.split(".", 1)[0] != str(setup["node_major"]):
+            raise ValueError(f"Node {setup['node_major']} is required, found {node_version}")
+        command = [
+            npm,
+            "install",
+            "--ignore-scripts",
+            "--no-audit",
+            "--no-fund",
+            "--no-save",
+            "--package-lock=false",
+            *setup["packages"],
+        ]
+        run_stage("npm_dependencies", command, checkout, workspace, records, 900)
+        return Path(sys.executable), {
+            "python": f"{sys.version_info.major}.{sys.version_info.minor}",
+            "node": node_version,
+        }
+
+    java = shutil.which("java")
+    javac = shutil.which("javac")
+    maven = shutil.which("mvn.cmd" if os.name == "nt" else "mvn")
+    if java is None or javac is None or maven is None:
+        raise ValueError("Java, Javac, and Maven are required for Maven replay setup")
+    java_result = run_stage("java_version", [java, "-version"], workspace, workspace, records, 60)
+    javac_result = run_stage("javac_version", [javac, "-version"], workspace, workspace, records, 60)
+    maven_result = run_stage("maven_version", [maven, "-version"], workspace, workspace, records, 60)
+    java_version = _version_from_result(JAVA_VERSION, java_result, "Java")
+    javac_version = _version_from_result(JAVAC_VERSION, javac_result, "Javac")
+    maven_version = _version_from_result(MAVEN_VERSION, maven_result, "Maven")
+    if _major_version(java_version, "Java") != setup["java_major"]:
+        raise ValueError(f"Java {setup['java_major']} is required, found {java_version}")
+    if _major_version(javac_version, "Javac") != setup["java_major"]:
+        raise ValueError(f"Javac {setup['java_major']} is required, found {javac_version}")
+    if _major_version(maven_version, "Maven") != setup["maven_major"]:
+        raise ValueError(f"Maven {setup['maven_major']} is required, found {maven_version}")
+    run_stage(
+        "maven_dependencies",
+        [
+            maven,
+            "--batch-mode",
+            "--quiet",
+            "-Drat.skip=true",
+            "-DskipTests",
+            "-DincludeScope=compile",
+            "org.apache.maven.plugins:maven-dependency-plugin:3.9.0:resolve",
+        ],
+        checkout,
+        workspace,
+        records,
+        900,
+    )
+    return Path(sys.executable), {
+        "python": f"{sys.version_info.major}.{sys.version_info.minor}",
+        "node": "",
+        "java": java_version,
+        "javac": javac_version,
+        "maven": maven_version,
+    }
 
 
 def replay_task(task: dict[str, Any], workspace: Path) -> dict[str, Any]:
