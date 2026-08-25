@@ -1,0 +1,34 @@
+{
+  "version": "repropilot.repeated-repository-benchmark/v1",
+  "id": "repository-scale-repeat-3-v1",
+  "benchmark": "benchmark.json",
+  "benchmark_id": "repository-scale-pilot-v1",
+  "benchmark_sha256": "b12bfa95f51c8bbf7e3e875d810f08548de0762de5caaa014c9d015af494173c",
+  "repetitions_per_task": 3,
+  "execution_order": "round_robin",
+  "execution_mode": "live_model",
+  "model": {
+    "provider": "dashscope.aliyuncs.com",
+    "name": "qwen3-coder-plus"
+  },
+  "max_live_requests_per_run": 3,
+  "require_clean_harness": true,
+  "require_exact_harness_revision": true,
+  "require_hash_linked_trajectory": true,
+  "task_ids": [
+    "rank-bm25-boundary-robustness",
+    "humanize-naturalsize-rounding",
+    "more-itertools-strict-counted-sample",
+    "flask-ipv6-host-parsing",
+    "p-queue-abort-listener-cleanup",
+    "commons-codec-phonetic-boundaries"
+  ],
+  "boundaries": [
+    "The campaign has eighteen frozen cells: six independent repository tasks multiplied by three repetitions.",
+    "Round-robin order is fixed before execution and a failed cell is retained without success-based retry.",
+    "All cells must use one clean harness revision, the same model identity, the same task contracts, and the same request cap.",
+    "The candidate-informed adversarial follow-up is excluded because it is not an independent repository sample.",
+    "A completed campaign measures this frozen model and harness combination, not general software-engineering ability.",
+    "Token-derived cost is not a billing receipt."
+  ]
+}
