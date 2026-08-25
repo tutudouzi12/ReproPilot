@@ -431,6 +431,10 @@ def cost_record(usage: ModelUsage, attempted_requests: int, args: argparse.Names
     }
 
 
+def failure_record(error: str) -> dict[str, str] | None:
+    return {"error": error} if error else None
+
+
 def classify_outcome(ledger: TrialLedger | None, report: ValidationReport | None, error: str) -> str:
     if error:
         return "run_failed"
@@ -619,7 +623,7 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
             "protected_files_intact": report.protected_files_intact if report is not None else False,
             "reason": report.reason if report is not None else run_error,
         },
-        "failure": {"error": run_error},
+        "failure": failure_record(run_error),
         "boundaries": [
             *task["boundaries"],
             "The candidate was executed by local subprocess with a stripped environment, not a network-isolated container.",

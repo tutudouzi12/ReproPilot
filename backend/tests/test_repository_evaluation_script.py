@@ -15,6 +15,11 @@ repository_evaluation = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(repository_evaluation)
 
 
+def test_failure_record_is_null_for_success_and_bound_for_failure() -> None:
+    assert repository_evaluation.failure_record("") is None
+    assert repository_evaluation.failure_record("RuntimeError: failed") == {"error": "RuntimeError: failed"}
+
+
 def test_sanitize_workspace_paths_replaces_workspace_temp_and_home(tmp_path: Path) -> None:
     workspace = tmp_path / "workspace"
     value = {
