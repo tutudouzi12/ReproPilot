@@ -132,5 +132,8 @@ def test_autoresearch_builds_fixed_eight_node_harness():
     assert "text_excerpt" not in prepare.inputs["uploaded_files"][0]
     assert by_type(plan, "autoresearch_run").assigned_to == "research_coding_agent"
     assert by_type(plan, "autoresearch_validate").required_artifacts == [
-        "workspace_path", "prepared_runtime", "research_spec", "research_trial_ledger", "research_best_candidate"
+        "workspace_path", "prepared_runtime", "research_spec", "research_trial_ledger", "research_best_candidate", "research_trajectory_open"
+    ]
+    assert by_type(plan, "autoresearch_validate").output_artifacts == [
+        "research_validation_report", "validated_research_metrics", "research_trajectory_jsonl", "research_trajectory_manifest"
     ]

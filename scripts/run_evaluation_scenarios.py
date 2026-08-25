@@ -32,6 +32,7 @@ from app.autoresearch import (  # noqa: E402
     run_autoresearch,
     validate_autoresearch,
 )
+from app.trajectory import TrajectoryManifest, TrajectoryRecorder, finalize_trajectory, write_trajectory_artifacts  # noqa: E402
 
 
 SCENARIO_ROOT = ROOT / "examples" / "autoresearch" / "evaluation-suite" / "scenarios"
@@ -271,6 +272,8 @@ async def run_scenario(path: Path, run_root: Path, revision: str, source_dirty: 
     usage = ModelUsage()
     ledger: TrialLedger | None = None
     report: ValidationReport | None = None
+    trajectory = TrajectoryRecorder()
+    trajectory_manifest: TrajectoryManifest | None = None
     run_error = ""
     baseline_preflight: dict[str, Any] = {}
 
@@ -301,14 +304,30 @@ async def run_scenario(path: Path, run_root: Path, revision: str, source_dirty: 
         }
 
         try:
-            ledger = await run_autoresearch(workspace, spec, evaluator, proposer)
+            ledger = await run_autoresearch(workspace, spec, evaluator, proposer, event_sink=trajectory.emit)
             ledger.model_usage = usage
-            report = await validate_autoresearch(workspace, spec, ledger, evaluator)
+            report = await validate_autoresearch(workspace, spec, ledger, evaluator, event_sink=trajectory.emit)
+            trajectory_manifest = finalize_trajectory(
+                trajectory,
+                spec_sha256=spec.spec_sha256,
+                ledger=ledger,
+                validation=report,
+                terminal_status=report.status,
+            )
         except Exception as exc:
             run_error = f"{type(exc).__name__}: {exc}"
 
         observed = classify_outcome(ledger, report, run_error)
         expected = str(definition["expected_outcome"])
+        if trajectory_manifest is None and trajectory.events:
+            trajectory_manifest = finalize_trajectory(
+                trajectory,
+                spec_sha256=spec.spec_sha256,
+                ledger=ledger,
+                validation=report,
+                failure={"error": run_error or "run ended without a validation report"},
+                terminal_status=observed,
+            )
         final_candidate = workspace.joinpath("candidate.py").read_text(encoding="utf-8")
         final_hashes = {
             "candidate.py": sha256_file(workspace / "candidate.py"),
@@ -325,6 +344,8 @@ async def run_scenario(path: Path, run_root: Path, revision: str, source_dirty: 
             write_json(scenario_output / "trial-ledger.json", ledger.model_dump(mode="json"))
         if report is not None:
             write_json(scenario_output / "validation-report.json", report.model_dump(mode="json"))
+        if trajectory_manifest is not None:
+            write_trajectory_artifacts(scenario_output, trajectory, trajectory_manifest)
 
         result = {
             "version": RESULT_VERSION,
@@ -379,6 +400,8 @@ async def run_scenario(path: Path, run_root: Path, revision: str, source_dirty: 
                 "frozen_spec": f"{scenario_id}/frozen-spec.json",
                 "trial_ledger": f"{scenario_id}/trial-ledger.json" if ledger else None,
                 "validation_report": f"{scenario_id}/validation-report.json" if report else None,
+                "trajectory": f"{scenario_id}/trajectory.jsonl" if trajectory_manifest else None,
+                "trajectory_manifest": f"{scenario_id}/trajectory-manifest.json" if trajectory_manifest else None,
                 "initial_candidate": f"{scenario_id}/initial-candidate.py",
                 "final_candidate": f"{scenario_id}/final-candidate.py",
             },

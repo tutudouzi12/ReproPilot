@@ -66,6 +66,7 @@ from .prompts import (
 from .plotting import render_metric_plot, validate_plot_base64
 from .repository import discover_repository, prepare_first_available_repository
 from .research_coding import ExecutionResult, PatchProposal, RepairProposal, debug_paper_code, source_fingerprint, validate_patch_policy
+from .trajectory import TrajectoryRecorder, finalize_trajectory
 
 
 TRUE_VALUES = {"1", "true", "yes", "on"}
@@ -397,7 +398,8 @@ class RoutedAgentExecutor:
                     model_usage.record(completion.usage)
                     return CandidateProposal.model_validate(self._json_object(self._clean_json(completion.content)))
 
-                ledger = await run_autoresearch(workspace, spec, evaluator, proposer)
+                trajectory = TrajectoryRecorder()
+                ledger = await run_autoresearch(workspace, spec, evaluator, proposer, event_sink=trajectory.emit)
                 ledger.model_usage = model_usage
             except Exception as exc:
                 return TaskExecutionResult(status="failed", error=f"AutoResearch run failed: {exc}")
@@ -407,7 +409,7 @@ class RoutedAgentExecutor:
                 status="completed",
                 result=encoded,
                 structured_data=encoded,
-                artifact_values={"research_trial_ledger": encoded, "research_best_candidate": best, "research_best_metrics": json.dumps({spec.metric_key: ledger.best_score}, ensure_ascii=False)},
+                artifact_values={"research_trial_ledger": encoded, "research_best_candidate": best, "research_best_metrics": json.dumps({spec.metric_key: ledger.best_score}, ensure_ascii=False), "research_trajectory_open": trajectory.jsonl()},
                 logs=[f"AutoResearch completed trials={ledger.completed_trials}", f"best {spec.metric_key}={ledger.best_score:.8g}", f"model requests={ledger.model_usage.request_count} total_tokens={ledger.model_usage.total_tokens}", f"stop={ledger.stop_reason}"],
             )
         if task.type == "autoresearch_validate":
@@ -420,23 +422,35 @@ class RoutedAgentExecutor:
                     raise ValueError("prepared sandbox runtime is required for AutoResearch validation")
                 spec = ResearchSpec.model_validate_json(str(inputs.get("research_spec") or ""))
                 ledger = TrialLedger.model_validate_json(str(inputs.get("research_trial_ledger") or ""))
+                trajectory = TrajectoryRecorder.from_jsonl(str(inputs.get("research_trajectory_open") or ""))
 
                 async def evaluator(command: list[str]) -> CommandResult:
                     started = time.monotonic()
                     result = await self.sandbox.command(runtime, command)
                     return CommandResult(command=command, exit_code=int(result.get("exit_code", 1)), stdout=str(result.get("stdout", "")), stderr=str(result.get("stderr", "")), duration_ms=int((time.monotonic() - started) * 1000))
 
-                report = await validate_autoresearch(workspace, spec, ledger, evaluator)
+                report = await validate_autoresearch(workspace, spec, ledger, evaluator, event_sink=trajectory.emit)
+                trajectory_manifest = finalize_trajectory(
+                    trajectory,
+                    spec_sha256=spec.spec_sha256,
+                    ledger=ledger,
+                    validation=report,
+                    terminal_status=report.status,
+                )
             except Exception as exc:
                 return TaskExecutionResult(status="failed", error=f"AutoResearch validation failed: {exc}")
             encoded = report.model_dump_json()
+            trajectory_values = {
+                "research_trajectory_jsonl": trajectory.jsonl(),
+                "research_trajectory_manifest": trajectory_manifest.model_dump_json(),
+            }
             if report.status != "passed":
-                return TaskExecutionResult(status="failed", result=encoded, structured_data=encoded, error=f"AutoResearch validation failed: {report.reason}")
+                return TaskExecutionResult(status="failed", result=encoded, structured_data=encoded, artifact_values=trajectory_values, error=f"AutoResearch validation failed: {report.reason}")
             return TaskExecutionResult(
                 status="completed",
                 result=encoded,
                 structured_data=encoded,
-                artifact_values={"research_validation_report": encoded, "validated_research_metrics": json.dumps({spec.metric_key: report.observed_score, "validation_mode": report.validation_mode}, ensure_ascii=False)},
+                artifact_values={"research_validation_report": encoded, "validated_research_metrics": json.dumps({spec.metric_key: report.observed_score, "validation_mode": report.validation_mode}, ensure_ascii=False), **trajectory_values},
                 logs=[f"AutoResearch validation passed mode={report.validation_mode}", f"runs={report.passed_runs}/{spec.validation_runs}"],
             )
         if task.type == "resolve_dependencies":

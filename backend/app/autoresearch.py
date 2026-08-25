@@ -15,6 +15,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from .evaluator_feedback import compile_safe_evaluator_feedback, sanitize_untrusted_diagnostic
+from .trajectory import TrajectorySink, emit_event, evidence_sha256
 
 
 SPEC_VERSION = "autoresearch.spec/v1"
@@ -495,15 +496,58 @@ def target_reached(score: float, target: float | None, direction: str) -> bool:
     return score >= target if direction == "maximize" else score <= target
 
 
-async def _evaluate(spec: ResearchSpec, evaluator: Evaluator, command: list[str] | None = None, runs: int | None = None) -> tuple[float, list[float], list[CommandResult]]:
+def _command_event_payload(
+    result: CommandResult,
+    *,
+    trial_number: int,
+    run_number: int,
+    status: str,
+    phase: str,
+) -> dict[str, Any]:
+    return {
+        "trial": trial_number,
+        "run": run_number,
+        "phase": phase,
+        "status": status,
+        "exit_code": result.exit_code,
+        "duration_ms": max(0, result.duration_ms),
+        "evidence_sha256": evidence_sha256(result),
+    }
+
+
+async def _evaluate(
+    spec: ResearchSpec,
+    evaluator: Evaluator,
+    command: list[str] | None = None,
+    runs: int | None = None,
+    *,
+    event_sink: TrajectorySink | None = None,
+    trial_number: int = 0,
+    evaluation_event: Literal["public_evaluation", "hidden_validation"] = "public_evaluation",
+    phase: str = "search",
+) -> tuple[float, list[float], list[CommandResult]]:
     scores: list[float] = []
     results: list[CommandResult] = []
     selected = command or spec.eval_command
     count = runs or spec.search_runs
-    for _ in range(count):
-        for guard in spec.guard_commands:
+    for run_index in range(count):
+        run_number = run_index + 1
+        for guard_index, guard in enumerate(spec.guard_commands, start=1):
             guarded = await evaluator(guard)
             results.append(guarded)
+            guard_status = "passed" if guarded.exit_code == 0 else "timeout" if guarded.exit_code == 124 else "failed"
+            emit_event(
+                event_sink,
+                "guard",
+                _command_event_payload(
+                    guarded,
+                    trial_number=trial_number,
+                    run_number=run_number,
+                    status=guard_status,
+                    phase=phase,
+                )
+                | {"guard": guard_index},
+            )
             if guarded.exit_code != 0:
                 if guarded.exit_code == 124:
                     raise EvaluatorExecutionError("guard_timeout", "guard command timed out", results)
@@ -511,13 +555,48 @@ async def _evaluate(spec: ResearchSpec, evaluator: Evaluator, command: list[str]
         result = await evaluator(selected)
         results.append(result)
         if result.exit_code != 0:
+            emit_event(
+                event_sink,
+                evaluation_event,
+                _command_event_payload(
+                    result,
+                    trial_number=trial_number,
+                    run_number=run_number,
+                    status="timeout" if result.exit_code == 124 else "failed",
+                    phase=phase,
+                ),
+            )
             if result.exit_code == 124:
                 raise EvaluatorExecutionError("evaluator_timeout", "evaluator command timed out", results)
             raise EvaluatorExecutionError("evaluator_command_failed", "evaluator command failed", results)
         try:
-            scores.append(parse_metric(result.stdout, spec.metric_key))
+            score = parse_metric(result.stdout, spec.metric_key)
         except ValueError as exc:
+            emit_event(
+                event_sink,
+                evaluation_event,
+                _command_event_payload(
+                    result,
+                    trial_number=trial_number,
+                    run_number=run_number,
+                    status="metric_parse_failed",
+                    phase=phase,
+                ),
+            )
             raise EvaluatorExecutionError("metric_parse_failed", str(exc), results) from None
+        scores.append(score)
+        emit_event(
+            event_sink,
+            evaluation_event,
+            _command_event_payload(
+                result,
+                trial_number=trial_number,
+                run_number=run_number,
+                status="passed",
+                phase=phase,
+            )
+            | {"score": score},
+        )
     return aggregate_scores(scores, spec.search_aggregation, spec.direction), scores, results
 
 
@@ -677,7 +756,14 @@ def proposal_context(
     }
 
 
-async def run_autoresearch(workspace: str | Path, spec: ResearchSpec, evaluator: Evaluator, proposer: Proposer) -> TrialLedger:
+async def run_autoresearch(
+    workspace: str | Path,
+    spec: ResearchSpec,
+    evaluator: Evaluator,
+    proposer: Proposer,
+    *,
+    event_sink: TrajectorySink | None = None,
+) -> TrialLedger:
     root = Path(workspace).resolve(strict=True)
     if spec.spec_sha256 != canonical_sha256(_spec_payload(spec)):
         raise ValueError("AutoResearch frozen spec hash mismatch")
@@ -687,21 +773,49 @@ async def run_autoresearch(workspace: str | Path, spec: ResearchSpec, evaluator:
     best = dict(original)
     ledger = TrialLedger(spec_sha256=spec.spec_sha256, metric_key=spec.metric_key, direction=spec.direction, max_trials=spec.max_trials)
     started = time.monotonic()
+    emit_event(event_sink, "baseline", {"status": "started", "spec_sha256": spec.spec_sha256})
     try:
-        baseline, samples, commands = await _evaluate(spec, evaluator)
+        baseline, samples, commands = await _evaluate(
+            spec,
+            evaluator,
+            event_sink=event_sink,
+            trial_number=0,
+            phase="baseline",
+        )
         _assert_integrity(root, spec)
         trial = ResearchTrial(number=0, status="baseline", decision="keep", reason="frozen baseline", metric=baseline, metric_samples=samples, metric_stddev=statistics.pstdev(samples) if len(samples) > 1 else 0.0, metric_aggregation=spec.search_aggregation, command_results=commands, finished_at=utc_now())
         ledger.trials.append(trial)
         ledger.baseline_score = baseline
         ledger.best_score = baseline
         if spec.holdout_command:
-            holdout, _, holdout_results = await _evaluate(spec, evaluator, spec.holdout_command, 1)
+            holdout, _, holdout_results = await _evaluate(
+                spec,
+                evaluator,
+                spec.holdout_command,
+                1,
+                event_sink=event_sink,
+                trial_number=0,
+                evaluation_event="hidden_validation",
+                phase="baseline",
+            )
             _assert_integrity(root, spec)
             ledger.holdout_baseline_score = holdout
             ledger.command_runs += len(holdout_results)
             ledger.command_duration_ms += sum(item.duration_ms for item in holdout_results)
         ledger.command_runs += len(commands)
         ledger.command_duration_ms += sum(item.duration_ms for item in commands)
+        emit_event(
+            event_sink,
+            "baseline",
+            {
+                "status": "completed",
+                "score": baseline,
+                "samples": samples[:5],
+                "aggregation": spec.search_aggregation,
+                "holdout_baseline_score": ledger.holdout_baseline_score,
+                "spec_sha256": spec.spec_sha256,
+            },
+        )
     except Exception:
         restore_immutable_workspace(root, spec.editable_files, immutable_original)
         restore_files(root, original)
@@ -718,6 +832,17 @@ async def run_autoresearch(workspace: str | Path, spec: ResearchSpec, evaluator:
         trial = ResearchTrial(number=number, status="running", decision="reject")
         try:
             proposal = await proposer(proposal_context(root, spec, ledger, evaluator_diagnostics=evaluation_feedback))
+            emit_event(
+                event_sink,
+                "proposal",
+                {
+                    "trial": number,
+                    "status": proposal.status,
+                    "patch_count": len(proposal.patches),
+                    "path_sha256": [hashlib.sha256(patch.path.encode()).hexdigest() for patch in proposal.patches],
+                    "proposal_sha256": evidence_sha256(proposal),
+                },
+            )
             trial.diagnosis = proposal.diagnosis
             trial.hypothesis = proposal.hypothesis
             if proposal.status == "stop":
@@ -726,10 +851,22 @@ async def run_autoresearch(workspace: str | Path, spec: ResearchSpec, evaluator:
                 trial.finished_at = utc_now()
                 ledger.trials.append(trial)
                 ledger.stop_reason = "candidate_stopped"
+                emit_event(event_sink, "decision", {"trial": number, "decision": "stop", "status": "stopped"})
                 break
             trial.patches = _apply_candidate(root, spec, proposal)
+            emit_event(
+                event_sink,
+                "apply_patch",
+                {"trial": number, "status": "applied", "patch_count": len(trial.patches), "patches": trial.patches},
+            )
             _assert_integrity(root, spec)
-            score, samples, commands = await _evaluate(spec, evaluator)
+            score, samples, commands = await _evaluate(
+                spec,
+                evaluator,
+                event_sink=event_sink,
+                trial_number=number,
+                phase="candidate",
+            )
             _assert_integrity(root, spec)
             trial.metric = score
             trial.metric_samples = samples
@@ -745,6 +882,11 @@ async def run_autoresearch(workspace: str | Path, spec: ResearchSpec, evaluator:
                 ledger.best_score = score
                 ledger.accepted_trials += 1
                 best = snapshot_files(root, spec.editable_files)
+                emit_event(
+                    event_sink,
+                    "decision",
+                    {"trial": number, "decision": "keep", "status": "kept", "score": score},
+                )
                 evaluation_feedback = compile_safe_evaluator_feedback(
                     commands,
                     root,
@@ -763,6 +905,12 @@ async def run_autoresearch(workspace: str | Path, spec: ResearchSpec, evaluator:
                     samples=samples,
                 )
                 restore_files(root, best)
+                emit_event(
+                    event_sink,
+                    "decision",
+                    {"trial": number, "decision": "reject", "status": "no_improvement", "score": score},
+                )
+                emit_event(event_sink, "rollback", {"trial": number, "status": "restored_best", "reason": "no_improvement"})
         except EvaluatorExecutionError as exc:
             trial.status = "rejected"
             trial.reason = str(exc)
@@ -775,6 +923,12 @@ async def run_autoresearch(workspace: str | Path, spec: ResearchSpec, evaluator:
                 outcome=exc.outcome,
             )
             restore_files(root, best)
+            emit_event(
+                event_sink,
+                "decision",
+                {"trial": number, "decision": "reject", "status": exc.outcome},
+            )
+            emit_event(event_sink, "rollback", {"trial": number, "status": "restored_best", "reason": exc.outcome})
             try:
                 _assert_integrity(root, spec)
             except Exception:
@@ -796,6 +950,18 @@ async def run_autoresearch(workspace: str | Path, spec: ResearchSpec, evaluator:
             )
             evaluation_feedback = None
             restore_files(root, best)
+            emit_event(
+                event_sink,
+                "decision",
+                {
+                    "trial": number,
+                    "decision": "reject",
+                    "status": "exception",
+                    "error_type": type(exc).__name__[:96],
+                    "error_sha256": hashlib.sha256(trial.reason.encode()).hexdigest(),
+                },
+            )
+            emit_event(event_sink, "rollback", {"trial": number, "status": "restored_best", "reason": "exception"})
             try:
                 _assert_integrity(root, spec)
             except Exception:
@@ -824,7 +990,14 @@ async def run_autoresearch(workspace: str | Path, spec: ResearchSpec, evaluator:
     return ledger
 
 
-async def validate_autoresearch(workspace: str | Path, spec: ResearchSpec, ledger: TrialLedger, evaluator: Evaluator) -> ValidationReport:
+async def validate_autoresearch(
+    workspace: str | Path,
+    spec: ResearchSpec,
+    ledger: TrialLedger,
+    evaluator: Evaluator,
+    *,
+    event_sink: TrajectorySink | None = None,
+) -> ValidationReport:
     root = Path(workspace).resolve(strict=True)
     if spec.spec_sha256 != canonical_sha256(_spec_payload(spec)):
         raise ValueError("AutoResearch frozen spec hash mismatch")
@@ -838,16 +1011,54 @@ async def validate_autoresearch(workspace: str | Path, spec: ResearchSpec, ledge
     scores: list[float] = []
     reason = ""
     if candidate_intact and protected_intact:
-        for _ in range(spec.validation_runs):
+        for run_index in range(spec.validation_runs):
             result = await evaluator(command)
             results.append(result)
             if result.exit_code != 0:
                 reason = result.stderr or result.stdout or "validation command failed"
+                emit_event(
+                    event_sink,
+                    "hidden_validation",
+                    _command_event_payload(
+                        result,
+                        trial_number=ledger.completed_trials,
+                        run_number=run_index + 1,
+                        status="timeout" if result.exit_code == 124 else "failed",
+                        phase="validation",
+                    )
+                    | {"mode": mode},
+                )
                 continue
             try:
-                scores.append(parse_metric(result.stdout, spec.metric_key))
+                score = parse_metric(result.stdout, spec.metric_key)
             except ValueError as exc:
                 reason = str(exc)
+                emit_event(
+                    event_sink,
+                    "hidden_validation",
+                    _command_event_payload(
+                        result,
+                        trial_number=ledger.completed_trials,
+                        run_number=run_index + 1,
+                        status="metric_parse_failed",
+                        phase="validation",
+                    )
+                    | {"mode": mode},
+                )
+                continue
+            scores.append(score)
+            emit_event(
+                event_sink,
+                "hidden_validation",
+                _command_event_payload(
+                    result,
+                    trial_number=ledger.completed_trials,
+                    run_number=run_index + 1,
+                    status="passed",
+                    phase="validation",
+                )
+                | {"mode": mode, "score": score},
+            )
     candidate_intact = candidate_intact and hash_files(root, spec.editable_files) == ledger.best_candidate_files
     protected_intact = protected_intact and hash_files(root, spec.protected_files) == spec.frozen_files and workspace_fingerprint(root, spec.editable_files) == spec.frozen_workspace_sha256
     expected = ledger.holdout_baseline_score if mode == "hidden_holdout" else ledger.best_score
@@ -873,7 +1084,7 @@ async def validate_autoresearch(workspace: str | Path, spec: ResearchSpec, ledge
         reason = "protected or non-editable workspace files changed"
     elif not score_matches and not reason:
         reason = "fresh validation score did not satisfy the frozen acceptance rule"
-    return ValidationReport(
+    report = ValidationReport(
         spec_sha256=spec.spec_sha256,
         status="passed" if passed else "failed",
         validation_mode=mode,
@@ -894,3 +1105,19 @@ async def validate_autoresearch(workspace: str | Path, spec: ResearchSpec, ledge
         command_results=results,
         reason=reason,
     )
+    emit_event(
+        event_sink,
+        "hidden_validation",
+        {
+            "phase": "validation_summary",
+            "status": report.status,
+            "mode": report.validation_mode,
+            "observed_score": report.observed_score,
+            "passed_runs": report.passed_runs,
+            "failed_runs": report.failed_runs,
+            "candidate_intact": report.candidate_intact,
+            "protected_files_intact": report.protected_files_intact,
+            "report_sha256": evidence_sha256(report),
+        },
+    )
+    return report
