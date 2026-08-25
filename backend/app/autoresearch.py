@@ -14,6 +14,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from .evaluator_feedback import compile_safe_evaluator_feedback, sanitize_untrusted_diagnostic
+
 
 SPEC_VERSION = "autoresearch.spec/v1"
 LEDGER_VERSION = "autoresearch.ledger/v1"
@@ -110,6 +112,13 @@ class CommandResult(BaseModel):
     stdout: str = ""
     stderr: str = ""
     duration_ms: int = 0
+
+
+class EvaluatorExecutionError(RuntimeError):
+    def __init__(self, outcome: str, message: str, results: list[CommandResult]) -> None:
+        super().__init__(message)
+        self.outcome = outcome
+        self.results = results
 
 
 class CandidatePatch(BaseModel):
@@ -496,12 +505,19 @@ async def _evaluate(spec: ResearchSpec, evaluator: Evaluator, command: list[str]
             guarded = await evaluator(guard)
             results.append(guarded)
             if guarded.exit_code != 0:
-                raise RuntimeError(f"guard command failed: {guarded.stderr or guarded.stdout}")
+                if guarded.exit_code == 124:
+                    raise EvaluatorExecutionError("guard_timeout", "guard command timed out", results)
+                raise EvaluatorExecutionError("guard_command_failed", "guard command failed", results)
         result = await evaluator(selected)
         results.append(result)
         if result.exit_code != 0:
-            raise RuntimeError(f"evaluator command failed: {result.stderr or result.stdout}")
-        scores.append(parse_metric(result.stdout, spec.metric_key))
+            if result.exit_code == 124:
+                raise EvaluatorExecutionError("evaluator_timeout", "evaluator command timed out", results)
+            raise EvaluatorExecutionError("evaluator_command_failed", "evaluator command failed", results)
+        try:
+            scores.append(parse_metric(result.stdout, spec.metric_key))
+        except ValueError as exc:
+            raise EvaluatorExecutionError("metric_parse_failed", str(exc), results) from None
     return aggregate_scores(scores, spec.search_aggregation, spec.direction), scores, results
 
 
@@ -558,22 +574,6 @@ def _apply_candidate(root: Path, spec: ResearchSpec, proposal: CandidateProposal
         os.replace(temporary, path)
         records.append({**record, "after_sha256": sha256_file(path)})
     return records
-
-
-def evaluator_feedback(results: list[CommandResult], limit: int = 12_000) -> str:
-    chunks: list[str] = []
-    seen: set[str] = set()
-    for result in results:
-        for stream, value in (("stdout", result.stdout), ("stderr", result.stderr)):
-            content = value.strip()
-            if not content or content in seen:
-                continue
-            seen.add(content)
-            chunks.append(
-                f"command={json.dumps(result.command, ensure_ascii=False)} "
-                f"exit_code={result.exit_code} {stream}:\n{content}"
-            )
-    return "\n\n".join(chunks)[:limit]
 
 
 def objective_terms(objective: str) -> set[str]:
@@ -656,7 +656,12 @@ def editable_file_context(path: Path, objective: str, limit: int = EDITABLE_CONT
     }
 
 
-def proposal_context(root: Path, spec: ResearchSpec, ledger: TrialLedger, rejected_feedback: str = "") -> dict[str, Any]:
+def proposal_context(
+    root: Path,
+    spec: ResearchSpec,
+    ledger: TrialLedger,
+    evaluator_diagnostics: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     files = {
         relative: editable_file_context(_safe_existing_file(root, relative), spec.objective)
         for relative in spec.editable_files
@@ -668,7 +673,7 @@ def proposal_context(root: Path, spec: ResearchSpec, ledger: TrialLedger, reject
         "baseline_score": ledger.baseline_score,
         "best_score": ledger.best_score,
         "previous_trials": [trial.model_dump(mode="json", exclude={"command_results"}) for trial in ledger.trials[-4:]],
-        "rejected_feedback": rejected_feedback[:12_000],
+        "evaluator_diagnostics": evaluator_diagnostics,
     }
 
 
@@ -705,14 +710,14 @@ async def run_autoresearch(workspace: str | Path, spec: ResearchSpec, evaluator:
         ledger.finished_at = utc_now()
         raise
 
-    evaluation_feedback = ""
+    evaluation_feedback: dict[str, Any] | None = None
     for number in range(1, spec.max_trials + 1):
         if time.monotonic() - started >= spec.max_wall_seconds:
             ledger.stop_reason = "wall_time_budget_exhausted"
             break
         trial = ResearchTrial(number=number, status="running", decision="reject")
         try:
-            proposal = await proposer(proposal_context(root, spec, ledger, rejected_feedback=evaluation_feedback))
+            proposal = await proposer(proposal_context(root, spec, ledger, evaluator_diagnostics=evaluation_feedback))
             trial.diagnosis = proposal.diagnosis
             trial.hypothesis = proposal.hypothesis
             if proposal.status == "stop":
@@ -740,27 +745,56 @@ async def run_autoresearch(workspace: str | Path, spec: ResearchSpec, evaluator:
                 ledger.best_score = score
                 ledger.accepted_trials += 1
                 best = snapshot_files(root, spec.editable_files)
-                continuation = (
-                    f"target {spec.target_score!r} was not reached"
-                    if spec.target_score is not None
-                    else "the trial budget allows further improvement"
+                evaluation_feedback = compile_safe_evaluator_feedback(
+                    commands,
+                    root,
+                    outcome="candidate_kept_continue",
+                    score=score,
+                    samples=samples,
                 )
-                evaluation_feedback = (
-                    f"Candidate improved to {score:.8g}, but {continuation}. "
-                    f"Remaining public evaluator output:\n{evaluator_feedback(commands)}"
-                )[:12_000]
             else:
                 trial.status = "rejected"
                 trial.reason = f"{spec.metric_key} did not improve by required delta {spec.min_delta:.8g}"
-                evaluation_feedback = (
-                    f"{trial.reason}; samples={samples}; public evaluator output:\n{evaluator_feedback(commands)}\n"
-                    f"Rejected candidate: {proposal.model_dump_json()}"
-                )[:12_000]
+                evaluation_feedback = compile_safe_evaluator_feedback(
+                    commands,
+                    root,
+                    outcome="candidate_rejected_no_improvement",
+                    score=score,
+                    samples=samples,
+                )
                 restore_files(root, best)
+        except EvaluatorExecutionError as exc:
+            trial.status = "rejected"
+            trial.reason = str(exc)
+            trial.command_results = exc.results
+            ledger.command_runs += len(exc.results)
+            ledger.command_duration_ms += sum(item.duration_ms for item in exc.results)
+            evaluation_feedback = compile_safe_evaluator_feedback(
+                exc.results,
+                root,
+                outcome=exc.outcome,
+            )
+            restore_files(root, best)
+            try:
+                _assert_integrity(root, spec)
+            except Exception:
+                restore_immutable_workspace(root, spec.editable_files, immutable_original)
+                restore_files(root, original)
+                ledger.status = "failed"
+                ledger.stop_reason = "integrity_failure"
+                trial.decision = "abort"
+                trial.finished_at = utc_now()
+                ledger.trials.append(trial)
+                ledger.finished_at = utc_now()
+                raise
         except Exception as exc:
             trial.status = "rejected"
-            trial.reason = f"{type(exc).__name__}: {exc}".rstrip(": ")[:4000]
-            evaluation_feedback = trial.reason
+            trial.reason = sanitize_untrusted_diagnostic(
+                f"{type(exc).__name__}: {exc}".rstrip(": "),
+                root,
+                4000,
+            )
+            evaluation_feedback = None
             restore_files(root, best)
             try:
                 _assert_integrity(root, spec)
