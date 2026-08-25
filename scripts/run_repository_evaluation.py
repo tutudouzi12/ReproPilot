@@ -34,6 +34,7 @@ from app.autoresearch import (  # noqa: E402
     run_autoresearch,
     validate_autoresearch,
 )
+from app.trajectory import TrajectoryManifest, TrajectoryRecorder, finalize_trajectory, write_trajectory_artifacts  # noqa: E402
 
 
 TASK_VERSION = "repropilot.repository-evaluation-task/v1"
@@ -430,6 +431,10 @@ def cost_record(usage: ModelUsage, attempted_requests: int, args: argparse.Names
     }
 
 
+def failure_record(error: str) -> dict[str, str] | None:
+    return {"error": error} if error else None
+
+
 def classify_outcome(ledger: TrialLedger | None, report: ValidationReport | None, error: str) -> str:
     if error:
         return "run_failed"
@@ -541,6 +546,8 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
     responses: list[dict[str, Any]] = []
     ledger: TrialLedger | None = None
     report: ValidationReport | None = None
+    trajectory = TrajectoryRecorder()
+    trajectory_manifest: TrajectoryManifest | None = None
     run_error = ""
     initial_sources: dict[str, str] = {}
     final_sources: dict[str, str] = {}
@@ -554,9 +561,9 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
         evaluator = LocalRepositoryEvaluator(workspace, python, float(task.get("command_timeout_seconds", 60)))
         proposer = live_proposer(client, usage, args.max_live_requests, responses)
         try:
-            ledger = await run_autoresearch(workspace, frozen_spec, evaluator, proposer)
+            ledger = await run_autoresearch(workspace, frozen_spec, evaluator, proposer, event_sink=trajectory.emit)
             ledger.model_usage = usage
-            report = await validate_autoresearch(workspace, frozen_spec, ledger, evaluator)
+            report = await validate_autoresearch(workspace, frozen_spec, ledger, evaluator, event_sink=trajectory.emit)
         except Exception as exc:
             run_error = f"{type(exc).__name__}: {exc}"
         final_sources = editable_sources(workspace, frozen_spec.editable_files)
@@ -616,7 +623,7 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
             "protected_files_intact": report.protected_files_intact if report is not None else False,
             "reason": report.reason if report is not None else run_error,
         },
-        "failure": {"error": run_error},
+        "failure": failure_record(run_error),
         "boundaries": [
             *task["boundaries"],
             "The candidate was executed by local subprocess with a stripped environment, not a network-isolated container.",
@@ -631,6 +638,23 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
     response_payload = sanitize_workspace_paths(responses, workspace_path)
     ledger_payload = sanitize_workspace_paths(ledger.model_dump(mode="json"), workspace_path) if ledger is not None else None
     report_payload = sanitize_workspace_paths(report.model_dump(mode="json"), workspace_path) if report is not None else None
+    if ledger_payload is not None and report_payload is not None:
+        trajectory_manifest = finalize_trajectory(
+            trajectory,
+            spec_sha256=frozen_spec.spec_sha256,
+            ledger=ledger_payload,
+            validation=report_payload,
+            terminal_status=report.status,
+        )
+    elif trajectory.events:
+        trajectory_manifest = finalize_trajectory(
+            trajectory,
+            spec_sha256=frozen_spec.spec_sha256,
+            ledger=ledger_payload,
+            validation=report_payload,
+            failure=result["failure"],
+            terminal_status=outcome,
+        )
 
     output.mkdir(parents=True, exist_ok=False)
     write_editable_sources(output, "initial-files", initial_sources)
@@ -643,6 +667,8 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
         write_json(output / "trial-ledger.json", ledger_payload)
     if report_payload is not None:
         write_json(output / "validation-report.json", report_payload)
+    if trajectory_manifest is not None:
+        write_trajectory_artifacts(output, trajectory, trajectory_manifest)
     rendered_report = sanitize_workspace_paths(render_report(result, ledger, task), workspace_path)
     (output / "README.md").write_text(rendered_report, encoding="utf-8", newline="\n")
     result["artifact_sha256"] = {

@@ -242,7 +242,7 @@ class Planner:
             "research_coding_agent",
             [install.id],
             ["workspace_path", "repo_manifest", "prepared_runtime", "research_spec"],
-            ["research_trial_ledger", "research_best_candidate", "research_best_metrics"],
+            ["research_trial_ledger", "research_best_candidate", "research_best_metrics", "research_trajectory_open"],
             context,
             False,
         )
@@ -252,8 +252,8 @@ class Planner:
             "autoresearch_validate",
             "research_coding_agent",
             [run.id],
-            ["workspace_path", "prepared_runtime", "research_spec", "research_trial_ledger", "research_best_candidate"],
-            ["research_validation_report", "validated_research_metrics"],
+            ["workspace_path", "prepared_runtime", "research_spec", "research_trial_ledger", "research_best_candidate", "research_trajectory_open"],
+            ["research_validation_report", "validated_research_metrics", "research_trajectory_jsonl", "research_trajectory_manifest"],
             context,
             False,
         )
