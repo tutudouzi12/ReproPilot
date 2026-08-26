@@ -313,6 +313,68 @@ def score_summary(values: list[float]) -> dict[str, Any]:
     }
 
 
+def incomplete_usage_evidence(payload: dict[str, Any], request_cap: int, ordinal: int) -> dict[str, int | bool]:
+    usage = payload.get("usage")
+    if usage is None:
+        return {
+            "attempted_requests": 0,
+            "completed_responses": 0,
+            "usage_reports": 0,
+            "reported_tokens": 0,
+            "maximum_unobserved_attempts": request_cap,
+            "usage_unknown": True,
+        }
+    if not isinstance(usage, dict) or usage.get("status") not in {"partial", "unknown"}:
+        raise ValueError(f"repeated benchmark incomplete usage metadata is invalid at cell {ordinal}")
+    if usage["status"] == "unknown":
+        nullable = (
+            "attempted_requests",
+            "completed_responses",
+            "usage_reports",
+            "prompt_tokens",
+            "completion_tokens",
+            "reported_tokens",
+        )
+        if any(usage.get(key) is not None for key in nullable) or usage.get("maximum_unobserved_attempts") != request_cap:
+            raise ValueError(f"repeated benchmark unknown usage bounds are invalid at cell {ordinal}")
+        return {
+            "attempted_requests": 0,
+            "completed_responses": 0,
+            "usage_reports": 0,
+            "reported_tokens": 0,
+            "maximum_unobserved_attempts": request_cap,
+            "usage_unknown": True,
+        }
+    try:
+        counters = {
+            key: int(usage[key])
+            for key in (
+                "attempted_requests",
+                "completed_responses",
+                "usage_reports",
+                "prompt_tokens",
+                "completion_tokens",
+                "reported_tokens",
+            )
+        }
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValueError(f"repeated benchmark partial usage counters are invalid at cell {ordinal}") from exc
+    if (
+        any(value < 0 for value in counters.values())
+        or counters["attempted_requests"] > request_cap
+        or counters["completed_responses"] > counters["attempted_requests"]
+        or counters["usage_reports"] > counters["completed_responses"]
+        or counters["reported_tokens"] != counters["prompt_tokens"] + counters["completion_tokens"]
+        or usage.get("maximum_unobserved_attempts") != 0
+    ):
+        raise ValueError(f"repeated benchmark partial usage bounds are invalid at cell {ordinal}")
+    return {
+        **{key: counters[key] for key in ("attempted_requests", "completed_responses", "usage_reports", "reported_tokens")},
+        "maximum_unobserved_attempts": 0,
+        "usage_unknown": False,
+    }
+
+
 def build_repeated_matrix(campaign_path: Path, run_path: Path) -> dict[str, Any]:
     campaign, resolved_campaign, tasks = load_campaign(campaign_path)
     resolved_run = run_path.resolve(strict=True)
@@ -331,6 +393,8 @@ def build_repeated_matrix(campaign_path: Path, run_path: Path) -> dict[str, Any]
     completed_responses_total = 0
     usage_reports_total = 0
     reported_tokens = 0
+    maximum_unobserved_attempts = 0
+    incomplete_cells_with_unknown_usage = 0
     cost_amounts: list[float] = []
     cost_currency = ""
     for cell in run.cells:
@@ -343,6 +407,13 @@ def build_repeated_matrix(campaign_path: Path, run_path: Path) -> dict[str, Any]
             if failure_payload.get("classification") != cell.classification:
                 raise ValueError(f"repeated benchmark failure classification mismatch at cell {cell.ordinal}")
             incomplete_distribution[cell.classification] += 1
+            incomplete_usage = incomplete_usage_evidence(failure_payload, campaign.max_live_requests_per_run, cell.ordinal)
+            attempted_requests += int(incomplete_usage["attempted_requests"])
+            completed_responses_total += int(incomplete_usage["completed_responses"])
+            usage_reports_total += int(incomplete_usage["usage_reports"])
+            reported_tokens += int(incomplete_usage["reported_tokens"])
+            maximum_unobserved_attempts += int(incomplete_usage["maximum_unobserved_attempts"])
+            incomplete_cells_with_unknown_usage += int(bool(incomplete_usage["usage_unknown"]))
             continue
         result = validate_cell_result(campaign, run, run_root, cell, tasks[cell.task_id])
         results[(cell.task_id, cell.repetition)] = result
@@ -436,9 +507,16 @@ def build_repeated_matrix(campaign_path: Path, run_path: Path) -> dict[str, Any]
         "incomplete_distribution": dict(sorted(incomplete_distribution.items())),
         "usage": {
             "attempted_requests": attempted_requests,
+            "known_attempted_requests": attempted_requests,
             "completed_responses": completed_responses_total,
             "usage_reports": usage_reports_total,
             "reported_tokens": reported_tokens,
+            "maximum_unobserved_attempts": maximum_unobserved_attempts,
+            "attempted_request_bounds": {
+                "minimum": attempted_requests,
+                "maximum": attempted_requests + maximum_unobserved_attempts,
+            },
+            "incomplete_cells_with_unknown_usage": incomplete_cells_with_unknown_usage,
             "known_token_derived_cost": {
                 "currency": cost_currency or None,
                 "amount": sum(cost_amounts) if cost_amounts else None,
@@ -451,5 +529,6 @@ def build_repeated_matrix(campaign_path: Path, run_path: Path) -> dict[str, Any]
             "All rates use the frozen planned denominator; incomplete cells are not silently dropped.",
             "Automated contract pass is not a manual acceptance or upstream-readiness claim.",
             "Known cost is token-derived from retained run metadata and is not a billing receipt.",
+            "Usage from incomplete cells is counted when checkpointed; otherwise request bounds retain the frozen per-cell cap instead of treating unknown usage as zero.",
         ],
     }
