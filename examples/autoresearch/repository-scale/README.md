@@ -15,9 +15,10 @@ These tasks exercise repository acquisition and real project code. They remain b
 | [`more-itertools-strict-counted-sample`](more-itertools-strict-counted-sample/) | Historical merged PR [#944](https://github.com/more-itertools/more-itertools/pull/944) | `more-itertools/more-itertools@18225d856665bfc3bfdfcdbfa585290f92645daf` | public `4/6`, hidden `1/6` | Counted-sampling exception flow plus 825 upstream tests |
 | [`flask-ipv6-host-parsing`](flask-ipv6-host-parsing/) | Historical merged PR [#6096](https://github.com/pallets/flask/pull/6096) | `pallets/flask@514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b` | public `2/4`, hidden `2/5` | Two production modules plus 491 upstream tests |
 | [`p-queue-abort-listener-cleanup`](p-queue-abort-listener-cleanup/) | Historical merged PR [#235](https://github.com/sindresorhus/p-queue/pull/235) | `sindresorhus/p-queue@5e400174a89395a44399713191b76544cf743fe5` | public `2/4`, hidden `2/5` | TypeScript async cleanup plus 129 functional tests and type checks |
+| [`commons-codec-phonetic-boundaries`](commons-codec-phonetic-boundaries/) | Historical CODEC-315 repair | `apache/commons-codec@41871c2cc31ebab1865736c61026d193409b30b5` | public `2/4`, hidden `2/5` | One Java module plus the full Maven test phase |
 | [`more-itertools-strict-counted-sample-adversarial`](more-itertools-strict-counted-sample-adversarial/) | Candidate-informed follow-up | Same pinned `more-itertools` base | public `4/6`, hidden `2/10` | Lazy-iterator non-regression; excluded from independent repository counts |
 
-The pilot therefore contains six tasks across five unique repositories. The adversarial follow-up is retained to show how manual review hardened a missed boundary; it is not an independent repository sample and must remain separately labeled in aggregates.
+The pilot therefore contains seven tasks, six independent tasks, and six unique repositories. The adversarial follow-up is retained to show how manual review hardened a missed boundary; it is not an independent repository sample and must remain separately labeled in aggregates.
 
 ## Baseline contract
 
@@ -50,6 +51,8 @@ py -3.11 scripts\run_repository_benchmark_preflight.py `
   --python flask-ipv6-host-parsing=<flask-python> `
   --checkout p-queue-abort-listener-cleanup=<p-queue-checkout> `
   --python p-queue-abort-listener-cleanup=<python> `
+  --checkout commons-codec-phonetic-boundaries=<commons-codec-checkout> `
+  --python commons-codec-phonetic-boundaries=<python> `
   --checkout more-itertools-strict-counted-sample-adversarial=<more-itertools-checkout> `
   --python more-itertools-strict-counted-sample-adversarial=<more-itertools-python> `
   --output <preflight-report.json>
@@ -88,3 +91,18 @@ py -3.11 scripts\build_repository_benchmark_report.py `
 Strict mode verifies the benchmark contract hashes, selected result and review hashes, result artifact hashes, repository identity, clean harness state, normalized review decision, one-primary-run-per-independent-task rule, and complete selection of every retained result. Missing reviews, tampered artifacts, or unselected runs fail report generation.
 
 The report separates post-development selected-run metrics from chronological first-run metrics. This exposes selection bias instead of presenting the selected `pass@1` value as a general model capability estimate.
+
+## Controlled repeated campaign
+
+[`repeated-benchmark.json`](repeated-benchmark.json) freezes a six-task by three-repetition round-robin campaign. The sanitized [`repeated-benchmark-results.json`](repeated-benchmark-results.json) and readable [`REPEATED_BENCHMARK_REPORT.md`](REPEATED_BENCHMARK_REPORT.md) publish the retained campaign as 18/18 recorded cells, 15/18 completed cells, 9/18 automated contract passes, three `runner_failed_without_result` cells, and a 30-39 attempted-request bound.
+
+Regenerate the readable report from the checked-in safe matrix without model access or private source artifacts:
+
+```powershell
+py -3.11 scripts\build_repeated_benchmark_public_report.py `
+  --matrix examples\autoresearch\repository-scale\repeated-benchmark-results.json `
+  --markdown-output examples\autoresearch\repository-scale\REPEATED_BENCHMARK_REPORT.md `
+  --retained-original-matrix-sha256 c03d4ba601a9a9782c7efc5d5c822d8678d304c62d26c0a56bc4772e3596857b
+```
+
+The public matrix excludes credentials, prompts, model responses, raw subprocess streams, errors, candidate source, and local absolute paths. It retains only bounded facts, classifications, relative evidence references, and SHA-256 commitments. The original campaign and its original matrix remain unchanged; the published rebuilt matrix adds bounded unknown usage instead of treating the three incomplete cells as zero requests.

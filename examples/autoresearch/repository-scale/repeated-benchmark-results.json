@@ -1,0 +1,437 @@
+{
+  "version": "repropilot.repeated-repository-benchmark-matrix/v1",
+  "campaign_id": "repository-scale-repeat-3-v1",
+  "campaign_sha256": "4d7cce23a2de3f3c76228e8cde9ab5f32366d5af7b70131eac2380c547d07323",
+  "run_manifest_sha256": "e0fc57733538adef2756923628829c378656027a4e5f2d6b41930e32f320ba75",
+  "benchmark_id": "repository-scale-pilot-v1",
+  "benchmark_sha256": "b12bfa95f51c8bbf7e3e875d810f08548de0762de5caaa014c9d015af494173c",
+  "harness_revision": "65e33cc6c0f98f897571b16297c856d2f8e77285",
+  "model": {
+    "provider": "dashscope.aliyuncs.com",
+    "name": "qwen3-coder-plus"
+  },
+  "execution_order": "round_robin",
+  "preflight_sha256": "0d392cde312efac697b47a4910077acc0745c52908cffdf03ad6cda39a982154",
+  "planned": {
+    "task_count": 6,
+    "repetitions_per_task": 3,
+    "cell_count": 18
+  },
+  "completion": {
+    "status": "incomplete",
+    "numerator": 15,
+    "denominator": 18,
+    "rate": 0.8333333333333334,
+    "recorded_cell_count": 18
+  },
+  "automated_cell_pass_rate": {
+    "numerator": 9,
+    "denominator": 18,
+    "rate": 0.5
+  },
+  "first_repetition_pass_rate": {
+    "numerator": 3,
+    "denominator": 6,
+    "rate": 0.5
+  },
+  "task_all_repetitions_pass_rate": {
+    "numerator": 3,
+    "denominator": 6,
+    "rate": 0.5
+  },
+  "task_at_least_one_pass_rate": {
+    "numerator": 3,
+    "denominator": 6,
+    "rate": 0.5
+  },
+  "outcome_distribution": {
+    "candidate_stopped": 4,
+    "hidden_validation_failed": 2,
+    "validation_passed": 9
+  },
+  "incomplete_distribution": {
+    "runner_failed_without_result": 3
+  },
+  "usage": {
+    "attempted_requests": 30,
+    "known_attempted_requests": 30,
+    "completed_responses": 28,
+    "usage_reports": 28,
+    "reported_tokens": 205683,
+    "maximum_unobserved_attempts": 9,
+    "attempted_request_bounds": {
+      "minimum": 30,
+      "maximum": 39
+    },
+    "incomplete_cells_with_unknown_usage": 3,
+    "known_token_derived_cost": {
+      "currency": null,
+      "amount": null,
+      "cells_with_calculated_cost": 0
+    }
+  },
+  "cells": [
+    {
+      "ordinal": 1,
+      "task_id": "rank-bm25-boundary-robustness",
+      "repetition": 1,
+      "status": "completed",
+      "result": "cells/001-rank-bm25-boundary-robustness-r1/artifact/result.json",
+      "result_sha256": "27648949354b2610bb6b9dd36bcf2275a200325a9158aa52c31b0ee14be4c437",
+      "classification": "candidate_stopped",
+      "failure": null,
+      "failure_sha256": null
+    },
+    {
+      "ordinal": 2,
+      "task_id": "humanize-naturalsize-rounding",
+      "repetition": 1,
+      "status": "completed",
+      "result": "cells/002-humanize-naturalsize-rounding-r1/artifact/result.json",
+      "result_sha256": "c4edf72a4bbd7300c69b8bedc9cfc0052c543609e8f25d904e06b7f96842a339",
+      "classification": "validation_passed",
+      "failure": null,
+      "failure_sha256": null
+    },
+    {
+      "ordinal": 3,
+      "task_id": "more-itertools-strict-counted-sample",
+      "repetition": 1,
+      "status": "completed",
+      "result": "cells/003-more-itertools-strict-counted-sample-r1/artifact/result.json",
+      "result_sha256": "7fed445bd3448bd4d854c1b888527647e7a5db8e5ec47fe3b0b72bd0bba9939f",
+      "classification": "validation_passed",
+      "failure": null,
+      "failure_sha256": null
+    },
+    {
+      "ordinal": 4,
+      "task_id": "flask-ipv6-host-parsing",
+      "repetition": 1,
+      "status": "completed",
+      "result": "cells/004-flask-ipv6-host-parsing-r1/artifact/result.json",
+      "result_sha256": "9b77bde768ea1ed4f0f5c43d395e06faa4eb220b9cb234be9f6e3d08d7079346",
+      "classification": "validation_passed",
+      "failure": null,
+      "failure_sha256": null
+    },
+    {
+      "ordinal": 5,
+      "task_id": "p-queue-abort-listener-cleanup",
+      "repetition": 1,
+      "status": "incomplete",
+      "result": null,
+      "result_sha256": null,
+      "classification": "runner_failed_without_result",
+      "failure": "cells/005-p-queue-abort-listener-cleanup-r1/failure.json",
+      "failure_sha256": "957a3cd99994e36e934c664e3a8b1b1dfbbdc888c88cd120dee1e0ff2b5d72a9"
+    },
+    {
+      "ordinal": 6,
+      "task_id": "commons-codec-phonetic-boundaries",
+      "repetition": 1,
+      "status": "completed",
+      "result": "cells/006-commons-codec-phonetic-boundaries-r1/artifact/result.json",
+      "result_sha256": "bc2ba22361e6e7a1d82699595043a82242ba458c1a067fad7189be73e0eaf729",
+      "classification": "candidate_stopped",
+      "failure": null,
+      "failure_sha256": null
+    },
+    {
+      "ordinal": 7,
+      "task_id": "rank-bm25-boundary-robustness",
+      "repetition": 2,
+      "status": "completed",
+      "result": "cells/007-rank-bm25-boundary-robustness-r2/artifact/result.json",
+      "result_sha256": "ef3504fcc7006efe4fabeec3f9bce098b25354570cc1998e0b6b27741b052c0a",
+      "classification": "hidden_validation_failed",
+      "failure": null,
+      "failure_sha256": null
+    },
+    {
+      "ordinal": 8,
+      "task_id": "humanize-naturalsize-rounding",
+      "repetition": 2,
+      "status": "completed",
+      "result": "cells/008-humanize-naturalsize-rounding-r2/artifact/result.json",
+      "result_sha256": "858bcc8420999892244430637601b9260d9d616b640e64b6508048d3296fca27",
+      "classification": "validation_passed",
+      "failure": null,
+      "failure_sha256": null
+    },
+    {
+      "ordinal": 9,
+      "task_id": "more-itertools-strict-counted-sample",
+      "repetition": 2,
+      "status": "completed",
+      "result": "cells/009-more-itertools-strict-counted-sample-r2/artifact/result.json",
+      "result_sha256": "3953311ef48651c46b26bc027a8efef6ddc71de95f057981b80d75764460b4f7",
+      "classification": "validation_passed",
+      "failure": null,
+      "failure_sha256": null
+    },
+    {
+      "ordinal": 10,
+      "task_id": "flask-ipv6-host-parsing",
+      "repetition": 2,
+      "status": "completed",
+      "result": "cells/010-flask-ipv6-host-parsing-r2/artifact/result.json",
+      "result_sha256": "3f4f4329233a8a16a5196cb0f3b4b5ab45a4f8f1e096c9d21ff3de35b4a25383",
+      "classification": "validation_passed",
+      "failure": null,
+      "failure_sha256": null
+    },
+    {
+      "ordinal": 11,
+      "task_id": "p-queue-abort-listener-cleanup",
+      "repetition": 2,
+      "status": "incomplete",
+      "result": null,
+      "result_sha256": null,
+      "classification": "runner_failed_without_result",
+      "failure": "cells/011-p-queue-abort-listener-cleanup-r2/failure.json",
+      "failure_sha256": "5fca5c0f615dffbff7402d27a8dd229d231c5a415577cbf23e2d0d5d21768631"
+    },
+    {
+      "ordinal": 12,
+      "task_id": "commons-codec-phonetic-boundaries",
+      "repetition": 2,
+      "status": "completed",
+      "result": "cells/012-commons-codec-phonetic-boundaries-r2/artifact/result.json",
+      "result_sha256": "9ffb197cc2978be13b9fc264e3e28c8ce96771dd4c6764af6b51f825967f936e",
+      "classification": "hidden_validation_failed",
+      "failure": null,
+      "failure_sha256": null
+    },
+    {
+      "ordinal": 13,
+      "task_id": "rank-bm25-boundary-robustness",
+      "repetition": 3,
+      "status": "completed",
+      "result": "cells/013-rank-bm25-boundary-robustness-r3/artifact/result.json",
+      "result_sha256": "0bc04f10f6c3cdebf21629a8399f65f433e740a33a27a081dd29fb37b2b1158d",
+      "classification": "candidate_stopped",
+      "failure": null,
+      "failure_sha256": null
+    },
+    {
+      "ordinal": 14,
+      "task_id": "humanize-naturalsize-rounding",
+      "repetition": 3,
+      "status": "completed",
+      "result": "cells/014-humanize-naturalsize-rounding-r3/artifact/result.json",
+      "result_sha256": "10f414f2c94c77e821db11701dc78ea301cc55192cb4cfeabcfa085bd2fd845c",
+      "classification": "validation_passed",
+      "failure": null,
+      "failure_sha256": null
+    },
+    {
+      "ordinal": 15,
+      "task_id": "more-itertools-strict-counted-sample",
+      "repetition": 3,
+      "status": "completed",
+      "result": "cells/015-more-itertools-strict-counted-sample-r3/artifact/result.json",
+      "result_sha256": "0d0fef93b692e03a26c4c6681d2e604e15ede3c39946d54f7c064baf59983223",
+      "classification": "validation_passed",
+      "failure": null,
+      "failure_sha256": null
+    },
+    {
+      "ordinal": 16,
+      "task_id": "flask-ipv6-host-parsing",
+      "repetition": 3,
+      "status": "completed",
+      "result": "cells/016-flask-ipv6-host-parsing-r3/artifact/result.json",
+      "result_sha256": "72e08d0876c3db06766a284555230372996dc5d3f12ad8c34a5da7ec0b5f2a75",
+      "classification": "validation_passed",
+      "failure": null,
+      "failure_sha256": null
+    },
+    {
+      "ordinal": 17,
+      "task_id": "p-queue-abort-listener-cleanup",
+      "repetition": 3,
+      "status": "incomplete",
+      "result": null,
+      "result_sha256": null,
+      "classification": "runner_failed_without_result",
+      "failure": "cells/017-p-queue-abort-listener-cleanup-r3/failure.json",
+      "failure_sha256": "8524dbe688dd997e4d991639f4ae3a6404a1bb14c32de75b97c4c70552bd5e44"
+    },
+    {
+      "ordinal": 18,
+      "task_id": "commons-codec-phonetic-boundaries",
+      "repetition": 3,
+      "status": "completed",
+      "result": "cells/018-commons-codec-phonetic-boundaries-r3/artifact/result.json",
+      "result_sha256": "6be8456bfa0f68e6ef82674140e76bb091e6cadd02a2c881ca57da02cd673739",
+      "classification": "candidate_stopped",
+      "failure": null,
+      "failure_sha256": null
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "rank-bm25-boundary-robustness",
+      "planned_repetitions": 3,
+      "completed_repetitions": 3,
+      "automated_passes": 0,
+      "automated_pass_rate": {
+        "numerator": 0,
+        "denominator": 3,
+        "rate": 0.0
+      },
+      "all_repetitions_passed": false,
+      "at_least_one_passed": false,
+      "first_repetition_passed": false,
+      "hidden_score": {
+        "count": 3,
+        "mean": 0.3333333333333333,
+        "stddev": 0.11785113019775792,
+        "minimum": 0.25,
+        "maximum": 0.5
+      },
+      "outcomes": [
+        "candidate_stopped",
+        "hidden_validation_failed",
+        "candidate_stopped"
+      ]
+    },
+    {
+      "task_id": "humanize-naturalsize-rounding",
+      "planned_repetitions": 3,
+      "completed_repetitions": 3,
+      "automated_passes": 3,
+      "automated_pass_rate": {
+        "numerator": 3,
+        "denominator": 3,
+        "rate": 1.0
+      },
+      "all_repetitions_passed": true,
+      "at_least_one_passed": true,
+      "first_repetition_passed": true,
+      "hidden_score": {
+        "count": 3,
+        "mean": 1.0,
+        "stddev": 0.0,
+        "minimum": 1.0,
+        "maximum": 1.0
+      },
+      "outcomes": [
+        "validation_passed",
+        "validation_passed",
+        "validation_passed"
+      ]
+    },
+    {
+      "task_id": "more-itertools-strict-counted-sample",
+      "planned_repetitions": 3,
+      "completed_repetitions": 3,
+      "automated_passes": 3,
+      "automated_pass_rate": {
+        "numerator": 3,
+        "denominator": 3,
+        "rate": 1.0
+      },
+      "all_repetitions_passed": true,
+      "at_least_one_passed": true,
+      "first_repetition_passed": true,
+      "hidden_score": {
+        "count": 3,
+        "mean": 1.0,
+        "stddev": 0.0,
+        "minimum": 1.0,
+        "maximum": 1.0
+      },
+      "outcomes": [
+        "validation_passed",
+        "validation_passed",
+        "validation_passed"
+      ]
+    },
+    {
+      "task_id": "flask-ipv6-host-parsing",
+      "planned_repetitions": 3,
+      "completed_repetitions": 3,
+      "automated_passes": 3,
+      "automated_pass_rate": {
+        "numerator": 3,
+        "denominator": 3,
+        "rate": 1.0
+      },
+      "all_repetitions_passed": true,
+      "at_least_one_passed": true,
+      "first_repetition_passed": true,
+      "hidden_score": {
+        "count": 3,
+        "mean": 1.0,
+        "stddev": 0.0,
+        "minimum": 1.0,
+        "maximum": 1.0
+      },
+      "outcomes": [
+        "validation_passed",
+        "validation_passed",
+        "validation_passed"
+      ]
+    },
+    {
+      "task_id": "p-queue-abort-listener-cleanup",
+      "planned_repetitions": 3,
+      "completed_repetitions": 0,
+      "automated_passes": 0,
+      "automated_pass_rate": {
+        "numerator": 0,
+        "denominator": 3,
+        "rate": 0.0
+      },
+      "all_repetitions_passed": null,
+      "at_least_one_passed": false,
+      "first_repetition_passed": false,
+      "hidden_score": {
+        "count": 0,
+        "mean": null,
+        "stddev": null,
+        "minimum": null,
+        "maximum": null
+      },
+      "outcomes": [
+        "incomplete",
+        "incomplete",
+        "incomplete"
+      ]
+    },
+    {
+      "task_id": "commons-codec-phonetic-boundaries",
+      "planned_repetitions": 3,
+      "completed_repetitions": 3,
+      "automated_passes": 0,
+      "automated_pass_rate": {
+        "numerator": 0,
+        "denominator": 3,
+        "rate": 0.0
+      },
+      "all_repetitions_passed": false,
+      "at_least_one_passed": false,
+      "first_repetition_passed": false,
+      "hidden_score": {
+        "count": 3,
+        "mean": 0.4000000000000001,
+        "stddev": 0.0,
+        "minimum": 0.4,
+        "maximum": 0.4
+      },
+      "outcomes": [
+        "candidate_stopped",
+        "hidden_validation_failed",
+        "candidate_stopped"
+      ]
+    }
+  ],
+  "boundaries": [
+    "All rates use the frozen planned denominator; incomplete cells are not silently dropped.",
+    "Automated contract pass is not a manual acceptance or upstream-readiness claim.",
+    "Known cost is token-derived from retained run metadata and is not a billing receipt.",
+    "Usage from incomplete cells is counted when checkpointed; otherwise request bounds retain the frozen per-cell cap instead of treating unknown usage as zero."
+  ]
+}
