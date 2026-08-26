@@ -17,6 +17,7 @@ if str(BACKEND_ROOT) not in sys.path:
     sys.path.insert(0, str(BACKEND_ROOT))
 
 from app.agents import LLMClient  # noqa: E402
+from app.evaluator_feedback import sanitize_untrusted_diagnostic  # noqa: E402
 from app.repeated_benchmark import (  # noqa: E402
     RepeatedCell,
     RepeatedRun,
@@ -32,6 +33,8 @@ from app.repeated_benchmark import (  # noqa: E402
 
 SINGLE_RUNNER = ROOT / "scripts" / "run_repository_evaluation.py"
 PREFLIGHT_RUNNER = ROOT / "scripts" / "run_repository_benchmark_preflight.py"
+RUNNER_STATE_VERSION = "repropilot.repository-evaluation-runner-state/v1"
+FAILURE_DIAGNOSTIC_LIMIT = 1200
 
 
 def git(*arguments: str) -> str:
@@ -98,6 +101,89 @@ def stream_fingerprint(stdout: str, stderr: str, exit_code: int) -> dict[str, An
     }
 
 
+def unknown_usage(request_cap: int) -> dict[str, Any]:
+    return {
+        "status": "unknown",
+        "attempted_requests": None,
+        "completed_responses": None,
+        "usage_reports": None,
+        "prompt_tokens": None,
+        "completion_tokens": None,
+        "reported_tokens": None,
+        "maximum_unobserved_attempts": request_cap,
+    }
+
+
+def partial_usage_from_runner_state(path: Path, request_cap: int, provider: str, model: str) -> dict[str, Any] | None:
+    try:
+        state = read_object(path)
+        if (
+            state.get("version") != RUNNER_STATE_VERSION
+            or state.get("provider") != provider
+            or state.get("model") != model
+            or state.get("request_cap") != request_cap
+        ):
+            return None
+        counters = {
+            key: int(state[key])
+            for key in (
+                "attempted_requests",
+                "completed_responses",
+                "usage_reports",
+                "prompt_tokens",
+                "completion_tokens",
+                "reported_tokens",
+            )
+        }
+    except (KeyError, TypeError, ValueError, OSError, json.JSONDecodeError):
+        return None
+    if (
+        any(value < 0 for value in counters.values())
+        or counters["attempted_requests"] > request_cap
+        or counters["completed_responses"] > counters["attempted_requests"]
+        or counters["usage_reports"] > counters["completed_responses"]
+        or counters["reported_tokens"] != counters["prompt_tokens"] + counters["completion_tokens"]
+    ):
+        return None
+    return {"status": "partial", **counters, "maximum_unobserved_attempts": 0}
+
+
+def runner_failure_record(
+    stdout: str,
+    stderr: str,
+    exit_code: int,
+    *,
+    runner_state: Path,
+    output: Path,
+    request_cap: int,
+    provider: str,
+    model: str,
+) -> dict[str, Any]:
+    failure: dict[str, Any] = {
+        "classification": "runner_failed_without_result",
+        "trust": "untrusted_subprocess_data",
+        **stream_fingerprint(stdout, stderr, exit_code),
+    }
+    diagnostics: dict[str, str] = {}
+    for name, value in (("stdout", stdout), ("stderr", stderr)):
+        if value:
+            sanitized = sanitize_untrusted_diagnostic(value, ROOT, FAILURE_DIAGNOSTIC_LIMIT)
+            if sanitized:
+                diagnostics[name] = sanitized
+    if diagnostics:
+        failure["safe_diagnostic"] = diagnostics
+    if runner_state.is_file():
+        failure["runner_state"] = runner_state.relative_to(output).as_posix()
+        failure["runner_state_sha256"] = sha256_file(runner_state)
+        usage = partial_usage_from_runner_state(runner_state, request_cap, provider, model)
+        failure["runner_state_status"] = "valid" if usage is not None else "invalid"
+        failure["usage"] = usage if usage is not None else unknown_usage(request_cap)
+    else:
+        failure["runner_state_status"] = "missing"
+        failure["usage"] = unknown_usage(request_cap)
+    return failure
+
+
 def run_preflight(
     campaign_path: Path,
     task_ids: list[str],
@@ -120,6 +206,7 @@ def single_run_command(
     checkout: Path,
     python: Path,
     output: Path,
+    runner_state: Path,
     args: argparse.Namespace,
     request_cap: int,
 ) -> list[str]:
@@ -134,6 +221,8 @@ def single_run_command(
         str(python),
         "--output",
         str(output),
+        "--runner-state",
+        str(runner_state),
         "--max-live-requests",
         str(request_cap),
     ]
@@ -264,6 +353,9 @@ def main() -> int:
                         classification=str(result.get("outcome", "unknown"))[:128],
                     )
                     validate_cell_result(campaign, run, output, recovered_cell, tasks[task_id])
+                    recovered_runner_state = cell_dir / "runner-state.json"
+                    if recovered_runner_state.exists():
+                        recovered_runner_state.unlink()
                     run.cells.append(recovered_cell)
                     write_json_atomic(run_path, run.model_dump(mode="json"))
                     continue
@@ -276,8 +368,17 @@ def main() -> int:
             cell_dir.parent.mkdir(parents=True, exist_ok=True)
             write_json_atomic(cell_dir / "cell-started.json", {"ordinal": ordinal, "task_id": task_id, "repetition": repetition})
             artifact_dir = cell_dir / "artifact"
+            runner_state = cell_dir / "runner-state.json"
             task_dir = Path(tasks[task_id]["task_dir"])
-            command = single_run_command(task_dir, checkouts[task_id], pythons[task_id], artifact_dir, args, campaign.max_live_requests_per_run)
+            command = single_run_command(
+                task_dir,
+                checkouts[task_id],
+                pythons[task_id],
+                artifact_dir,
+                runner_state,
+                args,
+                campaign.max_live_requests_per_run,
+            )
             completed = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", check=False, timeout=7200)
             result_path = artifact_dir / "result.json"
             if result_path.is_file():
@@ -286,8 +387,19 @@ def main() -> int:
                 relative = result_path.relative_to(output).as_posix()
                 cell = RepeatedCell(ordinal=ordinal, task_id=task_id, repetition=repetition, status="completed", result=relative, result_sha256=sha256_file(result_path), classification=classification)
                 validate_cell_result(campaign, run, output, cell, tasks[task_id])
+                if runner_state.exists():
+                    runner_state.unlink()
             else:
-                failure = {"classification": "runner_failed_without_result", **stream_fingerprint(completed.stdout, completed.stderr, completed.returncode)}
+                failure = runner_failure_record(
+                    completed.stdout,
+                    completed.stderr,
+                    completed.returncode,
+                    runner_state=runner_state,
+                    output=output,
+                    request_cap=campaign.max_live_requests_per_run,
+                    provider=campaign.model.provider,
+                    model=campaign.model.name,
+                )
                 failure_path = cell_dir / "failure.json"
                 write_json_atomic(failure_path, failure)
                 cell = RepeatedCell(ordinal=ordinal, task_id=task_id, repetition=repetition, status="incomplete", classification="runner_failed_without_result", failure=failure_path.relative_to(output).as_posix(), failure_sha256=sha256_file(failure_path))

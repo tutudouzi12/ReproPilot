@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import tempfile
 from pathlib import Path
 
@@ -18,6 +19,39 @@ SPEC.loader.exec_module(repository_evaluation)
 def test_failure_record_is_null_for_success_and_bound_for_failure() -> None:
     assert repository_evaluation.failure_record("") is None
     assert repository_evaluation.failure_record("RuntimeError: failed") == {"error": "RuntimeError: failed"}
+
+
+def test_runner_state_record_contains_only_bounded_usage_metadata(monkeypatch) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "private-test-key")
+    monkeypatch.setenv("OPENAI_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+    monkeypatch.setenv("OPENAI_MODEL", "qwen3-coder-plus")
+    client = repository_evaluation.LLMClient(offline_demo_mode=False)
+    usage = repository_evaluation.ModelUsage(
+        provider="dashscope.aliyuncs.com",
+        model="qwen3-coder-plus",
+        request_count=1,
+        reported_request_count=1,
+        prompt_tokens=80,
+        completion_tokens=20,
+        total_tokens=100,
+    )
+
+    state = repository_evaluation.runner_state_record(client, usage, 2, 3, "response_received")
+
+    assert state == {
+        "version": repository_evaluation.RUNNER_STATE_VERSION,
+        "status": "response_received",
+        "provider": "dashscope.aliyuncs.com",
+        "model": "qwen3-coder-plus",
+        "request_cap": 3,
+        "attempted_requests": 2,
+        "completed_responses": 1,
+        "usage_reports": 1,
+        "prompt_tokens": 80,
+        "completion_tokens": 20,
+        "reported_tokens": 100,
+    }
+    assert "private-test-key" not in json.dumps(state)
 
 
 def test_sanitize_workspace_paths_replaces_workspace_temp_and_home(tmp_path: Path) -> None:
