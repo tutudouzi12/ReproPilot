@@ -14,6 +14,7 @@
     <a href="#演示">演示</a> ·
     <a href="#系统如何工作">工作流程</a> ·
     <a href="#核心执行架构">执行架构</a> ·
+    <a href="#真实仓库评测证据">评测证据</a> ·
     <a href="#快速启动">快速启动</a>
   </p>
 </div>
@@ -38,7 +39,7 @@ ReproPilot 关注的不是一次模型问答，而是一条完整的研究执行
 
 ### 4. Docker 隔离执行
 
-代码实验在独立 Docker 容器中运行，系统限制可用资源、网络、执行时间和输出大小，并在任务完成、失败或取消后清理容器。该机制用于降低运行第三方代码的风险，但不等同于面向不可信公网用户的生产级安全沙箱。
+产品运行时支持在独立 Docker 容器中执行代码，系统限制可用资源、网络、执行时间和输出大小，并在任务完成、失败或取消后清理容器。公开的真实仓库 benchmark runner 当前使用环境变量受限的本地子进程，并非网络隔离容器；两种执行边界分别记录，均不等同于面向不可信公网用户的生产级安全沙箱。
 
 ## 演示
 
@@ -51,7 +52,7 @@ ReproPilot 关注的不是一次模型问答，而是一条完整的研究执行
 1. **确定任务边界**：固定目标仓库、允许修改的文件、评测方式和实验预算。
 2. **生成执行计划**：将任务拆成带依赖关系的步骤，只运行前置条件已经满足的节点。
 3. **Agent 分工协作**：文献、代码、执行和数据 Agent 通过结构化产物交接结果。
-4. **运行并验收候选**：在 Docker 中执行代码，由系统重新计算指标并决定保留或回滚。
+4. **运行并验收候选**：通过受控执行器运行代码，由系统重新计算指标并决定保留或回滚。
 5. **保存实验依据**：记录实验过程、验收结果和论文主张对应的运行证据。
 
 ### 核心产物
@@ -62,6 +63,8 @@ ReproPilot 关注的不是一次模型问答，而是一条完整的研究执行
 | 执行计划与事件记录 | 描述 Agent 依赖、执行状态、恢复过程和实时进度 |
 | 实验账本 | 记录候选修改、模型调用和保留或拒绝原因 |
 | 验收报告 | 汇总系统重新计算的指标和文件完整性检查 |
+| [Hash-linked 实验轨迹](backend/app/trajectory.py) | 按顺序记录 baseline、候选、评测、决策、回滚与最终验收，并绑定终态证据哈希 |
+| [结构化运行评估](backend/app/run_assessment.py) | 分别保留 Outcome、Compliance、Process 原始事实；当前不计算主观综合分 |
 | 主张—证据图 | 将论文主张关联到论文位置、运行指标和真实产物 |
 
 ## 核心执行架构
@@ -74,7 +77,7 @@ ReproPilot 关注的不是一次模型问答，而是一条完整的研究执行
 
 | 检查项 | 结果 |
 |---|---|
-| Backend | Linux CI `150 passed`；行覆盖率门槛 83%，分支覆盖率门槛 68% |
+| Backend | [`main@7c59cbf`](https://github.com/tutudouzi12/ReproPilot/commit/7c59cbf425f08f1007085315e9083460952ae9be)：`256 passed, 5 skipped`；行覆盖率门槛 83%，分支覆盖率门槛 68% |
 | Docker Sandbox | `7 passed` |
 | AutoResearch scenarios | 7 个固定场景覆盖成功、契约拒绝、语法失败、超时、隐藏验收失败与完整性中止 |
 | Frontend | ESLint、TypeScript、Vite production build 通过 |
@@ -104,6 +107,17 @@ Pop-Location
 py -3.11 .\scripts\docker_smoke.py
 ```
 
+## 真实仓库评测证据
+
+仓库保留了固定版本、任务契约、Baseline、模型用量、候选补丁、自动验收与人工复核证据。以下数字来自已提交的冻结报告，不是从 README 临时统计，也不能外推为通用 Coding Agent 成功率。
+
+| 证据集 | 固定范围 | 已记录结果 |
+|---|---|---|
+| [多仓库 pilot benchmark](examples/autoresearch/repository-scale/BENCHMARK_REPORT.md) | 7 个任务、6 个独立任务、6 个唯一仓库；其中 1 个对抗任务复用 more-itertools，不计为独立仓库样本 | 选定主运行自动通过 `4/6`，人工接受 `2/6`；按时间顺序的首次运行自动通过与人工接受均为 `1/6` |
+| [18-cell 重复 campaign](examples/autoresearch/repository-scale/REPEATED_BENCHMARK_REPORT.md) | 6 个独立任务 × 3 次重复；固定模型、Harness revision、执行顺序与每 cell 请求上限 | 完成 `15/18`，自动通过 `9/18`，`3` 个 incomplete；已知请求尝试 `30`，保守边界 `30–39` |
+
+公开证据不会只保留成功案例：它同时记录候选主动停止、语法/上游测试拒绝、隐藏验收失败、自动通过后人工拒绝、完整性中止、provider 请求失败，以及 runner 未产出结果的 incomplete cell。自动通过只表示满足冻结任务契约，不表示上游维护者会接受、与历史补丁等价或已经达到生产可用水平。
+
 ## 快速启动
 
 需要 Docker Desktop 或兼容的 Docker Engine：
@@ -130,6 +144,8 @@ OPENAI_MODEL=your-model
 
 - [端到端演示](docs/end-to-end-demo.md)
 - [固定评测场景套件](examples/autoresearch/evaluation-suite/)
+- [多仓库 pilot benchmark](examples/autoresearch/repository-scale/BENCHMARK_REPORT.md)
+- [18-cell 重复 campaign](examples/autoresearch/repository-scale/REPEATED_BENCHMARK_REPORT.md)
 - [设计说明与已知限制](docs/design-decisions.md)
 - [本地启动指南](docs/local_startup_guide.md)
 - [用户手册](docs/user_manual.md)
@@ -139,4 +155,5 @@ OPENAI_MODEL=your-model
 - 当前运行时面向可靠的单机工作流，不是生产级分布式调度平台。
 - 当前身份机制适合本地个人使用，公开部署仍需补充正式认证和权限管理。
 - Docker 隔离降低了代码执行风险，但不能替代面向不可信租户的专业安全沙箱。
+- 公开的真实仓库 benchmark runner 当前使用环境变量受限的本地子进程，不具备 Docker Sandbox 的网络隔离边界。
 - 代码通过既定评测，只能证明当前任务要求被满足，不能自动证明论文结论被完整复现。
