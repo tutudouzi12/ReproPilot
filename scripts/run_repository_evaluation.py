@@ -34,6 +34,7 @@ from app.autoresearch import (  # noqa: E402
     run_autoresearch,
     validate_autoresearch,
 )
+from app.run_assessment import build_assessment, write_assessment_atomic  # noqa: E402
 from app.trajectory import TrajectoryManifest, TrajectoryRecorder, finalize_trajectory, write_trajectory_artifacts  # noqa: E402
 
 
@@ -710,6 +711,17 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
             failure=result["failure"],
             terminal_status=outcome,
         )
+    if trajectory_manifest is None:
+        raise RuntimeError("repository evaluation did not produce assessable trajectory evidence")
+    assessment = build_assessment(
+        spec=frozen_spec_payload,
+        ledger=ledger_payload,
+        validation=report_payload,
+        trajectory_jsonl=trajectory.jsonl(),
+        trajectory_manifest=trajectory_manifest,
+        failure=result["failure"],
+        result=result,
+    )
 
     output.mkdir(parents=True, exist_ok=False)
     write_editable_sources(output, "initial-files", initial_sources)
@@ -722,8 +734,8 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
         write_json(output / "trial-ledger.json", ledger_payload)
     if report_payload is not None:
         write_json(output / "validation-report.json", report_payload)
-    if trajectory_manifest is not None:
-        write_trajectory_artifacts(output, trajectory, trajectory_manifest)
+    write_trajectory_artifacts(output, trajectory, trajectory_manifest)
+    write_assessment_atomic(output / "assessment.json", assessment)
     rendered_report = sanitize_workspace_paths(render_report(result, ledger, task), workspace_path)
     (output / "README.md").write_text(rendered_report, encoding="utf-8", newline="\n")
     result["artifact_sha256"] = {
