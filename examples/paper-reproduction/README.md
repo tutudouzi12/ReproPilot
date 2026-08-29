@@ -1,5 +1,7 @@
 # Attention 论文 Smoke 复现示例
 
+> 真正包含固定数据、真实训练、论文指标对照和 Claim-to-Evidence 结论的案例，见 [fastText AG News 有界复现](fasttext-ag-news/)。本页只保留 API/DAG 结构 Smoke。
+
 这个示例通过公开 API 创建并执行一条完整的论文复现 DAG，固定使用 `harvardnlp/annotated-transformer`，以 smoke 模式验证仓库发现、依赖准备、隔离执行、Artifact 和事件历史。
 
 ```text

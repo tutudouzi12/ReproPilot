@@ -45,8 +45,12 @@ Final validation does not call the candidate model. It rechecks the spec, TrialL
 | `research_best_candidate` | Best score and final editable-file hashes |
 | `research_validation_report` | Fresh scores, mode, pass/fail, candidate integrity and protected-file integrity |
 | `validated_research_metrics` | Metric published only after final validation passes |
+| `research_trajectory_jsonl` / `research_trajectory_manifest` | Ordered hash-linked events and terminal evidence bindings |
+| `research_assessment` | Deterministic Outcome / Compliance / Process facts; no composite score |
 
-The existing ReproPilot Execution Inspector renders TrialLedger and validation reports inside its Artifact Preview, using the same layout tokens and interaction hierarchy as other research objects.
+After final validation, the backend verifies the trajectory and terminal evidence bindings, atomically writes `.repropilot/autoresearch/assessment.json`, and publishes the same object as `research_assessment`. A failed acceptance result still retains its validation and assessment evidence. If the trajectory or a bound source is changed, assessment generation is blocked instead of falling back to an unverified result.
+
+`GET /api/plans/{plan_id}/assessment` rebuilds the response from source artifacts. Historical plans without a native trajectory are explicitly returned as `trajectory_source=derived_from_ledger`, `integrity=partial`, and `process.status=partial`; they are never upgraded to verified. The Execution Inspector renders the three raw dimensions, integrity/source status, validation runs, event count and hard-violation reasons.
 
 `research_trial_ledger.model_usage` records the provider host, model, request count and provider-reported prompt, completion and total tokens. Usage is recorded before candidate-contract validation, so a paid response that is later rejected still remains visible. `reported_request_count` distinguishes responses with token metadata from compatible providers that omit it.
 

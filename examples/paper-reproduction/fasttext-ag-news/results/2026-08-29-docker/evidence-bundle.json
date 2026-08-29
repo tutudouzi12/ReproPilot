@@ -1,0 +1,35 @@
+{
+  "experiment_id": "fasttext-ag-news-bigram",
+  "files": {
+    "README.md": {
+      "bytes": 2675,
+      "sha256": "d60d0bf717faae667f2314f4d9d9310c174b282be686f8ff72ca47fb5324530b"
+    },
+    "claim-evidence-graph.json": {
+      "bytes": 8245,
+      "sha256": "8409a9154388e08b6785c92797eebde6500313c69d145be09e58837cb62cb699"
+    },
+    "claim-rubric.json": {
+      "bytes": 1604,
+      "sha256": "7781200537d862f41eefdb2af6295ece2bd3033d68b051b82d14ee86f9706eb4"
+    },
+    "comparison-report.json": {
+      "bytes": 1655,
+      "sha256": "0c9f031568987b07e69bd5c264482087b5089ec5771922638ac3470ab57bdcd5"
+    },
+    "experiment-spec.json": {
+      "bytes": 3171,
+      "sha256": "491e9a0d9cf709e9a415260e6c256043cb43c6d3e0c9eef4672e761388784d9e"
+    },
+    "provenance.json": {
+      "bytes": 2543,
+      "sha256": "9e66d3f66cf21e32247c89fd77c70ea88dd57d7e5c895c0ac027a6107e9640c0"
+    },
+    "run-metrics.json": {
+      "bytes": 3865,
+      "sha256": "3b09119bd49ffeeb66e960fc5292cd518ddff5f70a824a6b5e54cc495c927edc"
+    }
+  },
+  "verdict": "verified",
+  "version": "repropilot.paper-evidence-bundle/v1"
+}

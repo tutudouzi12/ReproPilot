@@ -1,0 +1,102 @@
+{
+  "dataset_members": {
+    "ag_news_csv/readme.txt": "779c2e6bbf93dd810d9c7b318006daef7a4bfc34062002461d251dc10fb9f58c",
+    "ag_news_csv/test.csv": "521465c2428ed7f02f8d6db6ffdd4b5447c1c701962353eb2c40d548c3c85699",
+    "ag_news_csv/train.csv": "76a0a2d2f92b286371fe4d4044640910a04a803fdd2538e0f3f29a5c6f6b672e"
+  },
+  "fasttext_binary_sha256": "09e7621c4fce7348f9836663b9fc6c7e37ce5e5aab89f4e8ba5a588b92e3e436",
+  "source_revision": "206179d64c1730862328e9b750e98bd8aa1c16b5",
+  "status": "completed",
+  "summary": {
+    "bigram": {
+      "max_accuracy_percent": 92.6,
+      "mean_accuracy_percent": 92.433333,
+      "mean_training_seconds": 6.819304,
+      "min_accuracy_percent": 92.2,
+      "population_stddev_percentage_points": 0.169967,
+      "runs": 3
+    },
+    "bigram_gain_percentage_points": 1.133333,
+    "unigram": {
+      "max_accuracy_percent": 91.4,
+      "mean_accuracy_percent": 91.3,
+      "mean_training_seconds": 6.306093,
+      "min_accuracy_percent": 91.2,
+      "population_stddev_percentage_points": 0.08165,
+      "runs": 3
+    }
+  },
+  "toolchain": {
+    "compiler": "g++ (Debian 12.2.0-14+deb12u1) 12.2.0",
+    "python": "Python 3.11.2"
+  },
+  "trials": [
+    {
+      "accuracy_percent": 91.3,
+      "model_bytes": 405607175,
+      "shuffle_seed": 1729,
+      "test_examples": 7600,
+      "training_seconds": 6.033346,
+      "training_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "training_stdout_sha256": "f246e104034c1c90bd97295d257a339684db38461825643632c7e42248cd9f74",
+      "variant": "unigram",
+      "word_ngrams": 1
+    },
+    {
+      "accuracy_percent": 92.5,
+      "model_bytes": 405607175,
+      "shuffle_seed": 1729,
+      "test_examples": 7600,
+      "training_seconds": 6.840209,
+      "training_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "training_stdout_sha256": "ffe009a16cf3054a73ee5767f134425a66776d8a2762d9139c20cb46ee0ee4c5",
+      "variant": "bigram",
+      "word_ngrams": 2
+    },
+    {
+      "accuracy_percent": 91.2,
+      "model_bytes": 405607175,
+      "shuffle_seed": 2718,
+      "test_examples": 7600,
+      "training_seconds": 6.46337,
+      "training_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "training_stdout_sha256": "b89e618dc26341b0d20723dd282eda9bd43a59a19d4338160ee8ba4e3ff09a53",
+      "variant": "unigram",
+      "word_ngrams": 1
+    },
+    {
+      "accuracy_percent": 92.2,
+      "model_bytes": 405607175,
+      "shuffle_seed": 2718,
+      "test_examples": 7600,
+      "training_seconds": 7.002826,
+      "training_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "training_stdout_sha256": "22a14951630408835a19b7e1d3ae434b12e7b11a30709c07405c585e2fff9367",
+      "variant": "bigram",
+      "word_ngrams": 2
+    },
+    {
+      "accuracy_percent": 91.4,
+      "model_bytes": 405607175,
+      "shuffle_seed": 3141,
+      "test_examples": 7600,
+      "training_seconds": 6.421562,
+      "training_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "training_stdout_sha256": "7b6c996ada0b3181a46932839c43e080119354e835f512c2d684fb5cc8d8abd9",
+      "variant": "unigram",
+      "word_ngrams": 1
+    },
+    {
+      "accuracy_percent": 92.6,
+      "model_bytes": 405607175,
+      "shuffle_seed": 3141,
+      "test_examples": 7600,
+      "training_seconds": 6.614877,
+      "training_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "training_stdout_sha256": "f61e2648b545a3bc18e0540b1dc7355556fc64057ed6997ac4e9ec3e3d419a10",
+      "variant": "bigram",
+      "word_ngrams": 2
+    }
+  ],
+  "version": "repropilot.paper-run-metrics/v1"
+}

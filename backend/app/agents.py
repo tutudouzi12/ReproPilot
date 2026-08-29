@@ -66,6 +66,7 @@ from .prompts import (
 from .plotting import render_metric_plot, validate_plot_base64
 from .repository import discover_repository, prepare_first_available_repository
 from .research_coding import ExecutionResult, PatchProposal, RepairProposal, debug_paper_code, source_fingerprint, validate_patch_policy
+from .run_assessment import build_assessment, prepare_workspace_assessment_path, write_assessment_atomic
 from .trajectory import TrajectoryRecorder, finalize_trajectory
 
 
@@ -369,6 +370,9 @@ class RoutedAgentExecutor:
                 return TaskExecutionResult(status="failed", error="OPENAI_API_KEY is required for AutoResearch candidate generation")
             try:
                 workspace = Path(str(inputs.get("workspace_path") or "")).resolve(strict=True)
+                assessment_path = prepare_workspace_assessment_path(workspace)
+                if assessment_path.exists() or assessment_path.is_symlink():
+                    assessment_path.unlink()
                 runtime = self._runtime_id(inputs)
                 if not runtime or runtime == "offline-runtime":
                     raise ValueError("prepared sandbox runtime is required for AutoResearch")
@@ -417,6 +421,9 @@ class RoutedAgentExecutor:
                 return TaskExecutionResult(status="failed", error="configured persistent sandbox is required for AutoResearch validation")
             try:
                 workspace = Path(str(inputs.get("workspace_path") or "")).resolve(strict=True)
+                assessment_path = prepare_workspace_assessment_path(workspace)
+                if assessment_path.exists() or assessment_path.is_symlink():
+                    assessment_path.unlink()
                 runtime = self._runtime_id(inputs)
                 if not runtime or runtime == "offline-runtime":
                     raise ValueError("prepared sandbox runtime is required for AutoResearch validation")
@@ -437,21 +444,59 @@ class RoutedAgentExecutor:
                     validation=report,
                     terminal_status=report.status,
                 )
+                assessment = build_assessment(
+                    spec=spec,
+                    ledger=ledger,
+                    validation=report,
+                    trajectory_jsonl=trajectory.jsonl(),
+                    trajectory_manifest=trajectory_manifest,
+                )
+                write_assessment_atomic(assessment_path, assessment)
             except Exception as exc:
-                return TaskExecutionResult(status="failed", error=f"AutoResearch validation failed: {exc}")
+                blocked = json.dumps(
+                    {
+                        "version": "autoresearch.assessment-status/v1",
+                        "status": "blocked",
+                        "reason": str(exc)[:1000],
+                    },
+                    ensure_ascii=False,
+                )
+                return TaskExecutionResult(
+                    status="failed",
+                    structured_data=blocked,
+                    error=f"AutoResearch validation failed: {exc}",
+                )
             encoded = report.model_dump_json()
+            assessment_json = assessment.model_dump_json()
             trajectory_values = {
+                "research_validation_report": encoded,
                 "research_trajectory_jsonl": trajectory.jsonl(),
                 "research_trajectory_manifest": trajectory_manifest.model_dump_json(),
+                "research_assessment": assessment_json,
             }
             if report.status != "passed":
-                return TaskExecutionResult(status="failed", result=encoded, structured_data=encoded, artifact_values=trajectory_values, error=f"AutoResearch validation failed: {report.reason}")
+                return TaskExecutionResult(
+                    status="failed",
+                    result=encoded,
+                    structured_data=assessment_json,
+                    artifact_values=trajectory_values,
+                    error=f"AutoResearch validation failed: {report.reason}",
+                    logs=[
+                        f"Assessment persisted to {assessment_path.relative_to(workspace).as_posix()}",
+                        f"outcome={assessment.outcome.status} compliance={assessment.compliance.status} process={assessment.process.status}",
+                    ],
+                )
             return TaskExecutionResult(
                 status="completed",
                 result=encoded,
-                structured_data=encoded,
-                artifact_values={"research_validation_report": encoded, "validated_research_metrics": json.dumps({spec.metric_key: report.observed_score, "validation_mode": report.validation_mode}, ensure_ascii=False), **trajectory_values},
-                logs=[f"AutoResearch validation passed mode={report.validation_mode}", f"runs={report.passed_runs}/{spec.validation_runs}"],
+                structured_data=assessment_json,
+                artifact_values={"validated_research_metrics": json.dumps({spec.metric_key: report.observed_score, "validation_mode": report.validation_mode}, ensure_ascii=False), **trajectory_values},
+                logs=[
+                    f"AutoResearch validation passed mode={report.validation_mode}",
+                    f"runs={report.passed_runs}/{spec.validation_runs}",
+                    f"Assessment persisted to {assessment_path.relative_to(workspace).as_posix()}",
+                    f"outcome={assessment.outcome.status} compliance={assessment.compliance.status} process={assessment.process.status}",
+                ],
             )
         if task.type == "resolve_dependencies":
             if inputs.get("research_spec"):

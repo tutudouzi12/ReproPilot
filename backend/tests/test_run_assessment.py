@@ -6,7 +6,10 @@ from datetime import datetime, timezone
 import pytest
 
 from app.autoresearch import ModelUsage, ResearchSpec, TrialLedger, ValidationReport, canonical_sha256
+from app.models import PlanGraph, TaskNode
+from app.plan_assessment import assessment_state, build_plan_assessment
 from app.run_assessment import ASSESSMENT_METHOD, ASSESSMENT_VERSION, build_assessment
+from app.scheduler import build_artifact
 from app.trajectory import TrajectoryRecorder, finalize_trajectory
 
 
@@ -270,3 +273,98 @@ def test_assessment_rejects_non_integer_or_negative_run_counters(invalid_count: 
             trajectory_manifest=manifest,
             result=result,
         )
+
+
+def plan_with_assessment_sources(
+    spec: ResearchSpec,
+    ledger: TrialLedger,
+    validation: ValidationReport,
+    *,
+    include_trajectory: bool,
+) -> PlanGraph:
+    plan = PlanGraph(
+        user_intent="assess the completed run",
+        intent_type="AutoResearch",
+        nodes=[TaskNode(name="validate", type="autoresearch_validate", description="validate", assigned_to="research_coding_agent")],
+        edges=[],
+    )
+    values: dict[str, object] = {
+        "research_spec": spec.model_dump_json(),
+        "research_trial_ledger": ledger.model_dump_json(),
+        "research_validation_report": validation.model_dump_json(),
+    }
+    if include_trajectory:
+        recorder, manifest = native_trajectory(spec, ledger, validation)
+        values["research_trajectory_jsonl"] = recorder.jsonl()
+        values["research_trajectory_manifest"] = manifest.model_dump_json()
+    for key, value in values.items():
+        plan.artifacts[key] = build_artifact(key, plan.nodes[0].id, value)
+    return plan
+
+
+def test_plan_assessment_rebuilds_native_sources_and_rejects_cached_drift() -> None:
+    spec = frozen_spec()
+    ledger = completed_ledger(spec)
+    validation = validation_report(spec)
+    plan = plan_with_assessment_sources(spec, ledger, validation, include_trajectory=True)
+    assessment = build_plan_assessment(plan)
+    plan.artifacts["research_assessment"] = build_artifact(
+        "research_assessment",
+        plan.nodes[0].id,
+        assessment.model_dump_json(),
+    )
+
+    assert assessment_state(plan)["assessment"]["evidence"]["integrity"] == "verified"
+
+    changed = assessment.model_copy(deep=True)
+    changed.outcome.best_score = 999
+    plan.artifacts["research_assessment"]["value"] = changed.model_dump_json()
+    blocked = assessment_state(plan)
+    assert blocked["status"] == "blocked"
+    assert blocked["assessment"] is None
+    assert "does not match" in blocked["reason"]
+
+
+def test_plan_assessment_marks_legacy_sources_partial() -> None:
+    spec = frozen_spec()
+    plan = plan_with_assessment_sources(spec, completed_ledger(spec), validation_report(spec), include_trajectory=False)
+
+    state = assessment_state(plan)
+
+    assert state["status"] == "available"
+    assert state["assessment"]["evidence"]["trajectory_source"] == "derived_from_ledger"
+    assert state["assessment"]["evidence"]["integrity"] == "partial"
+    assert state["assessment"]["process"]["status"] == "partial"
+
+
+def test_plan_assessment_blocks_tampered_native_trajectory() -> None:
+    spec = frozen_spec()
+    plan = plan_with_assessment_sources(spec, completed_ledger(spec), validation_report(spec), include_trajectory=True)
+    trajectory = str(plan.artifacts["research_trajectory_jsonl"]["value"])
+    plan.artifacts["research_trajectory_jsonl"]["value"] = trajectory.replace('"score":1.0', '"score":999.0', 1)
+
+    state = assessment_state(plan)
+
+    assert state["status"] == "blocked"
+    assert state["assessment"] is None
+    assert "trajectory" in state["reason"]
+
+
+def test_blocked_validation_cannot_be_downgraded_to_legacy_partial() -> None:
+    spec = frozen_spec()
+    plan = plan_with_assessment_sources(spec, completed_ledger(spec), validation_report(spec), include_trajectory=False)
+    plan.artifacts.pop("research_validation_report")
+    plan.nodes[0].status = "failed"
+    plan.nodes[0].structured_data = json.dumps(
+        {
+            "version": "autoresearch.assessment-status/v1",
+            "status": "blocked",
+            "reason": "trajectory event hash mismatch",
+        }
+    )
+
+    state = assessment_state(plan)
+
+    assert state["status"] == "blocked"
+    assert state["assessment"] is None
+    assert state["reason"] == "trajectory event hash mismatch"

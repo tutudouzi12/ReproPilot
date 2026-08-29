@@ -15,6 +15,7 @@ from app.autoresearch import (
     aggregate_scores,
     editable_file_context,
     freeze_research_spec,
+    hash_files,
     parse_metric,
     proposal_context,
     run_autoresearch,
@@ -542,6 +543,114 @@ async def test_run_retains_exception_type_when_proposer_message_is_empty(tmp_pat
 
     assert ledger.trials[-1].status == "rejected"
     assert ledger.trials[-1].reason == "TimeoutError"
+
+
+def validation_executor_fixture(root: Path, spec, ledger, trajectory: TrajectoryRecorder):
+    task = TaskNode(
+        name="Validate and assess",
+        type="autoresearch_validate",
+        description="validate",
+        assigned_to="research_coding_agent",
+        inputs={
+            "workspace_path": str(root),
+            "prepared_runtime": "runtime-1",
+            "research_spec": spec.model_dump_json(),
+            "research_trial_ledger": ledger.model_dump_json(),
+            "research_best_candidate": "{}",
+            "research_trajectory_open": trajectory.jsonl(),
+        },
+        output_artifacts=[
+            "research_validation_report",
+            "validated_research_metrics",
+            "research_trajectory_jsonl",
+            "research_trajectory_manifest",
+            "research_assessment",
+        ],
+    )
+    plan = PlanGraph(user_intent="validate", intent_type="AutoResearch", nodes=[task], edges=[])
+    executor = RoutedAgentExecutor(offline_demo_mode=True)
+
+    class FakeSandbox:
+        configured = True
+
+        async def command(self, runtime: str, command: list[str]):
+            assert runtime == "runtime-1"
+            result = await evaluator_for(root)(command)
+            return {
+                "exit_code": result.exit_code,
+                "stdout": result.stdout,
+                "stderr": result.stderr,
+            }
+
+    executor.sandbox = FakeSandbox()
+    return executor, task, plan
+
+
+@pytest.mark.asyncio
+async def test_validation_task_persists_verified_assessment_json(tmp_path: Path) -> None:
+    root = workspace(tmp_path)
+    spec = freeze(root, validation_runs=1)
+    ledger = TrialLedger(
+        spec_sha256=spec.spec_sha256,
+        status="completed",
+        metric_key=spec.metric_key,
+        direction=spec.direction,
+        baseline_score=1.0,
+        best_score=1.0,
+        holdout_baseline_score=0.5,
+        max_trials=spec.max_trials,
+        completed_trials=0,
+        accepted_trials=0,
+        stop_reason="trial_budget_exhausted",
+        best_candidate_files=hash_files(root, spec.editable_files),
+    )
+    trajectory = TrajectoryRecorder()
+    trajectory.emit("baseline", {"status": "started", "spec_sha256": spec.spec_sha256})
+    trajectory.emit("baseline", {"status": "completed", "score": 1.0, "spec_sha256": spec.spec_sha256})
+    executor, task, plan = validation_executor_fixture(root, spec, ledger, trajectory)
+
+    result = await executor.execute(task, plan)
+
+    assert result.status == "completed"
+    assessment = json.loads(result.artifact_values["research_assessment"])
+    assert assessment["evidence"]["integrity"] == "verified"
+    assert assessment["outcome"]["status"] == "passed"
+    assert assessment["compliance"]["status"] == "verified"
+    assert assessment["process"]["status"] == "complete"
+    persisted = json.loads((root / ".repropilot" / "autoresearch" / "assessment.json").read_text(encoding="utf-8"))
+    assert persisted == assessment
+
+
+@pytest.mark.asyncio
+async def test_validation_task_refuses_assessment_for_tampered_open_trajectory(tmp_path: Path) -> None:
+    root = workspace(tmp_path)
+    spec = freeze(root, validation_runs=1)
+    ledger = TrialLedger(
+        spec_sha256=spec.spec_sha256,
+        status="completed",
+        metric_key=spec.metric_key,
+        direction=spec.direction,
+        baseline_score=1.0,
+        best_score=1.0,
+        holdout_baseline_score=0.5,
+        max_trials=spec.max_trials,
+        best_candidate_files=hash_files(root, spec.editable_files),
+    )
+    trajectory = TrajectoryRecorder()
+    trajectory.emit("baseline", {"status": "started", "spec_sha256": spec.spec_sha256})
+    trajectory.emit("baseline", {"status": "completed", "score": 1.0, "spec_sha256": spec.spec_sha256})
+    executor, task, plan = validation_executor_fixture(root, spec, ledger, trajectory)
+    task.inputs["research_trajectory_open"] = str(task.inputs["research_trajectory_open"]).replace('"score":1.0', '"score":999.0')
+    stale_assessment = root / ".repropilot" / "autoresearch" / "assessment.json"
+    stale_assessment.parent.mkdir(parents=True)
+    stale_assessment.write_text('{"stale":true}\n', encoding="utf-8")
+
+    result = await executor.execute(task, plan)
+
+    assert result.status == "failed"
+    assert result.artifact_values == {}
+    assert json.loads(result.structured_data)["status"] == "blocked"
+    assert not stale_assessment.exists()
 
 
 @pytest.mark.asyncio

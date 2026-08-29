@@ -1,0 +1,57 @@
+{
+  "acceptance_delta": 0.01,
+  "acceptance_rule": "minimum_improvement",
+  "acceptance_target_score": 0.3433333333333333,
+  "baseline_score": 0.3333333333333333,
+  "candidate_intact": true,
+  "command_results": [
+    {
+      "command": [
+        "python",
+        ".repropilot/uploads/03-holdout_evaluator.py"
+      ],
+      "duration_ms": 146,
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "{\"metrics\": {\"accuracy\": 1.0}}\n"
+    },
+    {
+      "command": [
+        "python",
+        ".repropilot/uploads/03-holdout_evaluator.py"
+      ],
+      "duration_ms": 188,
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "{\"metrics\": {\"accuracy\": 1.0}}\n"
+    },
+    {
+      "command": [
+        "python",
+        ".repropilot/uploads/03-holdout_evaluator.py"
+      ],
+      "duration_ms": 156,
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "{\"metrics\": {\"accuracy\": 1.0}}\n"
+    }
+  ],
+  "expected_score": 0.3333333333333333,
+  "failed_runs": 0,
+  "mean_score": 1.0,
+  "observed_score": 1.0,
+  "observed_scores": [
+    1.0,
+    1.0,
+    1.0
+  ],
+  "passed_runs": 3,
+  "protected_files_intact": true,
+  "reason": "",
+  "score_matches": true,
+  "spec_sha256": "dbda59edb2ee90207e458e1ca3ff0af7bf0a4f26e1c253b9950c1358a20c6e23",
+  "status": "passed",
+  "stddev": 0.0,
+  "validation_mode": "hidden_holdout",
+  "version": "autoresearch.validation/v1"
+}

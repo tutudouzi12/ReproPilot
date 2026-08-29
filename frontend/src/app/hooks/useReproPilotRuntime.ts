@@ -352,6 +352,10 @@ export function useReproPilotRuntime(options: UseReproPilotRuntimeOptions) {
             patchNodeState(event.task_id, (prev) => ({
               ...prev,
               logs: prev.logs ? `${prev.logs}\n[Plan Error] ${errorText}` : `[Plan Error] ${errorText}`,
+              result: String(event.payload?.result || prev.result || ''),
+              code: String(event.payload?.code || prev.code || ''),
+              structuredData: String(event.payload?.structured_data || prev.structuredData || ''),
+              imageBase64: pickImageBase64(event.payload) || prev.imageBase64 || '',
             }));
           }
           if (event.event_type === PLAN_EVENTS.TASK_REASSIGNED && event.task_id) {

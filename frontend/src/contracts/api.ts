@@ -106,6 +106,57 @@ export interface PlanGraph {
   };
   nodes: GraphTask[];
   edges: GraphEdge[];
+  artifacts?: Record<string, unknown>;
+}
+
+export interface RunAssessment {
+  version: 'autoresearch.assessment/v1';
+  method: string;
+  evidence: {
+    trajectory_source: 'native_hash_linked' | 'derived_from_ledger';
+    integrity: 'verified' | 'partial';
+    source_bindings_verified?: boolean | null;
+  };
+  outcome: {
+    status: 'passed' | 'failed' | 'not_assessable';
+    metric_key?: string | null;
+    baseline_score?: number | null;
+    best_score?: number | null;
+    directional_improvement?: number | null;
+    validation_status: 'passed' | 'failed' | 'not_run';
+    validation_mode?: string | null;
+    validation_observed_score?: number | null;
+    validation_passed_runs?: number | null;
+    validation_failed_runs?: number | null;
+  };
+  compliance: {
+    status: 'verified' | 'violated' | 'partial';
+    hard_violation: boolean;
+    hard_violation_reasons: string[];
+    trajectory_chain_verified?: boolean | null;
+    candidate_intact?: boolean | null;
+    protected_files_intact?: boolean | null;
+  };
+  process: {
+    status: 'complete' | 'partial';
+    event_count?: number | null;
+    completed_trials?: number | null;
+    accepted_trials?: number | null;
+    rollback_count?: number | null;
+    stop_reason?: string | null;
+  };
+  scoring: {
+    status: 'not_calculated';
+    composite_score: null;
+    reason: string;
+  };
+}
+
+export interface AssessmentState {
+  version: 'autoresearch.assessment-status/v1';
+  status: 'available' | 'unavailable' | 'blocked';
+  assessment: RunAssessment | null;
+  reason?: string | null;
 }
 
 export interface IntentContext {
@@ -177,6 +228,7 @@ export interface PlanResponse {
   session_id?: string;
   anon_user_id?: string;
   user_id?: string;
+  assessment?: AssessmentState;
 }
 
 export interface ChatResponse {

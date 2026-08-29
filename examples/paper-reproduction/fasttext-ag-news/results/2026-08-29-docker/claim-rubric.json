@@ -1,0 +1,46 @@
+{
+  "claims": [
+    {
+      "claim_type": "ablation",
+      "criteria": [
+        {
+          "description": "Mean bigram test accuracy is within the frozen tolerance of the paper's 92.5% AG News result.",
+          "expected_value": 92.5,
+          "id": "claim-001.criterion-01",
+          "metric_name": "bigram_mean_accuracy_percent",
+          "required_evidence": [
+            "paper",
+            "repository",
+            "environment",
+            "metric"
+          ],
+          "tolerance": 1.0,
+          "unit": "percent"
+        },
+        {
+          "description": "The bigram variant improves mean test accuracy over the unigram control by at least 0.5 percentage points.",
+          "expected_value": 1.0,
+          "id": "claim-001.criterion-02",
+          "metric_name": "bigram_gain_percentage_points",
+          "required_evidence": [
+            "paper",
+            "run",
+            "metric",
+            "comparison"
+          ],
+          "tolerance": 0.5,
+          "unit": "percentage_points"
+        }
+      ],
+      "id": "claim-001",
+      "importance": 1.0,
+      "source_locator": "Table 1 and Section 3.1",
+      "statement": "On AG News, adding word bigrams to the h=10 fastText classifier improves test accuracy from 91.5% to 92.5%.",
+      "title": "Word bigrams improve AG News accuracy"
+    }
+  ],
+  "paper_title": "Bag of Tricks for Efficient Text Classification",
+  "sha256": "2bd8163002fa540c8922d6a7a894a345b9b3be938d1094c440bc57f4e8b2d366",
+  "source_artifact": "parsed_paper",
+  "version": "claim.rubric/v1"
+}

@@ -18,6 +18,7 @@ from .events import EventBus
 from .models import ChatRequest, ExecuteTaskRequest, PlanEvent, PlanRequest, ReassignTaskRequest, TaskNode, utc_now
 from .autoresearch import parse_uploaded_research_spec
 from .planner import Planner
+from .plan_assessment import assessment_state
 from .scheduler import DAGScheduler, SchedulerConflict
 from .safe_http import open_pinned_pdf, resolve_public_addresses, validate_pdf_url
 from .store import FilePlanStore, PlanNotFound
@@ -216,7 +217,16 @@ async def create_plan(
 @app.get("/api/plans/{plan_id}")
 async def get_plan(plan_id: str, request: Request, x_user_id: str | None = Header(default=None)) -> dict:
     plan = await authorized_plan(plan_id, request, x_user_id)
-    return {"plan_graph": public_payload(plan.model_dump(mode="json", by_alias=True))}
+    payload = {"plan_graph": public_payload(plan.model_dump(mode="json", by_alias=True))}
+    if plan.intent_type == "AutoResearch":
+        payload["assessment"] = assessment_state(plan)
+    return payload
+
+
+@app.get("/api/plans/{plan_id}/assessment")
+async def get_plan_assessment(plan_id: str, request: Request, x_user_id: str | None = Header(default=None)) -> dict:
+    plan = await authorized_plan(plan_id, request, x_user_id)
+    return assessment_state(plan)
 
 
 @app.get("/api/plans/{plan_id}/events")

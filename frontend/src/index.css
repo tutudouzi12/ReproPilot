@@ -1378,7 +1378,18 @@ textarea:focus-visible {
 .autoresearch-integrity svg { width: 12px; height: 12px; }
 .autoresearch-integrity .is-valid svg { color: var(--workspace-success); }
 .autoresearch-integrity .is-invalid svg { color: var(--workspace-danger); }
+.autoresearch-integrity .is-partial svg { color: var(--workspace-warning, #d97706); }
 .autoresearch-samples, .autoresearch-reason { margin: 0; padding: 10px 11px; border-top: 1px solid var(--workspace-border-subtle); color: var(--workspace-text-muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 8.5px; line-height: 13px; }
+.autoresearch-dimensions { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1px; background: var(--workspace-border-subtle); }
+.autoresearch-dimensions > div { min-width: 0; padding: 10px; background: var(--workspace-panel-muted); }
+.autoresearch-dimensions span, .autoresearch-dimensions strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.autoresearch-dimensions span { color: var(--workspace-text-muted); font-size: 8.5px; }
+.autoresearch-dimensions strong { margin-top: 3px; color: var(--workspace-text); font-size: 9.5px; text-transform: uppercase; }
+.autoresearch-dimensions .is-valid strong { color: var(--workspace-success); }
+.autoresearch-dimensions .is-invalid strong { color: var(--workspace-danger); }
+.autoresearch-assessment-facts { display: grid; gap: 5px; padding: 10px 11px; border-top: 1px solid var(--workspace-border-subtle); color: var(--workspace-text-secondary); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 8.5px; }
+.autoresearch-warning, .autoresearch-no-score { margin: 0; padding: 9px 11px; border-top: 1px solid var(--workspace-border-subtle); color: var(--workspace-text-muted); font-size: 8.5px; line-height: 13px; }
+.autoresearch-warning { color: var(--workspace-warning, #d97706); }
 
 .execution-empty-state {
   padding: 18px 8px;

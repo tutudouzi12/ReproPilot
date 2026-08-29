@@ -1,0 +1,46 @@
+{
+  "criteria": {
+    "absolute_accuracy": {
+      "expected_percent": 92.5,
+      "observed_percent": 92.433333,
+      "status": "verified",
+      "tolerance_percentage_points": 1.0
+    },
+    "bigram_gain": {
+      "minimum_percentage_points": 0.5,
+      "observed_percentage_points": 1.133333,
+      "paper_reported_percentage_points": 1.0,
+      "status": "verified"
+    }
+  },
+  "observed": {
+    "bigram": {
+      "max_accuracy_percent": 92.6,
+      "mean_accuracy_percent": 92.433333,
+      "mean_training_seconds": 6.819304,
+      "min_accuracy_percent": 92.2,
+      "population_stddev_percentage_points": 0.169967,
+      "runs": 3
+    },
+    "bigram_gain_percentage_points": 1.133333,
+    "unigram": {
+      "max_accuracy_percent": 91.4,
+      "mean_accuracy_percent": 91.3,
+      "mean_training_seconds": 6.306093,
+      "min_accuracy_percent": 91.2,
+      "population_stddev_percentage_points": 0.08165,
+      "runs": 3
+    }
+  },
+  "paper_reported": {
+    "baseline_accuracy_percent": 91.5,
+    "bigram_accuracy_percent": 92.5,
+    "bigram_gain_percentage_points": 1.0
+  },
+  "protocol_deviations": [
+    "The official script uses an unseeded Perl shuffle; this reproduction fixes three shuffle seeds so data order can be replayed.",
+    "The official fastText commit is pinned to the paper's 2016-08-09 submission date, but it is compiled on Debian bookworm rather than the authors' original host environment.",
+    "Runtime is retained as environment evidence but is not compared with the paper's hardware-dependent one-second timing claim."
+  ],
+  "version": "repropilot.paper-comparison/v1"
+}

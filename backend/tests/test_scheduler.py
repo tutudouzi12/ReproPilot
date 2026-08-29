@@ -108,13 +108,47 @@ async def test_failed_result_retries_within_limit(tmp_path):
 
 
 @pytest.mark.asyncio
+async def test_retry_clears_stale_artifacts_from_previous_attempt(tmp_path):
+    class TwoFailures:
+        def __init__(self):
+            self.attempts = 0
+
+        async def execute(self, task, plan):
+            self.attempts += 1
+            if self.attempts == 1:
+                return TaskExecutionResult(
+                    status="failed",
+                    error="retryable validation failure",
+                    artifact_values={"research_assessment": '{"stale":true}'},
+                )
+            return TaskExecutionResult(status="failed", error="trajectory integrity failure")
+
+    store = FilePlanStore(tmp_path / "plans.json")
+    planner = Planner()
+    plan = planner.build_plan(planner.classify("retry artifact cleanup"))
+    plan.nodes = [plan.nodes[0]]
+    plan.edges = []
+    plan.nodes[0].retry_limit = 1
+    plan.nodes[0].output_artifacts = ["research_assessment"]
+    await store.save_plan(plan)
+
+    await DAGScheduler(store, EventBus(store), TwoFailures(), 1).execute_plan(plan.id)
+
+    saved = await store.get_plan(plan.id)
+    assert saved.status == "failed"
+    assert saved.nodes[0].run_count == 2
+    assert "research_assessment" not in saved.artifacts
+
+
+@pytest.mark.asyncio
 async def test_failed_result_preserves_validation_payload(tmp_path):
     class FailedValidationExecutor:
         async def execute(self, task, plan):
             return TaskExecutionResult(
                 status="failed",
                 result="validation payload",
-                structured_data='{"status":"failed"}',
+                structured_data='{"version":"autoresearch.assessment/v1"}',
+                artifact_values={"research_assessment": '{"version":"autoresearch.assessment/v1"}'},
                 error="holdout failed",
             )
 
@@ -124,6 +158,7 @@ async def test_failed_result_preserves_validation_payload(tmp_path):
     plan.nodes = [plan.nodes[0]]
     plan.edges = []
     plan.nodes[0].retry_limit = 0
+    plan.nodes[0].output_artifacts = ["research_assessment", "missing_failed_output"]
     await store.save_plan(plan)
 
     await DAGScheduler(
@@ -137,8 +172,14 @@ async def test_failed_result_preserves_validation_payload(tmp_path):
     assert saved.status == "failed"
     assert saved.nodes[0].status == "failed"
     assert saved.nodes[0].result == "validation payload"
-    assert saved.nodes[0].structured_data == '{"status":"failed"}'
+    assert saved.nodes[0].structured_data == '{"version":"autoresearch.assessment/v1"}'
     assert saved.nodes[0].error == "holdout failed"
+    assert saved.artifacts["research_assessment"]["value"] == '{"version":"autoresearch.assessment/v1"}'
+    assert saved.artifacts["research_assessment"]["type"] == "json"
+    assert "missing_failed_output" not in saved.artifacts
+    history = await store.list_events(plan.id)
+    failed = next(event for event in history if event.event_type == "task_failed")
+    assert failed.payload["structured_data"] == '{"version":"autoresearch.assessment/v1"}'
 
 
 class SlowExecutor:

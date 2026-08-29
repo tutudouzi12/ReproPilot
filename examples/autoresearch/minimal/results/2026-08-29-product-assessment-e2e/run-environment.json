@@ -1,0 +1,26 @@
+{
+  "version": "repropilot.product-run-environment/v1",
+  "harness_source_binding": {
+    "git_base": "65db62097cbafce382f0eb33ac40a88a9b499765",
+    "worktree_state": "dirty_uncommitted",
+    "worktree_change_entries_at_audit": 25,
+    "backend_image_id": "sha256:4f0528d77e30953b1a916ee805ed1d4cb324eb9fe17323ab035d920cf6798804",
+    "sandbox_image_id": "sha256:32b5f66b717fa1fd228123c6b821e92bd080d47393e706a5ff28c8ed5aa10a3d",
+    "release_evidence": false,
+    "boundary": "The image IDs bind this local run, but the harness source is not publicly reconstructable until the worktree changes are committed."
+  },
+  "model": {
+    "provider": "dashscope.aliyuncs.com",
+    "name": "qwen3-coder-plus",
+    "usage_source": "provider_reported"
+  },
+  "sandbox_limits": {
+    "cpu": 1,
+    "memory": "512m",
+    "pids": 128,
+    "network_disabled": true,
+    "exec_timeout_seconds": 300,
+    "max_output_bytes": 1048576,
+    "gpu_request": "none"
+  }
+}
