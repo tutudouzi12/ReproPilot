@@ -16,7 +16,7 @@ FAILED_DEPENDENCY_STATUSES = {"failed", "blocked", "canceled"}
 
 def infer_artifact_type(key: str) -> str:
     lowered = key.lower()
-    if lowered in {"claim_rubric", "claim_evidence_graph"}:
+    if lowered in {"claim_rubric", "claim_evidence_graph"} or "assessment" in lowered:
         return "json"
     if "plot" in lowered or "image" in lowered:
         return "image_base64"
@@ -262,6 +262,10 @@ class DAGScheduler:
                     pass
 
     async def _run_task(self, plan: PlanGraph, task: TaskNode) -> None:
+        for artifact_name in task.output_artifacts:
+            existing = plan.artifacts.get(artifact_name)
+            if isinstance(existing, dict) and existing.get("producer_task_id") == task.id:
+                plan.artifacts.pop(artifact_name, None)
         task.status = "in_progress"
         task.run_count += 1
         task.execution_epoch += 1
@@ -346,6 +350,21 @@ class DAGScheduler:
                 task.structured_data = result.structured_data or None
                 task.image_base64 = result.image_base64 or None
                 task.error = result.error or f"executor returned status {result.status}"
+                # Failed validation is still a valid scientific outcome. Keep
+                # only explicitly returned evidence; never synthesize missing
+                # outputs from a failed task's result text.
+                for artifact_name in task.output_artifacts:
+                    if artifact_name not in result.artifact_values:
+                        continue
+                    plan.artifacts[artifact_name] = build_artifact(
+                        artifact_name,
+                        task.id,
+                        result.artifact_values[artifact_name],
+                        result=result.result,
+                        code=result.code,
+                        structured_data=result.structured_data,
+                    )
+                    created_artifact_keys.append(artifact_name)
                 event_type = self._schedule_retry_or_fail(task)
         except TimeoutError:
             task.error = f"task timed out after {effective_timeout:g} seconds"
@@ -381,12 +400,14 @@ class DAGScheduler:
                     "artifacts": {key: plan.artifacts[key] for key in created_artifact_keys},
                 },
             ))
-        payload = {"error": task.error} if task.error else {
+        payload = {
             "result": task.result,
             "code": task.code,
             "structured_data": task.structured_data,
             "image_base64": task.image_base64,
         }
+        if task.error:
+            payload["error"] = task.error
         await self.events.publish(PlanEvent(
             plan_id=plan.id,
             event_type=event_type,

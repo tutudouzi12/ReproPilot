@@ -776,7 +776,11 @@ function ArtifactPreview({
   );
 }
 
-const selectedTaskTypeIsAutoResearch = (raw: string): boolean => raw.includes('autoresearch.ledger/v1') || raw.includes('autoresearch.validation/v1');
+const selectedTaskTypeIsAutoResearch = (raw: string): boolean =>
+  raw.includes('autoresearch.ledger/v1')
+  || raw.includes('autoresearch.validation/v1')
+  || raw.includes('autoresearch.assessment/v1')
+  || raw.includes('autoresearch.assessment-status/v1');
 
 function EmptyInspectorState({ text }: { text: string }) {
   return <div className="execution-empty-state">{text}</div>;

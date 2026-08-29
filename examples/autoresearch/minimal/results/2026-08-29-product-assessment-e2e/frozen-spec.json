@@ -1,0 +1,47 @@
+{
+  "dependencies": [],
+  "direction": "maximize",
+  "editable_files": [
+    ".repropilot/uploads/01-candidate.py"
+  ],
+  "eval_command": [
+    "python",
+    ".repropilot/uploads/02-evaluator.py"
+  ],
+  "frozen_files": {
+    ".repropilot/uploads/02-evaluator.py": "d93d862f090523608b9252ec5ad037da6be8f2e98477d0fce656415985064620",
+    ".repropilot/uploads/03-holdout_evaluator.py": "c782b513591d5f2e0012d0df2210221d352731de7399ca3c220d8751bd4ed38b"
+  },
+  "frozen_workspace_sha256": "6eee18ee4bce8524975673cdfcba245d0f79632b6ec8ee246832036c7a1ae92d",
+  "guard_commands": [
+    [
+      "python",
+      "-m",
+      "py_compile",
+      ".repropilot/uploads/01-candidate.py"
+    ]
+  ],
+  "holdout_command": [
+    "python",
+    ".repropilot/uploads/03-holdout_evaluator.py"
+  ],
+  "holdout_min_delta": 0.01,
+  "max_trials": 3,
+  "max_wall_seconds": 300,
+  "metric_key": "metrics.accuracy",
+  "min_delta": 0.01,
+  "name": "minimal-bounded-improvement",
+  "objective": "Improve the frozen accuracy metric without changing either evaluator.",
+  "protected_files": [
+    ".repropilot/uploads/02-evaluator.py",
+    ".repropilot/uploads/03-holdout_evaluator.py"
+  ],
+  "repository_revision": "7d5120eb81a3f9fcd0bca690a3f204f435ba39e2",
+  "search_aggregation": "worst",
+  "search_runs": 3,
+  "source_path": ".repropilot/uploads/04-autoresearch.json",
+  "spec_sha256": "dbda59edb2ee90207e458e1ca3ff0af7bf0a4f26e1c253b9950c1358a20c6e23",
+  "target_score": 1.0,
+  "validation_runs": 3,
+  "version": "autoresearch.spec/v1"
+}

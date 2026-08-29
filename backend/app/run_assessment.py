@@ -433,3 +433,25 @@ def write_assessment_atomic(path: Path, assessment: RunAssessment) -> None:
     finally:
         if temporary.exists():
             temporary.unlink()
+
+
+def prepare_workspace_assessment_path(workspace: str | Path) -> Path:
+    """Create a non-symlinked metadata directory contained by the workspace."""
+
+    root = Path(workspace).resolve(strict=True)
+    current = root
+    for part in (".repropilot", "autoresearch"):
+        current = current / part
+        if current.exists():
+            if current.is_symlink() or not current.is_dir():
+                raise ValueError(f"assessment metadata directory is unsafe: {part}")
+        else:
+            current.mkdir()
+        resolved = current.resolve(strict=True)
+        if resolved != root and root not in resolved.parents:
+            raise ValueError("assessment metadata directory escapes workspace")
+        current = resolved
+    path = current / "assessment.json"
+    if path.exists() and not (path.is_file() or path.is_symlink()):
+        raise ValueError("assessment output path is not a file")
+    return path

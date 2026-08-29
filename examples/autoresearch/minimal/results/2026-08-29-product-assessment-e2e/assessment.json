@@ -1,0 +1,114 @@
+{
+  "compliance": {
+    "candidate_intact": true,
+    "hard_violation": false,
+    "hard_violation_reasons": [],
+    "integrity_stop_triggered": false,
+    "protected_files_intact": true,
+    "spec_ledger_alignment": true,
+    "spec_validation_alignment": true,
+    "status": "verified",
+    "terminal_evidence_bindings_verified": true,
+    "trajectory_chain_verified": true
+  },
+  "evidence": {
+    "failure_sha256": null,
+    "integrity": "verified",
+    "last_event_sha256": "40845eafd35cf56ad157341237d2927cb70970451ac6b53e1801ea5eb02a1a65",
+    "ledger_sha256": "ee33258979aa244a849fc675d8a47fbcb25efeb620d18081b907f14bb0fc6c33",
+    "run_facts_sha256": null,
+    "source_bindings_verified": true,
+    "spec_sha256": "dbda59edb2ee90207e458e1ca3ff0af7bf0a4f26e1c253b9950c1358a20c6e23",
+    "trajectory_sha256": "e3eb2fab59538c1def25339f22bc98c355458513a03774e752da91f928a0d4ee",
+    "trajectory_source": "native_hash_linked",
+    "validation_sha256": "0ba0c526728e8ed04f695e8ff4ed63e14caaef722595c898bac0edb0b8af77d2"
+  },
+  "method": "deterministic_raw_facts_no_composite_score",
+  "outcome": {
+    "acceptance_delta": 0.01,
+    "acceptance_rule": "minimum_improvement",
+    "acceptance_target_score": 0.3433333333333333,
+    "baseline_score": 0.6666666666666666,
+    "best_score": 1.0,
+    "direction": "maximize",
+    "directional_improvement": 0.33333333333333337,
+    "metric_key": "metrics.accuracy",
+    "score_matches": true,
+    "status": "passed",
+    "terminal_status": "passed",
+    "validation_baseline_score": 0.3333333333333333,
+    "validation_failed_runs": 0,
+    "validation_mode": "hidden_holdout",
+    "validation_observed_score": 1.0,
+    "validation_passed_runs": 3,
+    "validation_status": "passed"
+  },
+  "process": {
+    "accepted_trials": 1,
+    "attempted_requests": null,
+    "baseline_completed": true,
+    "command_duration_ms": 2320,
+    "command_runs": 14,
+    "completed_responses": 2,
+    "completed_trials": 2,
+    "decision_counts": {
+      "keep": 1,
+      "reject": 1
+    },
+    "event_count": 26,
+    "event_status_counts": {
+      "apply_patch": {
+        "applied": 1
+      },
+      "baseline": {
+        "completed": 1,
+        "started": 1
+      },
+      "decision": {
+        "exception": 1,
+        "kept": 1
+      },
+      "guard": {
+        "passed": 7
+      },
+      "hidden_validation": {
+        "passed": 5
+      },
+      "proposal": {
+        "candidate": 1
+      },
+      "public_evaluation": {
+        "passed": 6
+      },
+      "rollback": {
+        "restored_best": 1
+      }
+    },
+    "event_type_counts": {
+      "apply_patch": 1,
+      "baseline": 2,
+      "decision": 2,
+      "finish": 1,
+      "guard": 7,
+      "hidden_validation": 5,
+      "proposal": 1,
+      "public_evaluation": 6,
+      "rollback": 1
+    },
+    "finish_event_present": true,
+    "max_trials": 3,
+    "reported_tokens": 2397,
+    "request_cap": null,
+    "rollback_count": 1,
+    "sequence_verified": true,
+    "status": "complete",
+    "stop_reason": "target_score_reached",
+    "usage_reports": 2
+  },
+  "scoring": {
+    "composite_score": null,
+    "reason": "raw dimension facts are retained before any validated weighting policy",
+    "status": "not_calculated"
+  },
+  "version": "autoresearch.assessment/v1"
+}

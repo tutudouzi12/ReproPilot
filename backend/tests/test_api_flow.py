@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import time
 
@@ -7,8 +8,10 @@ from fastapi.testclient import TestClient
 
 import app.main as main
 from app.agents import RoutedAgentExecutor
+from app.autoresearch import ResearchSpec, TrialLedger, canonical_sha256
 from app.events import EventBus
-from app.scheduler import DAGScheduler
+from app.models import PlanGraph, TaskNode
+from app.scheduler import DAGScheduler, build_artifact
 from app.store import FilePlanStore
 
 
@@ -104,9 +107,60 @@ def test_unknown_plan_routes_return_not_found(tmp_path, monkeypatch):
 
     with TestClient(main.app) as client:
         assert client.get("/api/plans/missing").status_code == 404
+        assert client.get("/api/plans/missing/assessment").status_code == 404
         assert client.get("/api/plans/missing/events").status_code == 404
         assert client.post("/api/plans/missing/execute").status_code == 404
         assert client.get("/api/plans/missing/stream").status_code == 404
+
+
+def test_assessment_endpoint_returns_legacy_plan_as_partial(tmp_path, monkeypatch):
+    store = FilePlanStore(tmp_path / "plans.json")
+    events = EventBus(store)
+    monkeypatch.setattr(main, "store", store)
+    monkeypatch.setattr(main, "events", events)
+    monkeypatch.setattr(main, "scheduler", DAGScheduler(store, events, RoutedAgentExecutor()))
+    monkeypatch.setattr(main, "UPLOAD_ROOT", tmp_path / "uploads")
+    spec = ResearchSpec(
+        name="legacy-api-run",
+        objective="Assess retained legacy evidence",
+        repository_revision="a" * 40,
+        editable_files=["candidate.py"],
+        protected_files=["evaluator.py"],
+        eval_command=["python", "evaluator.py"],
+        metric_key="metrics.score",
+        frozen_files={"evaluator.py": "b" * 64},
+        frozen_workspace_sha256="c" * 64,
+    )
+    spec_payload = spec.model_dump(mode="json")
+    spec_payload["spec_sha256"] = ""
+    spec.spec_sha256 = canonical_sha256(spec_payload)
+    ledger = TrialLedger(
+        spec_sha256=spec.spec_sha256,
+        status="completed",
+        metric_key=spec.metric_key,
+        direction=spec.direction,
+        baseline_score=0.5,
+        best_score=0.75,
+        max_trials=spec.max_trials,
+        completed_trials=1,
+        accepted_trials=1,
+        stop_reason="trial_budget_exhausted",
+    )
+    node = TaskNode(name="legacy run", type="autoresearch_run", description="run", assigned_to="research_coding_agent")
+    plan = PlanGraph(user_intent="legacy run", intent_type="AutoResearch", owner_id="legacy-owner", nodes=[node], edges=[])
+    plan.artifacts["research_spec"] = build_artifact("research_spec", node.id, spec.model_dump_json())
+    plan.artifacts["research_trial_ledger"] = build_artifact("research_trial_ledger", node.id, ledger.model_dump_json())
+    asyncio.run(store.save_plan(plan))
+
+    with TestClient(main.app) as client:
+        response = client.get(f"/api/plans/{plan.id}/assessment", headers={"X-User-Id": "legacy-owner"})
+        plan_response = client.get(f"/api/plans/{plan.id}", headers={"X-User-Id": "legacy-owner"})
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "available"
+    assert response.json()["assessment"]["evidence"]["trajectory_source"] == "derived_from_ledger"
+    assert response.json()["assessment"]["evidence"]["integrity"] == "partial"
+    assert plan_response.json()["assessment"] == response.json()
 
 
 def test_strict_api_plan_fails_instead_of_faking_missing_dependencies(tmp_path, monkeypatch):

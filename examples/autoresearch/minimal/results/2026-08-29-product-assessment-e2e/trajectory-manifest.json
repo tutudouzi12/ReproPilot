@@ -1,0 +1,14 @@
+{
+  "event_count": 26,
+  "event_version": "autoresearch.trajectory-event/v1",
+  "failure_sha256": null,
+  "first_event_sha256": "76866c1870d7bca17eb5e431a54bc9589d86ef936deb957f001a073a89c9c85d",
+  "last_event_sha256": "40845eafd35cf56ad157341237d2927cb70970451ac6b53e1801ea5eb02a1a65",
+  "ledger_sha256": "ee33258979aa244a849fc675d8a47fbcb25efeb620d18081b907f14bb0fc6c33",
+  "spec_sha256": "dbda59edb2ee90207e458e1ca3ff0af7bf0a4f26e1c253b9950c1358a20c6e23",
+  "terminal_event": "finish",
+  "terminal_status": "passed",
+  "trajectory_sha256": "e3eb2fab59538c1def25339f22bc98c355458513a03774e752da91f928a0d4ee",
+  "validation_sha256": "0ba0c526728e8ed04f695e8ff4ed63e14caaef722595c898bac0edb0b8af77d2",
+  "version": "autoresearch.trajectory-manifest/v1"
+}

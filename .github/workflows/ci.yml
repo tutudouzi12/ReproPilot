@@ -23,6 +23,7 @@ jobs:
       - run: python -m pytest -q --cov=app --cov-branch --cov-report=term-missing --cov-report=json:coverage.json
         working-directory: backend
       - run: python scripts/coverage_summary.py Backend backend/coverage.json --min-line 83 --min-branch 68
+      - run: python -m pytest -q examples/paper-reproduction/fasttext-ag-news/test_run.py
       - run: python -m pytest -q --cov=app --cov-branch --cov-report=term-missing --cov-report=json:coverage.json
         working-directory: docker-sandbox
       - run: python scripts/coverage_summary.py Sandbox docker-sandbox/coverage.json --min-line 88 --min-branch 80

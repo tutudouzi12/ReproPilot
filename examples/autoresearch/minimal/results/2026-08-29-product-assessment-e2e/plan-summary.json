@@ -1,0 +1,122 @@
+{
+  "assessment": {
+    "compliance": "verified",
+    "composite_score": null,
+    "integrity": "verified",
+    "outcome": "passed",
+    "process": "complete",
+    "trajectory_source": "native_hash_linked"
+  },
+  "evidence_boundary": "One bounded product-chain run proving deterministic execution, evidence binding, and assessment generation; not a general success rate, production SLA, or model ranking.",
+  "execution": {
+    "event_count": 51,
+    "event_type_counts": {
+      "artifact_created": 8,
+      "plan_completed": 1,
+      "plan_started": 1,
+      "task_completed": 8,
+      "task_log": 17,
+      "task_ready": 8,
+      "task_started": 8
+    },
+    "runtime_cleanup": {
+      "deleted_count": 1,
+      "failure_count": 0,
+      "requested": 1,
+      "status": "completed"
+    }
+  },
+  "model_usage": {
+    "completion_tokens": 460,
+    "model": "qwen3-coder-plus",
+    "prompt_tokens": 1937,
+    "provider": "dashscope.aliyuncs.com",
+    "reported_request_count": 2,
+    "request_count": 2,
+    "total_tokens": 2397
+  },
+  "plan": {
+    "created_at": "2026-08-29T13:23:11.888353+00:00",
+    "id": "312f3bc2e81d436f95ff8df0c48fecb3",
+    "intent_type": "AutoResearch",
+    "nodes": [
+      {
+        "assigned_to": "coder_agent",
+        "run_count": 1,
+        "status": "completed",
+        "type": "repo_discovery"
+      },
+      {
+        "assigned_to": "coder_agent",
+        "run_count": 1,
+        "status": "completed",
+        "type": "repo_prepare"
+      },
+      {
+        "assigned_to": "research_coding_agent",
+        "run_count": 1,
+        "status": "completed",
+        "type": "autoresearch_spec_freeze"
+      },
+      {
+        "assigned_to": "coder_agent",
+        "run_count": 1,
+        "status": "completed",
+        "type": "resolve_dependencies"
+      },
+      {
+        "assigned_to": "sandbox_agent",
+        "run_count": 1,
+        "status": "completed",
+        "type": "prepare_runtime"
+      },
+      {
+        "assigned_to": "sandbox_agent",
+        "run_count": 1,
+        "status": "completed",
+        "type": "install_dependencies"
+      },
+      {
+        "assigned_to": "research_coding_agent",
+        "run_count": 1,
+        "status": "completed",
+        "type": "autoresearch_run"
+      },
+      {
+        "assigned_to": "research_coding_agent",
+        "run_count": 1,
+        "status": "completed",
+        "type": "autoresearch_validate"
+      }
+    ],
+    "status": "completed",
+    "updated_at": "2026-08-29T13:23:48.312471+00:00"
+  },
+  "search": {
+    "accepted_trials": 1,
+    "aggregation": "worst",
+    "baseline_score": 0.6666666666666666,
+    "best_score": 1.0,
+    "completed_trials": 2,
+    "metric_key": "metrics.accuracy",
+    "runs_per_measurement": 3,
+    "stop_reason": "target_score_reached"
+  },
+  "target": {
+    "repository_revision": "7d5120eb81a3f9fcd0bca690a3f204f435ba39e2",
+    "repository_url": "https://github.com/tutudouzi12/ReproPilot",
+    "spec_sha256": "dbda59edb2ee90207e458e1ca3ff0af7bf0a4f26e1c253b9950c1358a20c6e23"
+  },
+  "validation": {
+    "candidate_intact": true,
+    "mode": "hidden_holdout",
+    "observed_scores": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "protected_files_intact": true,
+    "status": "passed"
+  },
+  "version": "repropilot.product-assessment-evidence/v1"
+}

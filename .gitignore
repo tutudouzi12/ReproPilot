@@ -1,5 +1,6 @@
 # Workspace metadata
 .codex/
+.repropilot/
 
 # Environment files
 backend.env
@@ -8,6 +9,7 @@ backend.env.ps1
 
 # Logs and runtime output
 logs/
+tmp/
 *.log
 
 # Build output
@@ -19,6 +21,7 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .coverage
+.coverage-*
 coverage.json
 .mypy_cache/
 .ruff_cache/

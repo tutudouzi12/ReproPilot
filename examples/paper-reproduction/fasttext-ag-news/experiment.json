@@ -1,0 +1,75 @@
+{
+  "version": "repropilot.paper-reproduction/v1",
+  "id": "fasttext-ag-news-bigram",
+  "title": "fastText word-bigram ablation on AG News",
+  "paper": {
+    "title": "Bag of Tricks for Efficient Text Classification",
+    "authors": [
+      "Armand Joulin",
+      "Edouard Grave",
+      "Piotr Bojanowski",
+      "Tomas Mikolov"
+    ],
+    "arxiv_id": "1607.01759",
+    "url": "https://arxiv.org/abs/1607.01759",
+    "pdf_url": "https://arxiv.org/pdf/1607.01759",
+    "pdf_sha256": "6cbcf620c2537ed54dfb9ed0d843a83689b82dc41dcd305bfb2e82425d4d7906",
+    "source_locator": "Table 1 and Section 3.1",
+    "reported": {
+      "baseline_accuracy_percent": 91.5,
+      "bigram_accuracy_percent": 92.5,
+      "bigram_gain_percentage_points": 1.0
+    }
+  },
+  "claim": {
+    "statement": "On AG News, adding word bigrams to the h=10 fastText classifier improves test accuracy from 91.5% to 92.5%.",
+    "absolute_accuracy_tolerance_percentage_points": 1.0,
+    "minimum_bigram_gain_percentage_points": 0.5
+  },
+  "repository": {
+    "url": "https://github.com/facebookresearch/fastText.git",
+    "revision": "206179d64c1730862328e9b750e98bd8aa1c16b5",
+    "archive_sha256": "24f30b4c939148f60174ea8d9995b22b9f1752dd2cfa16ed34e8d89c02c02b7d",
+    "license": "BSD-3-Clause",
+    "additional_patent_grant": "PATENTS",
+    "protocol_file": "classification-results.sh"
+  },
+  "dataset": {
+    "name": "AG News Topic Classification Dataset",
+    "url": "https://s3.amazonaws.com/fast-ai-nlp/ag_news_csv.tgz",
+    "archive_sha256": "9a8c300eabb45750237fcc669f61cb8a3448f3ef6f6098e1ce340e444f6872be",
+    "train_path": "ag_news_csv/train.csv",
+    "train_sha256": "76a0a2d2f92b286371fe4d4044640910a04a803fdd2538e0f3f29a5c6f6b672e",
+    "train_examples": 120000,
+    "test_path": "ag_news_csv/test.csv",
+    "test_sha256": "521465c2428ed7f02f8d6db6ffdd4b5447c1c701962353eb2c40d548c3c85699",
+    "test_examples": 7600,
+    "usage_boundary": "The bundled dataset readme describes research/non-commercial use; this example downloads data at run time and does not redistribute it."
+  },
+  "environment": {
+    "base_image": "debian:bookworm-slim@sha256:abd67ffcfa541b485a3dff59865ab629aa048a6c613e639d36e7456b0b229241",
+    "network_during_experiment": "none",
+    "cpus": 4,
+    "memory": "2g",
+    "pids_limit": 256,
+    "tmpfs_size": "2g"
+  },
+  "protocol": {
+    "dimension": 10,
+    "learning_rate": 0.25,
+    "epochs": 5,
+    "minimum_count": 1,
+    "bucket": 10000000,
+    "threads": 4,
+    "variants": {
+      "unigram": 1,
+      "bigram": 2
+    },
+    "shuffle_seeds": [1729, 2718, 3141],
+    "protocol_deviations": [
+      "The official script uses an unseeded Perl shuffle; this reproduction fixes three shuffle seeds so data order can be replayed.",
+      "The official fastText commit is pinned to the paper's 2016-08-09 submission date, but it is compiled on Debian bookworm rather than the authors' original host environment.",
+      "Runtime is retained as environment evidence but is not compared with the paper's hardware-dependent one-second timing claim."
+    ]
+  }
+}

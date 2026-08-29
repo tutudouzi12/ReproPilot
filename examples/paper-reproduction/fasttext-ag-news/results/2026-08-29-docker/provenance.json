@@ -1,0 +1,71 @@
+{
+  "container": {
+    "base_image": "debian:bookworm-slim@sha256:abd67ffcfa541b485a3dff59865ab629aa048a6c613e639d36e7456b0b229241",
+    "capabilities_dropped": "ALL",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "--read-only",
+      "--cpus",
+      "4",
+      "--memory",
+      "2g",
+      "--pids-limit",
+      "256",
+      "--security-opt",
+      "no-new-privileges",
+      "--cap-drop",
+      "ALL",
+      "--user",
+      "65534:65534",
+      "--tmpfs",
+      "/tmp:rw,noexec,nosuid,size=2g",
+      "--mount",
+      "type=bind,src=<DATASET_ARCHIVE>,dst=/input/ag_news_csv.tgz,readonly",
+      "repropilot-fasttext-ag-news:paper-v1",
+      "--seeds",
+      "1729,2718,3141"
+    ],
+    "docker_server_version": "29.6.2",
+    "image": {
+      "created": "2026-08-29T09:03:28.411223315Z",
+      "id": "sha256:899efbebaa0fdc29862d74953d78fda397839f8207f685367373eb52041cd221",
+      "tag": "repropilot-fasttext-ag-news:paper-v1"
+    },
+    "network": "none",
+    "no_new_privileges": true,
+    "read_only_root": true,
+    "resource_limits": {
+      "base_image": "debian:bookworm-slim@sha256:abd67ffcfa541b485a3dff59865ab629aa048a6c613e639d36e7456b0b229241",
+      "cpus": 4,
+      "memory": "2g",
+      "network_during_experiment": "none",
+      "pids_limit": 256,
+      "tmpfs_size": "2g"
+    }
+  },
+  "dataset": {
+    "archive_sha256": "9a8c300eabb45750237fcc669f61cb8a3448f3ef6f6098e1ce340e444f6872be",
+    "test_sha256": "521465c2428ed7f02f8d6db6ffdd4b5447c1c701962353eb2c40d548c3c85699",
+    "train_sha256": "76a0a2d2f92b286371fe4d4044640910a04a803fdd2538e0f3f29a5c6f6b672e",
+    "url": "https://s3.amazonaws.com/fast-ai-nlp/ag_news_csv.tgz"
+  },
+  "experiment_id": "fasttext-ag-news-bigram",
+  "experiment_spec_sha256": "e50703fe0446b4151ea730529be4840c781c267f55936dfdf796397f0288e5d7",
+  "finished_at": "2026-08-29T09:07:50.710312+00:00",
+  "host_platform": "Windows-10-10.0.22631-SP0",
+  "repropilot_revision": "65db62097cbafce382f0eb33ac40a88a9b499765",
+  "source": {
+    "additional_patent_grant": "PATENTS",
+    "archive_sha256": "24f30b4c939148f60174ea8d9995b22b9f1752dd2cfa16ed34e8d89c02c02b7d",
+    "license": "BSD-3-Clause",
+    "protocol_file": "classification-results.sh",
+    "revision": "206179d64c1730862328e9b750e98bd8aa1c16b5",
+    "url": "https://github.com/facebookresearch/fastText.git"
+  },
+  "started_at": "2026-08-29T09:07:00.122198+00:00",
+  "version": "repropilot.paper-provenance/v1"
+}

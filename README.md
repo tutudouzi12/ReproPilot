@@ -79,6 +79,8 @@ ReproPilot 关注的不是一次模型问答，而是一条完整的研究执行
 |---|---|
 | Backend | [`main@7c59cbf`](https://github.com/tutudouzi12/ReproPilot/commit/7c59cbf425f08f1007085315e9083460952ae9be)：`256 passed, 5 skipped`；行覆盖率门槛 83%，分支覆盖率门槛 68% |
 | Docker Sandbox | `7 passed` |
+| 有界论文复现 | [fastText AG News](examples/paper-reproduction/fasttext-ag-news/results/2026-08-29-docker/README.md)：固定官方源码、数据哈希与 Docker 环境，3 组 paired runs 得到 `92.433%` bigram accuracy、`+1.133 pp`，两项冻结标准均为 `verified` |
+| 产品链 Assessment E2E | [单次真实模型证据包](examples/autoresearch/minimal/results/2026-08-29-product-assessment-e2e/)：HTTP API 驱动 8/8 DAG 节点，公开指标 `0.6667 -> 1.0`，隐藏验收 `3/3`，26 个轨迹事件通过哈希链校验；运行镜像来自未提交工作区，因此明确标记 `release_evidence=false` |
 | AutoResearch scenarios | 7 个固定场景覆盖成功、契约拒绝、语法失败、超时、隐藏验收失败与完整性中止 |
 | Frontend | ESLint、TypeScript、Vite production build 通过 |
 | Dependency audit | `npm audit --omit=dev`：`0 vulnerabilities` |
@@ -86,7 +88,7 @@ ReproPilot 关注的不是一次模型问答，而是一条完整的研究执行
 | Docker smoke | 鉴权、白名单、资源限制、真实执行、超时、截断和清理通过 |
 | GitHub Actions | Backend、Sandbox、Frontend 与 Docker smoke jobs |
 
-上述状态区分单元测试、容器 Smoke 和真实模型案例；它们不等于公网生产部署或大规模论文复现成功率。
+上述状态区分单元测试、容器 Smoke、单条有界论文主张和真实模型案例；它们不等于公网生产部署、整篇论文完整复现或大规模论文复现成功率。
 
 ```powershell
 Push-Location backend
@@ -143,6 +145,8 @@ OPENAI_MODEL=your-model
 ## 文档导航
 
 - [端到端演示](docs/end-to-end-demo.md)
+- [fastText AG News 有界论文复现](examples/paper-reproduction/fasttext-ag-news/)
+- [真实模型产品链 Assessment 证据](examples/autoresearch/minimal/results/2026-08-29-product-assessment-e2e/)
 - [固定评测场景套件](examples/autoresearch/evaluation-suite/)
 - [多仓库 pilot benchmark](examples/autoresearch/repository-scale/BENCHMARK_REPORT.md)
 - [18-cell 重复 campaign](examples/autoresearch/repository-scale/REPEATED_BENCHMARK_REPORT.md)

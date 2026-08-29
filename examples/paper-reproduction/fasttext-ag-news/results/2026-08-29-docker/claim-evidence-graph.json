@@ -1,0 +1,163 @@
+{
+  "claims": [
+    {
+      "claim_id": "claim-001",
+      "claim_type": "ablation",
+      "confidence": 1.0,
+      "criteria": [
+        {
+          "confidence": 1.0,
+          "criterion_id": "claim-001.criterion-01",
+          "description": "Mean bigram test accuracy is within the frozen tolerance of the paper's 92.5% AG News result.",
+          "evidence_ids": [
+            "evidence-parsed-paper",
+            "evidence-repo-manifest",
+            "evidence-reproduction-mode-report",
+            "evidence-run-metrics",
+            "evidence-comparison-report"
+          ],
+          "observed_value": "92.433% mean across 3 runs",
+          "reason": "Observed 92.433% versus paper 92.5% with a frozen +/-1.0 percentage-point tolerance.",
+          "status": "verified"
+        },
+        {
+          "confidence": 1.0,
+          "criterion_id": "claim-001.criterion-02",
+          "description": "The bigram variant improves mean test accuracy over the unigram control by at least 0.5 percentage points.",
+          "evidence_ids": [
+            "evidence-parsed-paper",
+            "evidence-run-metrics",
+            "evidence-comparison-report"
+          ],
+          "observed_value": "1.133 percentage points",
+          "reason": "Observed paired mean gain 1.133 percentage points; the frozen minimum is 0.5.",
+          "status": "verified"
+        }
+      ],
+      "source_locator": "Table 1 and Section 3.1",
+      "statement": "On AG News, adding word bigrams to the h=10 fastText classifier improves test accuracy from 91.5% to 92.5%.",
+      "status": "verified",
+      "title": "Word bigrams improve AG News accuracy"
+    }
+  ],
+  "evidence": [
+    {
+      "artifact_key": "parsed_paper",
+      "available": true,
+      "evidence_type": "paper",
+      "id": "evidence-parsed-paper",
+      "sha256": "edac9002506a88bd2154de68da608ac24c53f79ba70539f920f08efa0dafa1f9",
+      "summary": "{\"arxiv_id\":\"1607.01759\",\"claim\":\"On AG News, adding word bigrams to the h=10 fastText classifier improves test accuracy from 91.5% to 92.5%.\",\"pdf_sha256\":\"6cbcf620c2537ed54dfb9ed0d843a83689b82dc41dcd305bfb2e82425d4d7906\",\"reported\":{\"baseline_accuracy_percent\":91.5,\"bigram_accuracy_percent\":92.5,\"bigram_gain_percentage_points\":1.0},\"source_locator\":\"Table 1 and Section 3.1\",\"title\":\"Bag of Tricks for Efficient Text Classification\"}"
+    },
+    {
+      "artifact_key": "repo_manifest",
+      "available": true,
+      "evidence_type": "repository",
+      "id": "evidence-repo-manifest",
+      "sha256": "2b16efbc1cd4b445236db82363db80b9e47486730c9ef1e97370ef9d609c3362",
+      "summary": "{\"additional_patent_grant\":\"PATENTS\",\"archive_sha256\":\"24f30b4c939148f60174ea8d9995b22b9f1752dd2cfa16ed34e8d89c02c02b7d\",\"license\":\"BSD-3-Clause\",\"revision\":\"206179d64c1730862328e9b750e98bd8aa1c16b5\",\"url\":\"https://github.com/facebookresearch/fastText.git\"}"
+    },
+    {
+      "artifact_key": "reproduction_mode_report",
+      "available": true,
+      "evidence_type": "environment",
+      "id": "evidence-reproduction-mode-report",
+      "sha256": "beb13cfaa77d5a8fb8dc543f50ec1aec93fb3954de8ce66d69717f9b96d5903b",
+      "summary": "{\"container\":{\"base_image\":\"debian:bookworm-slim@sha256:abd67ffcfa541b485a3dff59865ab629aa048a6c613e639d36e7456b0b229241\",\"capabilities_dropped\":\"ALL\",\"command\":[\"docker\",\"run\",\"--rm\",\"--network\",\"none\",\"--read-only\",\"--cpus\",\"4\",\"--memory\",\"2g\",\"--pids-limit\",\"256\",\"--security-opt\",\"no-new-privileges\",\"--cap-drop\",\"ALL\",\"--user\",\"65534:65534\",\"--tmpfs\",\"/tmp:rw,noexec,nosuid,size=2g\",\"--mount\",\"type=bind,src=<DATASET_ARCHIVE>,dst=/input/ag_news_csv.tgz,readonly\",\"repropilot-fasttext-ag-news:pap"
+    },
+    {
+      "artifact_key": "dependency_install_report",
+      "available": true,
+      "evidence_type": "environment",
+      "id": "evidence-dependency-install-report",
+      "sha256": "3548978831b716eae3b1938bb7312d9d7f3ffb038b5461b1ec6e8d6fc7ee2325",
+      "summary": "{\"base_image\":\"debian:bookworm-slim@sha256:abd67ffcfa541b485a3dff59865ab629aa048a6c613e639d36e7456b0b229241\",\"fasttext_source\":{\"additional_patent_grant\":\"PATENTS\",\"archive_sha256\":\"24f30b4c939148f60174ea8d9995b22b9f1752dd2cfa16ed34e8d89c02c02b7d\",\"license\":\"BSD-3-Clause\",\"revision\":\"206179d64c1730862328e9b750e98bd8aa1c16b5\",\"url\":\"https://github.com/facebookresearch/fastText.git\"}}"
+    },
+    {
+      "artifact_key": "run_metrics",
+      "available": true,
+      "evidence_type": "metric",
+      "id": "evidence-run-metrics",
+      "sha256": "3305ee926fe5097fe878dd8d2b0aa7e9d5ea17186c3f6a06809a7e21ce4c8522",
+      "summary": "{\"dataset_members\":{\"ag_news_csv/readme.txt\":\"779c2e6bbf93dd810d9c7b318006daef7a4bfc34062002461d251dc10fb9f58c\",\"ag_news_csv/test.csv\":\"521465c2428ed7f02f8d6db6ffdd4b5447c1c701962353eb2c40d548c3c85699\",\"ag_news_csv/train.csv\":\"76a0a2d2f92b286371fe4d4044640910a04a803fdd2538e0f3f29a5c6f6b672e\"},\"fasttext_binary_sha256\":\"09e7621c4fce7348f9836663b9fc6c7e37ce5e5aab89f4e8ba5a588b92e3e436\",\"source_revision\":\"206179d64c1730862328e9b750e98bd8aa1c16b5\",\"status\":\"completed\",\"summary\":{\"bigram\":{\"max_accura"
+    },
+    {
+      "artifact_key": "paper_debug_report",
+      "available": true,
+      "evidence_type": "run",
+      "id": "evidence-paper-debug-report",
+      "sha256": "3499a866b3606161ea924535a565c78c0896ee13355a4b4859bbf00628ef3764",
+      "summary": "{\"patches\":0,\"source_revision_unchanged\":true,\"status\":\"not_needed\"}"
+    },
+    {
+      "artifact_key": "paper_patch_manifest",
+      "available": true,
+      "evidence_type": "patch",
+      "id": "evidence-paper-patch-manifest",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "summary": "[]"
+    },
+    {
+      "artifact_key": "comparison_report",
+      "available": true,
+      "evidence_type": "comparison",
+      "id": "evidence-comparison-report",
+      "sha256": "cf1e0499f6ad5bea9517ffccc43345c0c66ca240754f361b7e25eb1f926d7b7b",
+      "summary": "{\"criteria\":{\"absolute_accuracy\":{\"expected_percent\":92.5,\"observed_percent\":92.433333,\"status\":\"verified\",\"tolerance_percentage_points\":1.0},\"bigram_gain\":{\"minimum_percentage_points\":0.5,\"observed_percentage_points\":1.133333,\"paper_reported_percentage_points\":1.0,\"status\":\"verified\"}},\"observed\":{\"bigram\":{\"max_accuracy_percent\":92.6,\"mean_accuracy_percent\":92.433333,\"mean_training_seconds\":6.819304,\"min_accuracy_percent\":92.2,\"population_stddev_percentage_points\":0.169967,\"runs\":3},\"bigram_ga"
+    },
+    {
+      "artifact_key": "rerun_metrics",
+      "available": false,
+      "evidence_type": "metric",
+      "id": "evidence-rerun-metrics",
+      "sha256": "",
+      "summary": ""
+    },
+    {
+      "artifact_key": "rerun_report",
+      "available": false,
+      "evidence_type": "run",
+      "id": "evidence-rerun-report",
+      "sha256": "",
+      "summary": ""
+    },
+    {
+      "artifact_key": "gap_debug_report",
+      "available": false,
+      "evidence_type": "run",
+      "id": "evidence-gap-debug-report",
+      "sha256": "",
+      "summary": ""
+    },
+    {
+      "artifact_key": "gap_patch_manifest",
+      "available": false,
+      "evidence_type": "patch",
+      "id": "evidence-gap-patch-manifest",
+      "sha256": "",
+      "summary": ""
+    },
+    {
+      "artifact_key": "result_plot",
+      "available": false,
+      "evidence_type": "figure",
+      "id": "evidence-result-plot",
+      "sha256": "",
+      "summary": ""
+    }
+  ],
+  "rubric_sha256": "2bd8163002fa540c8922d6a7a894a345b9b3be938d1094c440bc57f4e8b2d366",
+  "status": "assessed",
+  "status_reason": "all criterion verdicts were produced and validated against the bounded evidence inventory",
+  "summary": {
+    "blocked_by_missing_asset": 0,
+    "contradicted": 0,
+    "criterion_evidence_coverage": 1.0,
+    "partially_reproduced": 0,
+    "total_claims": 1,
+    "total_criteria": 2,
+    "unverifiable": 0,
+    "verified": 1
+  },
+  "version": "claim.evidence/v1"
+}
