@@ -40,6 +40,18 @@ def artifact(value: object) -> dict[str, object]:
     return {"value": value}
 
 
+def test_published_evidence_checksums_are_complete_and_lf_stable() -> None:
+    checksums = load_json("checksums.json")
+    published_files = {path.name for path in SOURCE.iterdir() if path.is_file() and path.name != "checksums.json"}
+
+    assert set(checksums) == published_files
+    assert b"\r\n" not in (SOURCE / "checksums.json").read_bytes()
+    for name, expected in checksums.items():
+        data = (SOURCE / name).read_bytes()
+        assert b"\r\n" not in data, f"evidence must use LF: {name}"
+        assert hashlib.sha256(data).hexdigest() == expected
+
+
 def test_export_rebuilds_assessment_and_binds_every_output(tmp_path: Path) -> None:
     plan_id = "product-assessment-export-fixture"
     node = TaskNode(

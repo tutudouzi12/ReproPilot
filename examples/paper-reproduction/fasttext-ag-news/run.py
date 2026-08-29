@@ -38,7 +38,11 @@ def canonical_json(value: Any) -> str:
 
 
 def write_json(path: Path, value: Any) -> None:
-    path.write_text(json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
 
 
 def sha256_file(path: Path) -> str:
@@ -569,7 +573,7 @@ def main() -> int:
     for name, value in outputs.items():
         write_json(output_dir / name, value)
     report = render_report(experiment, metrics, comparison, graph)
-    (output_dir / "README.md").write_text(report, encoding="utf-8")
+    (output_dir / "README.md").write_text(report, encoding="utf-8", newline="\n")
 
     evidence_files = sorted([*outputs, "README.md"])
     bundle = {

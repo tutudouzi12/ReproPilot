@@ -1,0 +1,3 @@
+# Public evidence is byte-hashed, so its checkout bytes must be platform-independent.
+examples/paper-reproduction/fasttext-ag-news/results/2026-08-29-docker/** text eol=lf
+examples/autoresearch/minimal/results/2026-08-29-product-assessment-e2e/** text eol=lf

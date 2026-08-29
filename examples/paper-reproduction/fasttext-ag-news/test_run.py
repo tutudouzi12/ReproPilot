@@ -94,6 +94,9 @@ def test_adjudication_uses_product_claim_evidence_contract():
 
 def test_retained_docker_evidence_is_hash_linked_and_path_sanitized():
     result_dir = ROOT / "results" / "2026-08-29-docker"
+    for artifact in result_dir.iterdir():
+        if artifact.is_file():
+            assert b"\r\n" not in artifact.read_bytes(), f"evidence must use LF: {artifact.name}"
     bundle = json.loads((result_dir / "evidence-bundle.json").read_text(encoding="utf-8"))
     assert bundle["verdict"] == "verified"
     for name, metadata in bundle["files"].items():
