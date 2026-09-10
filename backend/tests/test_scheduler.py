@@ -235,6 +235,19 @@ class HandoffExecutor:
         return TaskExecutionResult(result=f"completed by {task.assigned_to}")
 
 
+class ConcurrentHandoffExecutor:
+    def __init__(self, task_ids):
+        self.started = {task_id: asyncio.Event() for task_id in task_ids}
+        self.release = {task_id: asyncio.Event() for task_id in task_ids}
+        self.calls = []
+
+    async def execute(self, task, plan):
+        self.calls.append((task.id, task.assigned_to))
+        self.started[task.id].set()
+        await self.release[task.id].wait()
+        return TaskExecutionResult(result=f"completed by {task.assigned_to}")
+
+
 @pytest.mark.asyncio
 async def test_reassignment_discards_stale_result(tmp_path):
     store = FilePlanStore(tmp_path / "plans.json")
@@ -261,6 +274,73 @@ async def test_reassignment_discards_stale_result(tmp_path):
     assert saved.nodes[0].result == "completed by sandbox_agent"
     history = await store.list_events(plan.id)
     assert any(event.event_type == "task_result_discarded" for event in history)
+
+
+@pytest.mark.asyncio
+async def test_concurrent_completion_preserves_sibling_reassignment(tmp_path):
+    store = FilePlanStore(tmp_path / "plans.json")
+    event_bus = EventBus(store)
+    planner = Planner()
+    plan = planner.build_plan(planner.classify("并发任务转交测试"))
+    plan.nodes = plan.nodes[:2]
+    plan.edges = []
+    for node in plan.nodes:
+        node.dependencies = []
+    reassigned, sibling = plan.nodes
+    reassigned.assigned_to = "coder_agent"
+    sibling.assigned_to = "data_agent"
+    await store.save_plan(plan)
+    executor = ConcurrentHandoffExecutor([reassigned.id, sibling.id])
+    scheduler = DAGScheduler(store, event_bus, executor, 2)
+    events = event_bus.subscribe(plan.id)
+
+    async def wait_for_task_event(event_type, task_id):
+        while True:
+            event = await asyncio.wait_for(events.get(), timeout=2)
+            if event.event_type == event_type and event.task_id == task_id:
+                return event
+
+    try:
+        running = asyncio.create_task(scheduler.execute_plan(plan.id))
+        await asyncio.gather(
+            asyncio.wait_for(executor.started[reassigned.id].wait(), timeout=2),
+            asyncio.wait_for(executor.started[sibling.id].wait(), timeout=2),
+        )
+        started = await store.get_plan(plan.id)
+        old_execution = scheduler._find_task(started, reassigned.id)
+
+        await scheduler.reassign_task(plan.id, reassigned.id, "sandbox_agent")
+        executor.release[sibling.id].set()
+        await wait_for_task_event("task_completed", sibling.id)
+
+        after_sibling = await store.get_plan(plan.id)
+        handed_off = scheduler._find_task(after_sibling, reassigned.id)
+        assert handed_off.assigned_to == "sandbox_agent"
+        assert handed_off.execution_epoch == old_execution.execution_epoch + 1
+        assert handed_off.execution_id is None
+        assert handed_off.lease_owner is None
+
+        executor.release[reassigned.id].set()
+        await asyncio.wait_for(running, timeout=2)
+    finally:
+        event_bus.unsubscribe(plan.id, events)
+
+    saved = await store.get_plan(plan.id)
+    final_task = scheduler._find_task(saved, reassigned.id)
+    assert saved.status == "completed"
+    assert final_task.assigned_to == "sandbox_agent"
+    assert final_task.result == "completed by sandbox_agent"
+    assert [agent for task_id, agent in executor.calls if task_id == reassigned.id] == [
+        "coder_agent",
+        "sandbox_agent",
+    ]
+    history = await store.list_events(plan.id)
+    assert any(
+        event.event_type == "task_result_discarded"
+        and event.task_id == reassigned.id
+        and event.execution_id == old_execution.execution_id
+        for event in history
+    )
 
 
 @pytest.mark.asyncio
