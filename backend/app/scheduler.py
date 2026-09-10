@@ -289,50 +289,28 @@ class DAGScheduler:
         effective_timeout = max(0.001, min(float(task.timeout_seconds), plan_remaining))
         execution_logs: list[str] = []
         created_artifact_keys: list[str] = []
+        created_artifacts: dict[str, dict] = {}
+        finished_task = task.model_copy(deep=True)
         try:
             result = await asyncio.wait_for(
                 self.executor.execute(task_snapshot, plan_snapshot),
                 timeout=effective_timeout,
             )
             execution_logs = result.logs
-            # Re-read the lease from durable state. API-driven reassignment uses
-            # a separate plan copy, so checking only this run's in-memory graph
-            # would allow the old agent result to overwrite the handoff.
-            persisted = await self.store.get_plan(plan.id)
-            current = self._find_task(persisted, task.id)
-            if (
-                current.execution_id != execution_id
-                or current.execution_epoch != execution_epoch
-                or current.lease_owner != lease_owner
-            ):
-                for index, candidate in enumerate(plan.nodes):
-                    if candidate.id == task.id:
-                        plan.nodes[index] = current
-                        break
-                await self.events.publish(PlanEvent(
-                    plan_id=plan.id,
-                    event_type="task_result_discarded",
-                    task_id=task.id,
-                    task_status=current.status,
-                    trace_id=plan.trace_id,
-                    execution_id=execution_id,
-                    payload={"reason": "stale execution lease"},
-                ))
-                return
             if result.status == "completed":
-                task.status = "completed"
-                task.result = result.result
-                task.code = result.code
-                task.structured_data = result.structured_data
-                task.image_base64 = result.image_base64
-                task.error = result.error or None
-                for artifact_name in task.output_artifacts:
+                finished_task.status = "completed"
+                finished_task.result = result.result
+                finished_task.code = result.code
+                finished_task.structured_data = result.structured_data
+                finished_task.image_base64 = result.image_base64
+                finished_task.error = result.error or None
+                for artifact_name in finished_task.output_artifacts:
                     value = result.artifact_values.get(artifact_name)
                     if value is None:
                         value = result.code if ("code" in artifact_name or "file_path" in artifact_name) and result.code else result.structured_data or result.result
-                    plan.artifacts[artifact_name] = build_artifact(
+                    created_artifacts[artifact_name] = build_artifact(
                         artifact_name,
-                        task.id,
+                        finished_task.id,
                         value,
                         result=result.result,
                         code=result.code,
@@ -341,23 +319,44 @@ class DAGScheduler:
                     created_artifact_keys.append(artifact_name)
                 event_type = "task_completed"
             else:
-                task.result = result.result or None
-                task.code = result.code or None
-                task.structured_data = result.structured_data or None
-                task.image_base64 = result.image_base64 or None
-                task.error = result.error or f"executor returned status {result.status}"
-                event_type = self._schedule_retry_or_fail(task)
+                finished_task.result = result.result or None
+                finished_task.code = result.code or None
+                finished_task.structured_data = result.structured_data or None
+                finished_task.image_base64 = result.image_base64 or None
+                finished_task.error = result.error or f"executor returned status {result.status}"
+                event_type = self._schedule_retry_or_fail(finished_task)
         except TimeoutError:
-            task.error = f"task timed out after {effective_timeout:g} seconds"
-            event_type = self._schedule_retry_or_fail(task)
+            finished_task.error = f"task timed out after {effective_timeout:g} seconds"
+            event_type = self._schedule_retry_or_fail(finished_task)
         except Exception as exc:
-            task.error = str(exc)
-            event_type = self._schedule_retry_or_fail(task)
-        task.finished_at = utc_now() if task.status in TERMINAL_TASK_STATUSES else None
-        task.updated_at = utc_now()
-        task.lease_owner = None
-        task.lease_expires_at = None
-        await self.store.save_plan(plan)
+            finished_task.error = str(exc)
+            event_type = self._schedule_retry_or_fail(finished_task)
+        finished_task.finished_at = utc_now() if finished_task.status in TERMINAL_TASK_STATUSES else None
+        finished_task.updated_at = utc_now()
+        finished_task.lease_owner = None
+        finished_task.lease_expires_at = None
+        committed, current = await self.store.commit_task_if_lease_matches(
+            plan.id,
+            finished_task,
+            execution_id=execution_id,
+            execution_epoch=execution_epoch,
+            lease_owner=lease_owner,
+            artifacts=created_artifacts,
+        )
+        self._replace_task(plan, current)
+        if not committed:
+            await self.events.publish(PlanEvent(
+                plan_id=plan.id,
+                event_type="task_result_discarded",
+                task_id=task.id,
+                task_status=current.status,
+                trace_id=plan.trace_id,
+                execution_id=execution_id,
+                payload={"reason": "stale execution lease"},
+            ))
+            return
+        plan.artifacts.update(created_artifacts)
+        task = current
         for message in execution_logs:
             await self.events.publish(PlanEvent(
                 plan_id=plan.id,
@@ -378,7 +377,7 @@ class DAGScheduler:
                 execution_id=execution_id,
                 payload={
                     "artifact_keys": created_artifact_keys,
-                    "artifacts": {key: plan.artifacts[key] for key in created_artifact_keys},
+                    "artifacts": {key: created_artifacts[key] for key in created_artifact_keys},
                 },
             ))
         payload = {"error": task.error} if task.error else {
@@ -458,6 +457,14 @@ class DAGScheduler:
             if task.id == task_id:
                 return task
         raise KeyError(task_id)
+
+    @staticmethod
+    def _replace_task(plan: PlanGraph, task: TaskNode) -> None:
+        for index, candidate in enumerate(plan.nodes):
+            if candidate.id == task.id:
+                plan.nodes[index] = task
+                return
+        raise KeyError(task.id)
 
     @staticmethod
     def _block_failed_dependencies(plan: PlanGraph) -> list[tuple[TaskNode, str]]:

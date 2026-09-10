@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import asyncio
+from copy import deepcopy
 import json
 import os
 from pathlib import Path
+from typing import Any
 
-from .models import PlanEvent, PlanGraph, utc_now
+from .models import PlanEvent, PlanGraph, TaskNode, utc_now
 
 
 class PlanNotFound(KeyError):
@@ -67,6 +69,39 @@ class FilePlanStore:
         if plan is None:
             raise PlanNotFound(plan_id)
         return plan.model_copy(deep=True)
+
+    async def commit_task_if_lease_matches(
+        self,
+        plan_id: str,
+        task: TaskNode,
+        *,
+        execution_id: str,
+        execution_epoch: int,
+        lease_owner: str,
+        artifacts: dict[str, Any] | None = None,
+    ) -> tuple[bool, TaskNode]:
+        """Commit one task without replacing unrelated state from a stale plan copy."""
+        async with self._lock:
+            plan = self._plans.get(plan_id)
+            if plan is None:
+                raise PlanNotFound(plan_id)
+            for index, current in enumerate(plan.nodes):
+                if current.id != task.id:
+                    continue
+                if (
+                    current.execution_id != execution_id
+                    or current.execution_epoch != execution_epoch
+                    or current.lease_owner != lease_owner
+                ):
+                    return False, current.model_copy(deep=True)
+                committed = task.model_copy(deep=True)
+                plan.nodes[index] = committed
+                if artifacts:
+                    plan.artifacts.update(deepcopy(artifacts))
+                plan.refresh_meta()
+                await self._persist()
+                return True, committed.model_copy(deep=True)
+            raise KeyError(task.id)
 
     async def append_event(self, event: PlanEvent) -> None:
         async with self._lock:
