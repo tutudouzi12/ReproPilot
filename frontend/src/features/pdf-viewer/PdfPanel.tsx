@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { FileUp, MessageSquare, Minus, Plus, Sparkles, X } from 'lucide-react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import type { ChatResponse } from '../../contracts/api';
@@ -38,6 +38,7 @@ export function PdfPanel({ pdfUrl, onAskAI }: PdfPanelProps) {
   const [selection, setSelection] = useState<TextSelection | null>(null);
   const [translatedText, setTranslatedText] = useState('');
   const [isTranslating, setIsTranslating] = useState(false);
+  const pdfOptions = useMemo(() => ({ withCredentials: true }), []);
 
   const closeAssistant = useCallback(() => {
     setSelection(null);
@@ -112,6 +113,7 @@ export function PdfPanel({ pdfUrl, onAskAI }: PdfPanelProps) {
       <div ref={contentRef} onMouseUp={handleTextSelection} className="pdf-canvas">
         <Document
           file={pdfUrl}
+          options={pdfOptions}
           loading={<div className="p-6 text-center text-sm text-gray-500">正在加载 PDF...</div>}
           error={<div className="p-6 text-center text-sm text-red-600">{loadError || 'PDF 加载失败'}</div>}
           onLoadSuccess={({ numPages: loadedPages }) => {

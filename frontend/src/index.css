@@ -60,6 +60,110 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
+.api-auth-gate {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 20% 20%, rgb(182 95 60 / 0.09), transparent 32%),
+    var(--workspace-canvas);
+}
+
+.api-auth-card {
+  width: min(420px, 100%);
+  padding: 32px;
+  border: 1px solid var(--workspace-border);
+  border-radius: var(--workspace-radius-md);
+  background: var(--workspace-raised);
+  box-shadow: 0 18px 50px rgb(37 36 33 / 0.08);
+}
+
+.api-auth-card--status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--workspace-text-secondary);
+}
+
+.api-auth-card--status p,
+.api-auth-card__eyebrow,
+.api-auth-card__copy,
+.api-auth-card__error {
+  margin: 0;
+}
+
+.api-auth-card__icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 18px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--workspace-accent-soft);
+  color: var(--workspace-accent-hover);
+}
+
+.api-auth-card__icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.api-auth-card__eyebrow {
+  color: var(--workspace-accent-hover);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.api-auth-card h1 {
+  margin: 5px 0 10px;
+  font-family: ui-serif, Georgia, Cambria, 'Times New Roman', serif;
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.api-auth-card__copy {
+  color: var(--workspace-text-secondary);
+  font-size: 12px;
+  line-height: 19px;
+}
+
+.api-auth-card__label {
+  display: block;
+  margin: 22px 0 7px;
+  color: var(--workspace-text-secondary);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.api-auth-card__input {
+  width: 100%;
+  height: 40px;
+  border: 1px solid var(--workspace-border-strong);
+  border-radius: var(--workspace-radius-sm);
+  padding: 0 11px;
+  background: var(--workspace-panel);
+  color: var(--workspace-text);
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  font-size: 13px;
+}
+
+.api-auth-card__error {
+  margin-top: 9px;
+  color: var(--workspace-danger);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.api-auth-card__submit {
+  width: 100%;
+  margin-top: 18px;
+}
+
 .repropilot-app-shell {
   display: flex;
   height: 100vh;

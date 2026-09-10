@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import hmac
 import json
 import os
@@ -15,8 +16,17 @@ from fastapi.responses import Response, StreamingResponse
 
 from .agents import RoutedAgentExecutor
 from .events import EventBus
-from .models import ChatRequest, ExecuteTaskRequest, PlanEvent, PlanRequest, ReassignTaskRequest, TaskNode, utc_now
 from .autoresearch import parse_uploaded_research_spec
+from .models import (
+    ApiAuthSessionRequest,
+    ChatRequest,
+    ExecuteTaskRequest,
+    PlanEvent,
+    PlanRequest,
+    ReassignTaskRequest,
+    TaskNode,
+    utc_now,
+)
 from .planner import Planner
 from .scheduler import DAGScheduler, SchedulerConflict
 from .safe_http import open_pinned_pdf, resolve_public_addresses, validate_pdf_url
@@ -32,6 +42,8 @@ events = EventBus(store)
 agents = RoutedAgentExecutor()
 planner = Planner()
 scheduler = DAGScheduler(store, events, agents, int(os.getenv("MAX_CONCURRENT_TASKS", "2")))
+API_AUTH_COOKIE_NAME = "repropilot_api_session"
+API_AUTH_PUBLIC_PATHS = {"/api/health", "/api/auth/status", "/api/auth/session"}
 
 
 @asynccontextmanager
@@ -56,15 +68,31 @@ app.add_middleware(
 @app.middleware("http")
 async def api_auth(request: Request, call_next):
     expected = os.getenv("API_AUTH_TOKEN", "").strip()
-    if expected and request.url.path.startswith("/api/") and request.url.path != "/api/health":
-        provided = request.headers.get("Authorization", "").removeprefix("Bearer ").strip()
-        if not hmac.compare_digest(provided, expected):
+    if (
+        expected
+        and request.method != "OPTIONS"
+        and request.url.path.startswith("/api/")
+        and request.url.path not in API_AUTH_PUBLIC_PATHS
+    ):
+        if not api_credentials_match(request, expected):
             return Response(
                 content=json.dumps({"error": "invalid API bearer token"}),
                 status_code=401,
                 media_type="application/json",
             )
     return await call_next(request)
+
+
+def browser_session_value(token: str) -> str:
+    return hmac.new(token.encode(), b"repropilot-browser-session", hashlib.sha256).hexdigest()
+
+
+def api_credentials_match(request: Request, expected: str) -> bool:
+    provided = request.headers.get("Authorization", "").removeprefix("Bearer ").strip()
+    bearer_matches = bool(provided) and hmac.compare_digest(provided, expected)
+    cookie = request.cookies.get(API_AUTH_COOKIE_NAME, "")
+    cookie_matches = bool(cookie) and hmac.compare_digest(cookie, browser_session_value(expected))
+    return bearer_matches or cookie_matches
 
 
 def identity(value: str | None, prefix: str, request: Request | None = None) -> str:
@@ -119,6 +147,36 @@ async def health() -> dict:
         "backend": {"ok": True, "runtime": "python", "version": app.version},
         "sandbox": sandbox,
     }
+
+
+@app.get("/api/auth/status")
+async def api_auth_status(request: Request) -> dict[str, bool]:
+    expected = os.getenv("API_AUTH_TOKEN", "").strip()
+    return {
+        "enabled": bool(expected),
+        "authenticated": not expected or api_credentials_match(request, expected),
+    }
+
+
+@app.post("/api/auth/session")
+async def create_api_auth_session(
+    payload: ApiAuthSessionRequest,
+    request: Request,
+    response: Response,
+) -> dict[str, bool]:
+    expected = os.getenv("API_AUTH_TOKEN", "").strip()
+    if expected and not hmac.compare_digest(payload.token.strip(), expected):
+        raise HTTPException(status_code=401, detail="invalid API bearer token")
+    if expected:
+        response.set_cookie(
+            API_AUTH_COOKIE_NAME,
+            browser_session_value(expected),
+            httponly=True,
+            secure=request.url.scheme == "https",
+            samesite="strict",
+            path="/",
+        )
+    return {"enabled": bool(expected), "authenticated": True}
 
 
 async def fetch_sandbox_health(
