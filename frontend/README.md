@@ -22,6 +22,8 @@ npm run build
 
 生产镜像使用 Nginx 托管静态文件，并把 `/api/` 同源代理到 Backend；SSE 路由关闭代理缓冲。
 
+Backend 配置了 `API_AUTH_TOKEN` 时，前端会显示 Token 验证页。验证成功后 Backend 写入仅限 HTTP、`SameSite=Strict` 的会话 Cookie；Token 不会保存到浏览器存储或打包进静态资源。开发服务器和 Compose 镜像使用同一流程。
+
 ## 主要模块
 
 - `src/app/hooks/useReproPilotRuntime.ts`：计划执行、SSE 和节点状态同步

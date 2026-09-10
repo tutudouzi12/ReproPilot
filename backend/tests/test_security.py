@@ -19,6 +19,58 @@ def test_api_bearer_token_protects_routes_but_not_health(monkeypatch):
     assert allowed.status_code == 200
 
 
+def test_api_auth_session_enables_bundled_frontend_cookie_auth(monkeypatch):
+    monkeypatch.setenv("API_AUTH_TOKEN", "test-secret")
+    client = TestClient(main.app)
+
+    assert client.get("/api/auth/status").json() == {"enabled": True, "authenticated": False}
+    denied = client.post("/api/auth/session", json={"token": "wrong-secret"})
+    assert denied.status_code == 401
+    assert main.API_AUTH_COOKIE_NAME not in client.cookies
+
+    signed_in = client.post("/api/auth/session", json={"token": "test-secret"})
+    assert signed_in.status_code == 200
+    assert signed_in.json() == {"enabled": True, "authenticated": True}
+    assert "test-secret" not in signed_in.headers["set-cookie"]
+    assert "HttpOnly" in signed_in.headers["set-cookie"]
+    assert "SameSite=strict" in signed_in.headers["set-cookie"]
+
+    assert client.get("/api/auth/status").json() == {"enabled": True, "authenticated": True}
+    assert client.get("/api/hello").status_code == 200
+    assert client.get("/api/plans/missing/stream").status_code == 404
+    assert client.get("/api/pdf-proxy").status_code == 422
+    assert client.post("/api/execute", json={}).status_code == 422
+
+
+def test_api_auth_session_is_optional_when_token_is_unset(monkeypatch):
+    monkeypatch.delenv("API_AUTH_TOKEN", raising=False)
+    client = TestClient(main.app)
+
+    assert client.get("/api/auth/status").json() == {"enabled": False, "authenticated": True}
+    signed_in = client.post("/api/auth/session", json={"token": "unused"})
+    assert signed_in.json() == {"enabled": False, "authenticated": True}
+    assert main.API_AUTH_COOKIE_NAME not in client.cookies
+    assert client.get("/api/hello").status_code == 200
+
+
+def test_api_auth_allows_cors_preflight_without_credentials(monkeypatch):
+    monkeypatch.setenv("API_AUTH_TOKEN", "test-secret")
+    client = TestClient(main.app)
+
+    response = client.options(
+        "/api/plan",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "X-User-Id,X-Session-Id,Content-Type",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:5173"
+    assert response.headers["access-control-allow-credentials"] == "true"
+
+
 def test_pdf_url_rejects_non_arxiv_and_private_resolution(monkeypatch):
     with pytest.raises(HTTPException):
         main.validate_remote_pdf_url("http://127.0.0.1/secret.pdf")

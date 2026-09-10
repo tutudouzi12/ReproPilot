@@ -69,6 +69,8 @@ Linux/macOS 对应命令：
 
 Backend 健康检查会真实请求 Sandbox。配置了 `SANDBOX_URL` 但 Docker 不可用时，顶层 `ok` 会返回 `false`，不会把“只配置了地址”误报为健康。
 
+设置 `API_AUTH_TOKEN` 后，打开 React 工作台会先出现 Token 验证页。验证成功后 Backend 使用 `HttpOnly`、`SameSite=Strict` 的派生会话 Cookie 为 REST、SSE 和 PDF 请求鉴权；原始 Token 不会写入浏览器存储。直接调用 API 的客户端仍可使用 `Authorization: Bearer <token>`。
+
 严格模式下，`REPOSITORY_OPERATIONS_ENABLED=false` 会使仓库准备节点失败；未配置可用 Sandbox 会使运行时创建、依赖安装和代码执行节点失败。演示模式下这些节点可继续 DAG，但输出包含 `evidence_status=unverified_demo`，未执行代码不返回伪造的成功退出码。
 
 ## Docker Compose

@@ -175,6 +175,10 @@ class ChatRequest(BaseModel):
     message: str = Field(min_length=1)
 
 
+class ApiAuthSessionRequest(BaseModel):
+    token: str = Field(min_length=1)
+
+
 class ExecuteTaskRequest(BaseModel):
     task_id: str
     task_name: str
