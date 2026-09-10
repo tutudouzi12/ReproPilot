@@ -385,12 +385,6 @@ export function useReproPilotRuntime(options: UseReproPilotRuntimeOptions) {
             });
           }
         },
-        onError: () => {
-          source.close();
-          if (planEventSourceRef.current === source) {
-            planEventSourceRef.current = null;
-          }
-        },
       });
 
       planEventSourceRef.current = source;

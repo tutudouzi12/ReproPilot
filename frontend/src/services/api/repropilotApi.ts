@@ -84,7 +84,6 @@ export const createPlanEventSource = (
   planId: string,
   handlers: {
     onPlanEvent: (event: PlanEvent) => void;
-    onError?: () => void;
   },
 ): EventSource => {
 	const source = new EventSource(`${API_BASE_URL}/api/plans/${planId}/stream`, { withCredentials: true });
@@ -92,9 +91,8 @@ export const createPlanEventSource = (
     const parsed = JSON.parse((evt as MessageEvent).data) as PlanEvent;
     handlers.onPlanEvent(parsed);
   });
-  if (handlers.onError) {
-    source.onerror = handlers.onError;
-  }
+  // Leave errors to the native EventSource retry loop. Closing the source from
+  // onerror would permanently disable reconnection after a transient failure.
   return source;
 };
 
